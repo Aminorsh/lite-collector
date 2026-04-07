@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"lite-collector/services"
 	"lite-collector/utils"
@@ -9,18 +10,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateForm handles creating a new form.
-// Request body: { "title": "...", "description": "...", "schema": "<json string>" }
+// CreateForm godoc
+// @Summary      Create a form
+// @Description  Creates a new draft form owned by the authenticated user.
+// @Tags         forms
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body  body      createFormRequest  true  "Form data"
+// @Success      201   {object}  formResponse
+// @Failure      400   {object}  errorResponse
+// @Failure      401   {object}  errorResponse
+// @Failure      500   {object}  errorResponse
+// @Router       /forms [post]
 func CreateForm(formService *services.FormService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req struct {
-			Title       string `json:"title" binding:"required"`
-			Description string `json:"description"`
-			Schema      string `json:"schema" binding:"required"`
-		}
+		var req createFormRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			e := utils.ErrBadRequest
-			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": err.Error()}})
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: err.Error()}})
 			return
 		}
 
@@ -29,21 +37,31 @@ func CreateForm(formService *services.FormService) gin.HandlerFunc {
 		form, err := formService.CreateForm(userID, req.Title, req.Description, []byte(req.Schema))
 		if err != nil {
 			e := utils.AsAppError(err)
-			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
 			return
 		}
 
-		c.JSON(http.StatusCreated, gin.H{
-			"id":          form.ID,
-			"title":       form.Title,
-			"description": form.Description,
-			"status":      form.Status,
-			"created_at":  form.CreatedAt,
+		c.JSON(http.StatusCreated, formResponse{
+			ID:          form.ID,
+			Title:       form.Title,
+			Description: form.Description,
+			Status:      form.Status,
+			CreatedAt:   form.CreatedAt,
+			UpdatedAt:   form.UpdatedAt,
 		})
 	}
 }
 
-// GetForms returns all forms owned by the current user.
+// GetForms godoc
+// @Summary      List my forms
+// @Description  Returns all forms owned by the authenticated user.
+// @Tags         forms
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  formListResponse
+// @Failure      401  {object}  errorResponse
+// @Failure      500  {object}  errorResponse
+// @Router       /forms [get]
 func GetForms(formService *services.FormService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.MustGet("user_id").(uint64)
@@ -51,15 +69,37 @@ func GetForms(formService *services.FormService) gin.HandlerFunc {
 		forms, err := formService.GetFormsByOwner(userID)
 		if err != nil {
 			e := utils.AsAppError(err)
-			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"forms": forms})
+		items := make([]formResponse, 0, len(forms))
+		for _, f := range forms {
+			items = append(items, formResponse{
+				ID:          f.ID,
+				Title:       f.Title,
+				Description: f.Description,
+				Status:      f.Status,
+				CreatedAt:   f.CreatedAt,
+				UpdatedAt:   f.UpdatedAt,
+			})
+		}
+		c.JSON(http.StatusOK, formListResponse{Forms: items})
 	}
 }
 
-// GetForm returns a single form by ID (owner only).
+// GetForm godoc
+// @Summary      Get a form
+// @Description  Returns a single form by ID. Only the owner can access it.
+// @Tags         forms
+// @Produce      json
+// @Security     BearerAuth
+// @Param        formId  path      int  true  "Form ID"
+// @Success      200     {object}  formDetailResponse
+// @Failure      401     {object}  errorResponse
+// @Failure      403     {object}  errorResponse
+// @Failure      404     {object}  errorResponse
+// @Router       /forms/{formId} [get]
 func GetForm(formService *services.FormService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.MustGet("user_id").(uint64)
@@ -68,58 +108,81 @@ func GetForm(formService *services.FormService) gin.HandlerFunc {
 		form, err := formService.GetFormByID(formID, userID)
 		if err != nil {
 			e := utils.AsAppError(err)
-			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"id":          form.ID,
-			"title":       form.Title,
-			"description": form.Description,
-			"schema":      string(form.Schema),
-			"status":      form.Status,
-			"created_at":  form.CreatedAt,
-			"updated_at":  form.UpdatedAt,
+		c.JSON(http.StatusOK, formDetailResponse{
+			ID:          form.ID,
+			Title:       form.Title,
+			Description: form.Description,
+			Schema:      string(form.Schema),
+			Status:      form.Status,
+			CreatedAt:   form.CreatedAt,
+			UpdatedAt:   form.UpdatedAt,
 		})
 	}
 }
 
-// UpdateForm updates an existing form (owner only).
-// Request body: { "title": "...", "description": "...", "schema": "<json string>" }
+// UpdateForm godoc
+// @Summary      Update a form
+// @Description  Updates title, description, and schema of a draft form. Owner only.
+// @Tags         forms
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        formId  path      int               true  "Form ID"
+// @Param        body    body      updateFormRequest  true  "Updated form data"
+// @Success      200     {object}  formResponse
+// @Failure      400     {object}  errorResponse
+// @Failure      401     {object}  errorResponse
+// @Failure      403     {object}  errorResponse
+// @Failure      404     {object}  errorResponse
+// @Failure      500     {object}  errorResponse
+// @Router       /forms/{formId} [put]
 func UpdateForm(formService *services.FormService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.MustGet("user_id").(uint64)
 		formID := c.Param("formId")
 
-		var req struct {
-			Title       string `json:"title"`
-			Description string `json:"description"`
-			Schema      string `json:"schema"`
-		}
+		var req updateFormRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			e := utils.ErrBadRequest
-			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": err.Error()}})
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: err.Error()}})
 			return
 		}
 
 		form, err := formService.UpdateForm(formID, userID, req.Title, req.Description, []byte(req.Schema))
 		if err != nil {
 			e := utils.AsAppError(err)
-			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"id":          form.ID,
-			"title":       form.Title,
-			"description": form.Description,
-			"status":      form.Status,
-			"updated_at":  form.UpdatedAt,
+		c.JSON(http.StatusOK, formResponse{
+			ID:          form.ID,
+			Title:       form.Title,
+			Description: form.Description,
+			Status:      form.Status,
+			CreatedAt:   form.CreatedAt,
+			UpdatedAt:   form.UpdatedAt,
 		})
 	}
 }
 
-// PublishForm publishes a form (owner only).
+// PublishForm godoc
+// @Summary      Publish a form
+// @Description  Changes form status from draft to published. Submitters can then fill it in. Owner only.
+// @Tags         forms
+// @Produce      json
+// @Security     BearerAuth
+// @Param        formId  path      int  true  "Form ID"
+// @Success      200     {object}  messageResponse
+// @Failure      401     {object}  errorResponse
+// @Failure      403     {object}  errorResponse
+// @Failure      404     {object}  errorResponse
+// @Failure      500     {object}  errorResponse
+// @Router       /forms/{formId}/publish [post]
 func PublishForm(formService *services.FormService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.MustGet("user_id").(uint64)
@@ -127,10 +190,51 @@ func PublishForm(formService *services.FormService) gin.HandlerFunc {
 
 		if err := formService.PublishForm(formID, userID); err != nil {
 			e := utils.AsAppError(err)
-			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "form published successfully"})
+		c.JSON(http.StatusOK, messageResponse{Message: "form published successfully"})
 	}
+}
+
+// Request / response types
+
+type createFormRequest struct {
+	Title       string `json:"title"       binding:"required" example:"2024 Annual Report"`
+	Description string `json:"description"                    example:"Please fill in before Friday"`
+	Schema      string `json:"schema"      binding:"required" example:"{\"fields\":[{\"key\":\"f_001\",\"label\":\"姓名\",\"type\":\"text\",\"required\":true}]}"`
+}
+
+type updateFormRequest struct {
+	Title       string `json:"title"       example:"Updated title"`
+	Description string `json:"description" example:"Updated description"`
+	Schema      string `json:"schema"      example:"{\"fields\":[]}"`
+}
+
+type formResponse struct {
+	ID          uint64    `json:"id"          example:"42"`
+	Title       string    `json:"title"       example:"2024 Annual Report"`
+	Description string    `json:"description" example:"Please fill in before Friday"`
+	Status      int8      `json:"status"      example:"0"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type formDetailResponse struct {
+	ID          uint64    `json:"id"          example:"42"`
+	Title       string    `json:"title"       example:"2024 Annual Report"`
+	Description string    `json:"description" example:"Please fill in before Friday"`
+	Schema      string    `json:"schema"      example:"{\"fields\":[]}"`
+	Status      int8      `json:"status"      example:"1"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type formListResponse struct {
+	Forms []formResponse `json:"forms"`
+}
+
+type messageResponse struct {
+	Message string `json:"message" example:"form published successfully"`
 }

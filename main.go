@@ -1,8 +1,26 @@
+// @title           Lite Collector API
+// @version         1.0
+// @description     Intelligent data collection platform — WeChat Mini Program backend.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   Lite Collector Team
+
+// @license.name  MIT
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey  BearerAuth
+// @in                          header
+// @name                        Authorization
+// @description                 JWT token. Format: "Bearer <token>"
+
 package main
 
 import (
 	"lite-collector/config"
 	"lite-collector/db"
+	_ "lite-collector/docs" // swag generated docs
 	"lite-collector/middleware"
 	"lite-collector/repository"
 	"lite-collector/routes"
@@ -10,6 +28,8 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -45,6 +65,9 @@ func main() {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
+	// Swagger UI
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	// API routes
 	v1 := r.Group("/api/v1")
 	{
@@ -59,6 +82,7 @@ func main() {
 
 	addr := ":" + cfg.Server.Port
 	log.Printf("Server starting on %s", addr)
+	log.Printf("Swagger UI available at http://localhost%s/swagger/index.html", addr)
 	if err := r.Run(addr); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

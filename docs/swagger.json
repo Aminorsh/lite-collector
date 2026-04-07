@@ -1,0 +1,680 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Intelligent data collection platform — WeChat Mini Program backend.",
+        "title": "Lite Collector API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Lite Collector Team"
+        },
+        "license": {
+            "name": "MIT"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/auth/wx-login": {
+            "post": {
+                "description": "Exchange a WeChat login code for a JWT token. Creates the user if first login.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "WeChat login",
+                "parameters": [
+                    {
+                        "description": "WeChat login code",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.wxLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.wxLoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/forms": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all forms owned by the authenticated user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "forms"
+                ],
+                "summary": "List my forms",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.formListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new draft form owned by the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "forms"
+                ],
+                "summary": "Create a form",
+                "parameters": [
+                    {
+                        "description": "Form data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.createFormRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.formResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/forms/{formId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns a single form by ID. Only the owner can access it.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "forms"
+                ],
+                "summary": "Get a form",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Form ID",
+                        "name": "formId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.formDetailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates title, description, and schema of a draft form. Owner only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "forms"
+                ],
+                "summary": "Update a form",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Form ID",
+                        "name": "formId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated form data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.updateFormRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.formResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/forms/{formId}/publish": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Changes form status from draft to published. Submitters can then fill it in. Owner only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "forms"
+                ],
+                "summary": "Publish a form",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Form ID",
+                        "name": "formId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.messageResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/forms/{formId}/submissions": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Submit field values for a published form. Each user can submit once per form. AI anomaly detection is triggered asynchronously after submission.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "submissions"
+                ],
+                "summary": "Submit a form",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Form ID",
+                        "name": "formId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Field key→value map",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.submissionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/forms/{formId}/submissions/my": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the authenticated user's submission for a given form, including all field values.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "submissions"
+                ],
+                "summary": "Get my submission",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Form ID",
+                        "name": "formId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.submissionWithValuesResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handlers.createFormRequest": {
+            "type": "object",
+            "required": [
+                "schema",
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Please fill in before Friday"
+                },
+                "schema": {
+                    "type": "string",
+                    "example": "{\"fields\":[{\"key\":\"f_001\",\"label\":\"姓名\",\"type\":\"text\",\"required\":true}]}"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "2024 Annual Report"
+                }
+            }
+        },
+        "handlers.errorDetail": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "FORM_NOT_FOUND"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "form not found"
+                }
+            }
+        },
+        "handlers.errorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/handlers.errorDetail"
+                }
+            }
+        },
+        "handlers.formDetailResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Please fill in before Friday"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "schema": {
+                    "type": "string",
+                    "example": "{\"fields\":[]}"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "title": {
+                    "type": "string",
+                    "example": "2024 Annual Report"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.formListResponse": {
+            "type": "object",
+            "properties": {
+                "forms": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.formResponse"
+                    }
+                }
+            }
+        },
+        "handlers.formResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Please fill in before Friday"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 42
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "title": {
+                    "type": "string",
+                    "example": "2024 Annual Report"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.messageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "form published successfully"
+                }
+            }
+        },
+        "handlers.submissionResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 7
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "submitted_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.submissionWithValuesResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 7
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "submitted_at": {
+                    "type": "string"
+                },
+                "values": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "handlers.updateFormRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Updated description"
+                },
+                "schema": {
+                    "type": "string",
+                    "example": "{\"fields\":[]}"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Updated title"
+                }
+            }
+        },
+        "handlers.userInfo": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string",
+                    "example": ""
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "nickname": {
+                    "type": "string",
+                    "example": "WeChat User"
+                },
+                "openid": {
+                    "type": "string",
+                    "example": "oXxxx_abc123"
+                }
+            }
+        },
+        "handlers.wxLoginRequest": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "wx_login_code_abc123"
+                }
+            }
+        },
+        "handlers.wxLoginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "user": {
+                    "$ref": "#/definitions/handlers.userInfo"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "JWT token. Format: \"Bearer \u003ctoken\u003e\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

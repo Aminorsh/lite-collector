@@ -1,0 +1,452 @@
+basePath: /api/v1
+definitions:
+  handlers.createFormRequest:
+    properties:
+      description:
+        example: Please fill in before Friday
+        type: string
+      schema:
+        example: '{"fields":[{"key":"f_001","label":"姓名","type":"text","required":true}]}'
+        type: string
+      title:
+        example: 2024 Annual Report
+        type: string
+    required:
+    - schema
+    - title
+    type: object
+  handlers.errorDetail:
+    properties:
+      code:
+        example: FORM_NOT_FOUND
+        type: string
+      message:
+        example: form not found
+        type: string
+    type: object
+  handlers.errorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/handlers.errorDetail'
+    type: object
+  handlers.formDetailResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        example: Please fill in before Friday
+        type: string
+      id:
+        example: 42
+        type: integer
+      schema:
+        example: '{"fields":[]}'
+        type: string
+      status:
+        example: 1
+        type: integer
+      title:
+        example: 2024 Annual Report
+        type: string
+      updated_at:
+        type: string
+    type: object
+  handlers.formListResponse:
+    properties:
+      forms:
+        items:
+          $ref: '#/definitions/handlers.formResponse'
+        type: array
+    type: object
+  handlers.formResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        example: Please fill in before Friday
+        type: string
+      id:
+        example: 42
+        type: integer
+      status:
+        example: 0
+        type: integer
+      title:
+        example: 2024 Annual Report
+        type: string
+      updated_at:
+        type: string
+    type: object
+  handlers.messageResponse:
+    properties:
+      message:
+        example: form published successfully
+        type: string
+    type: object
+  handlers.submissionResponse:
+    properties:
+      id:
+        example: 7
+        type: integer
+      status:
+        example: 0
+        type: integer
+      submitted_at:
+        type: string
+    type: object
+  handlers.submissionWithValuesResponse:
+    properties:
+      id:
+        example: 7
+        type: integer
+      status:
+        example: 1
+        type: integer
+      submitted_at:
+        type: string
+      values:
+        additionalProperties: true
+        type: object
+    type: object
+  handlers.updateFormRequest:
+    properties:
+      description:
+        example: Updated description
+        type: string
+      schema:
+        example: '{"fields":[]}'
+        type: string
+      title:
+        example: Updated title
+        type: string
+    type: object
+  handlers.userInfo:
+    properties:
+      avatar_url:
+        example: ""
+        type: string
+      id:
+        example: 1
+        type: integer
+      nickname:
+        example: WeChat User
+        type: string
+      openid:
+        example: oXxxx_abc123
+        type: string
+    type: object
+  handlers.wxLoginRequest:
+    properties:
+      code:
+        example: wx_login_code_abc123
+        type: string
+    required:
+    - code
+    type: object
+  handlers.wxLoginResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user:
+        $ref: '#/definitions/handlers.userInfo'
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: Lite Collector Team
+  description: Intelligent data collection platform — WeChat Mini Program backend.
+  license:
+    name: MIT
+  termsOfService: http://swagger.io/terms/
+  title: Lite Collector API
+  version: "1.0"
+paths:
+  /auth/wx-login:
+    post:
+      consumes:
+      - application/json
+      description: Exchange a WeChat login code for a JWT token. Creates the user
+        if first login.
+      parameters:
+      - description: WeChat login code
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.wxLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.wxLoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      summary: WeChat login
+      tags:
+      - auth
+  /forms:
+    get:
+      description: Returns all forms owned by the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.formListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: List my forms
+      tags:
+      - forms
+    post:
+      consumes:
+      - application/json
+      description: Creates a new draft form owned by the authenticated user.
+      parameters:
+      - description: Form data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createFormRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.formResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a form
+      tags:
+      - forms
+  /forms/{formId}:
+    get:
+      description: Returns a single form by ID. Only the owner can access it.
+      parameters:
+      - description: Form ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.formDetailResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a form
+      tags:
+      - forms
+    put:
+      consumes:
+      - application/json
+      description: Updates title, description, and schema of a draft form. Owner only.
+      parameters:
+      - description: Form ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      - description: Updated form data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateFormRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.formResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a form
+      tags:
+      - forms
+  /forms/{formId}/publish:
+    post:
+      description: Changes form status from draft to published. Submitters can then
+        fill it in. Owner only.
+      parameters:
+      - description: Form ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.messageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Publish a form
+      tags:
+      - forms
+  /forms/{formId}/submissions:
+    post:
+      consumes:
+      - application/json
+      description: Submit field values for a published form. Each user can submit
+        once per form. AI anomaly detection is triggered asynchronously after submission.
+      parameters:
+      - description: Form ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      - description: Field key→value map
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.submissionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Submit a form
+      tags:
+      - submissions
+  /forms/{formId}/submissions/my:
+    get:
+      description: Returns the authenticated user's submission for a given form, including
+        all field values.
+      parameters:
+      - description: Form ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.submissionWithValuesResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get my submission
+      tags:
+      - submissions
+securityDefinitions:
+  BearerAuth:
+    description: 'JWT token. Format: "Bearer <token>"'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
