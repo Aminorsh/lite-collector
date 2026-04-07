@@ -2,26 +2,25 @@ package routes
 
 import (
 	"lite-collector/handlers"
-	"lite-collector/repository"
+	"lite-collector/services"
 
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterFormRoutes registers form-related routes
-func RegisterFormRoutes(r *gin.RouterGroup, formRepo repository.FormRepository, submissionRepo repository.SubmissionRepository) {
+// RegisterFormRoutes registers form and nested submission routes
+func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, submissionService *services.SubmissionService) {
 	forms := r.Group("/forms")
 	{
-		forms.POST("/", handlers.CreateForm(formRepo))
-		forms.GET("/", handlers.GetForms(formRepo))
-		forms.GET("/:formId", handlers.GetForm(formRepo))
-		forms.PUT("/:formId", handlers.UpdateForm(formRepo))
-		forms.POST("/:formId/publish", handlers.PublishForm(formRepo))
+		forms.POST("/", handlers.CreateForm(formService))
+		forms.GET("/", handlers.GetForms(formService))
+		forms.GET("/:formId", handlers.GetForm(formService))
+		forms.PUT("/:formId", handlers.UpdateForm(formService))
+		forms.POST("/:formId/publish", handlers.PublishForm(formService))
 
-		// Submission routes nested under forms
 		submissions := forms.Group("/:formId/submissions")
 		{
-			submissions.POST("/", handlers.CreateSubmission(submissionRepo))
-			submissions.GET("/my", handlers.GetMySubmission(submissionRepo))
+			submissions.POST("/", handlers.CreateSubmission(submissionService))
+			submissions.GET("/my", handlers.GetMySubmission(submissionService))
 		}
 	}
 }

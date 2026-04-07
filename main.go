@@ -6,6 +6,7 @@ import (
 	"lite-collector/middleware"
 	"lite-collector/repository"
 	"lite-collector/routes"
+	"lite-collector/services"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -16,24 +17,30 @@ func main() {
 	cfg := config.Load()
 
 	// Initialize database connection
-	dataSourceName := cfg.Database.User + ":" + cfg.Database.Password + "@tcp(" + cfg.Database.Host + ":" + cfg.Database.Port + ")/" + cfg.Database.DBName + "?charset=utf8mb4&parseTime=True&loc=Local"
-	db.Init(dataSourceName)
+	dsn := cfg.Database.User + ":" + cfg.Database.Password +
+		"@tcp(" + cfg.Database.Host + ":" + cfg.Database.Port + ")/" +
+		cfg.Database.DBName + "?charset=utf8mb4&parseTime=True&loc=Local"
+	db.Init(dsn)
 
 	// Initialize Gin router
 	r := gin.New()
-
-	// Middleware
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
-	// Initialize repositories
+	jwtSecret := []byte(cfg.JWT.Secret)
+
+	// Repositories
 	userRepo := repository.NewUserRepository(db.GetDB())
 	formRepo := repository.NewFormRepository(db.GetDB())
 	submissionRepo := repository.NewSubmissionRepository(db.GetDB())
+	aiJobRepo := repository.NewAIJobRepository(db.GetDB())
 
-	jwtSecret := []byte(cfg.JWT.Secret)
+	// Services
+	userService := services.NewUserService(userRepo, jwtSecret)
+	formService := services.NewFormService(formRepo)
+	submissionService := services.NewSubmissionService(submissionRepo, aiJobRepo)
 
-	// Health check endpoint (no auth required)
+	// Health check (no auth)
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
@@ -41,20 +48,15 @@ func main() {
 	// API routes
 	v1 := r.Group("/api/v1")
 	{
-		// Auth routes (no auth required)
-		routes.RegisterAuthRoutes(v1, userRepo, jwtSecret)
+		routes.RegisterAuthRoutes(v1, userService)
 
-		// Protected routes (require auth)
 		protected := v1.Group("")
-		protected.Use(middleware.AuthMiddleware(jwtSecret)) // Apply auth middleware
+		protected.Use(middleware.AuthMiddleware(jwtSecret))
 		{
-			routes.RegisterFormRoutes(protected, formRepo, submissionRepo)
-			// Submission routes are now handled within form routes as nested routes
-			// routes.RegisterSubmissionRoutes(protected) // Removed to avoid conflicts
+			routes.RegisterFormRoutes(protected, formService, submissionService)
 		}
 	}
 
-	// Start server
 	addr := ":" + cfg.Server.Port
 	log.Printf("Server starting on %s", addr)
 	if err := r.Run(addr); err != nil {

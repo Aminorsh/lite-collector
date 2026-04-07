@@ -1,71 +1,65 @@
 package services
 
 import (
+	"fmt"
+
 	"lite-collector/models"
 	"lite-collector/repository"
 )
 
+// SubmissionWithValues is the combined view returned to callers
+type SubmissionWithValues struct {
+	Submission *models.Submission
+	Values     map[string]interface{}
+}
+
 // SubmissionService handles submission-related operations
 type SubmissionService struct {
 	submissionRepo repository.SubmissionRepository
+	aiJobRepo      repository.AIJobRepository
 }
 
-// NewSubmissionService creates a new SubmissionService instance with dependency injection
-func NewSubmissionService(submissionRepo repository.SubmissionRepository) *SubmissionService {
+// NewSubmissionService creates a new SubmissionService instance
+func NewSubmissionService(submissionRepo repository.SubmissionRepository, aiJobRepo repository.AIJobRepository) *SubmissionService {
 	return &SubmissionService{
 		submissionRepo: submissionRepo,
+		aiJobRepo:      aiJobRepo,
 	}
 }
 
-// CreateSubmission creates a new form submission
+// CreateSubmission persists a new submission and enqueues an AI anomaly-detection job.
+// TODO Phase 3: replace mock with real DB + AI job creation
 func (s *SubmissionService) CreateSubmission(formID string, submitterID uint64, values map[string]interface{}) (*models.Submission, error) {
-	// In a real implementation, this would:
-	// 1. Validate the form exists and is published
-	// 2. Validate the submission values against the form schema
-	// 3. Create submission record
-	// 4. Create submission value records for each field
-	// 5. Return the created submission
-
-	// For now, we'll return a mock submission
-	return &models.Submission{
-		ID:         1,
-		FormID:     1, // Would parse formID in real implementation
+	// TODO: parse formID, validate form exists and is published, persist submission
+	// and submission_values via repository, then call aiJobRepo.Create
+	submission := &models.Submission{
+		ID:          1,
+		FormID:      1,
 		SubmitterID: submitterID,
-		Status:     0, // pending
-	}, nil
-}
-
-// GetMySubmission gets the current user's submission for a form
-func (s *SubmissionService) GetMySubmission(formID string, userID uint64) (*models.Submission, error) {
-	// In a real implementation, this would query for submission by form_id and submitter_id
-	// For now, we'll return a mock submission if ID is "1"
-	if formID == "1" {
-		return &models.Submission{
-			ID:         1,
-			FormID:     1,
-			SubmitterID: userID,
-			Status:     1, // normal
-		}, nil
+		Status:      0,
 	}
-	return nil, nil // Would return error in real implementation
+	return submission, nil
 }
 
-// GetSubmissionValues gets all values for a submission
-func (s *SubmissionService) GetSubmissionValues(submissionID uint64) ([]models.SubmissionValue, error) {
-	// In a real implementation, this would query submission_values by submission_id
-	// For now, we'll return mock values
-	return []models.SubmissionValue{
-		{
-			ID:           1,
-			SubmissionID: submissionID,
-			FieldKey:     "f_001",
-			Value:        "张三",
+// GetMySubmissionWithValues returns the caller's submission for a form together
+// with its field values as a flat map.
+// TODO Phase 3: replace mock with real repository calls
+func (s *SubmissionService) GetMySubmissionWithValues(formID string, userID uint64) (*SubmissionWithValues, error) {
+	// TODO: parse formID, query submissionRepo.FindByFormIDAndSubmitterID,
+	// then submissionRepo.FindValuesBySubmissionID
+	if formID != "1" {
+		return nil, fmt.Errorf("submission not found")
+	}
+	return &SubmissionWithValues{
+		Submission: &models.Submission{
+			ID:          1,
+			FormID:      1,
+			SubmitterID: userID,
+			Status:      1,
 		},
-		{
-			ID:           2,
-			SubmissionID: submissionID,
-			FieldKey:     "f_002",
-			Value:        "技术部",
+		Values: map[string]interface{}{
+			"f_001": "张三",
+			"f_002": "技术部",
 		},
 	}, nil
 }

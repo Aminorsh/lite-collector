@@ -1,35 +1,61 @@
 package services
 
 import (
+	"fmt"
+	"time"
+
 	"lite-collector/models"
 	"lite-collector/repository"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // UserService handles user-related operations
 type UserService struct {
-	userRepo repository.UserRepository
+	userRepo  repository.UserRepository
+	jwtSecret []byte
 }
 
-// NewUserService creates a new UserService instance with dependency injection
-func NewUserService(userRepo repository.UserRepository) *UserService {
+// NewUserService creates a new UserService instance
+func NewUserService(userRepo repository.UserRepository, jwtSecret []byte) *UserService {
 	return &UserService{
-		userRepo: userRepo,
+		userRepo:  userRepo,
+		jwtSecret: jwtSecret,
 	}
 }
 
-// FindByOpenID finds a user by their WeChat OpenID
-func (s *UserService) FindByOpenID(openID string) (*models.User, error) {
-	return s.userRepo.FindByOpenID(openID)
-}
+// Login exchanges a WeChat code for a JWT token, creating the user if needed.
+// Returns the signed token string and the user record.
+func (s *UserService) Login(code string) (string, *models.User, error) {
+	// TODO Phase 3: replace with real WeChat code exchange (cfg.Wechat.AppID/AppSecret)
+	openid := "simulated_openid_" + code
+	nickname := "WeChat User"
+	avatarURL := ""
 
-// Create creates a new user
-func (s *UserService) Create(user *models.User) error {
-	return s.userRepo.Create(user)
-}
+	user, err := s.userRepo.FindByOpenID(openid)
+	if err != nil {
+		// User not found — create a new one
+		user = &models.User{
+			OpenID:    openid,
+			Nickname:  nickname,
+			AvatarURL: avatarURL,
+		}
+		if err := s.userRepo.Create(user); err != nil {
+			return "", nil, fmt.Errorf("failed to create user: %w", err)
+		}
+	}
 
-// Update updates an existing user
-func (s *UserService) Update(user *models.User) error {
-	return s.userRepo.Update(user)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": user.ID,
+		"openid":  user.OpenID,
+		"exp":     time.Now().Add(24 * time.Hour).Unix(),
+	})
+	tokenString, err := token.SignedString(s.jwtSecret)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to sign token: %w", err)
+	}
+
+	return tokenString, user, nil
 }
 
 // FindByID finds a user by ID
