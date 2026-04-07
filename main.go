@@ -1,8 +1,28 @@
+// @title           Lite Collector 接口文档
+// @version         1.0
+// @description     轻量级智能数据收集平台后端接口。所有接口（除登录外）需在请求头携带 JWT token，格式：Bearer <token>。
+// @description
+// @description     **状态码说明（提交记录 status）：** 0=待检测 1=正常 2=有异常
+// @description     **状态码说明（表单 status）：** 0=草稿 1=已发布 2=已归档
+
+// @contact.name   Lite Collector Team
+
+// @license.name  MIT
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey  BearerAuth
+// @in                          header
+// @name                        Authorization
+// @description                 登录后获取的 JWT token，格式：Bearer <token>
+
 package main
 
 import (
 	"lite-collector/config"
 	"lite-collector/db"
+	_ "lite-collector/docs" // swag generated docs
 	"lite-collector/middleware"
 	"lite-collector/repository"
 	"lite-collector/routes"
@@ -10,6 +30,8 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -45,6 +67,9 @@ func main() {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
+	// Swagger UI
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	// API routes
 	v1 := r.Group("/api/v1")
 	{
@@ -59,6 +84,7 @@ func main() {
 
 	addr := ":" + cfg.Server.Port
 	log.Printf("Server starting on %s", addr)
+	log.Printf("Swagger UI available at http://localhost%s/swagger/index.html", addr)
 	if err := r.Run(addr); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

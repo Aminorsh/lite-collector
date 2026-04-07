@@ -1,0 +1,451 @@
+basePath: /api/v1
+definitions:
+  handlers.createFormRequest:
+    properties:
+      description:
+        example: 请于周五前填写完毕
+        type: string
+      schema:
+        example: '{"fields":[{"key":"f_001","label":"姓名","type":"text","required":true}]}'
+        type: string
+      title:
+        example: 2024年度部门报表
+        type: string
+    required:
+    - schema
+    - title
+    type: object
+  handlers.errorDetail:
+    properties:
+      code:
+        example: FORM_NOT_FOUND
+        type: string
+      message:
+        example: form not found
+        type: string
+    type: object
+  handlers.errorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/handlers.errorDetail'
+    type: object
+  handlers.formDetailResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        example: 请于周五前填写完毕
+        type: string
+      id:
+        example: 42
+        type: integer
+      schema:
+        example: '{"fields":[{"key":"f_001","label":"姓名","type":"text","required":true}]}'
+        type: string
+      status:
+        example: 1
+        type: integer
+      title:
+        example: 2024年度部门报表
+        type: string
+      updated_at:
+        type: string
+    type: object
+  handlers.formListResponse:
+    properties:
+      forms:
+        items:
+          $ref: '#/definitions/handlers.formResponse'
+        type: array
+    type: object
+  handlers.formResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        example: 请于周五前填写完毕
+        type: string
+      id:
+        example: 42
+        type: integer
+      status:
+        example: 0
+        type: integer
+      title:
+        example: 2024年度部门报表
+        type: string
+      updated_at:
+        type: string
+    type: object
+  handlers.messageResponse:
+    properties:
+      message:
+        example: form published successfully
+        type: string
+    type: object
+  handlers.submissionResponse:
+    properties:
+      id:
+        example: 7
+        type: integer
+      status:
+        example: 0
+        type: integer
+      submitted_at:
+        type: string
+    type: object
+  handlers.submissionWithValuesResponse:
+    properties:
+      id:
+        example: 7
+        type: integer
+      status:
+        example: 1
+        type: integer
+      submitted_at:
+        type: string
+      values:
+        additionalProperties: true
+        type: object
+    type: object
+  handlers.updateFormRequest:
+    properties:
+      description:
+        example: 更新后的描述
+        type: string
+      schema:
+        example: '{"fields":[]}'
+        type: string
+      title:
+        example: 更新后的标题
+        type: string
+    type: object
+  handlers.userInfo:
+    properties:
+      avatar_url:
+        example: ""
+        type: string
+      id:
+        example: 1
+        type: integer
+      nickname:
+        example: WeChat User
+        type: string
+      openid:
+        example: oXxxx_abc123
+        type: string
+    type: object
+  handlers.wxLoginRequest:
+    properties:
+      code:
+        example: wx_login_code_abc123
+        type: string
+    required:
+    - code
+    type: object
+  handlers.wxLoginResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user:
+        $ref: '#/definitions/handlers.userInfo'
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: Lite Collector Team
+  description: |-
+    轻量级智能数据收集平台后端接口。所有接口（除登录外）需在请求头携带 JWT token，格式：Bearer <token>。
+
+    **状态码说明（提交记录 status）：** 0=待检测 1=正常 2=有异常
+    **状态码说明（表单 status）：** 0=草稿 1=已发布 2=已归档
+  license:
+    name: MIT
+  title: Lite Collector 接口文档
+  version: "1.0"
+paths:
+  /auth/wx-login:
+    post:
+      consumes:
+      - application/json
+      description: 使用微信 wx.login() 返回的临时 code 换取 JWT token。首次登录时自动创建用户。
+      parameters:
+      - description: 微信登录 code
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.wxLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.wxLoginResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      summary: 微信登录
+      tags:
+      - 认证
+  /forms:
+    get:
+      description: 返回当前登录用户创建的所有表单（草稿和已发布均包含）。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.formListResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取我的表单列表
+      tags:
+      - 表单
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的草稿表单，归属于当前登录用户。创建后需调用发布接口才能开放填写。
+      parameters:
+      - description: 表单基本信息
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createFormRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.formResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 创建表单
+      tags:
+      - 表单
+  /forms/{formId}:
+    get:
+      description: 根据 ID 获取单个表单的完整信息，包含 schema 字段结构。仅表单创建者可访问。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.formDetailResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: 无权访问该表单
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 表单不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取表单详情
+      tags:
+      - 表单
+    put:
+      consumes:
+      - application/json
+      description: 修改草稿表单的标题、描述和字段结构（schema）。仅表单创建者可操作。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      - description: 需要更新的字段
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateFormRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.formResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: 无权操作该表单
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 表单不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 更新表单
+      tags:
+      - 表单
+  /forms/{formId}/publish:
+    post:
+      description: 将表单状态从草稿（0）改为已发布（1）。发布后填写人才可提交数据。仅表单创建者可操作。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.messageResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: 无权操作该表单
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 表单不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 发布表单
+      tags:
+      - 表单
+  /forms/{formId}/submissions:
+    post:
+      consumes:
+      - application/json
+      description: 向已发布的表单提交字段数据。每位用户对每个表单只能提交一次。提交后后端自动触发 AI 异常检测（异步），status 会在后台更新。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      - description: 字段 key→value 映射，key 对应表单 schema 中的 field_key
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.submissionResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 提交表单数据
+      tags:
+      - 提交记录
+  /forms/{formId}/submissions/my:
+    get:
+      description: 获取当前登录用户在指定表单中的提交记录，包含所有填写的字段值。每人每表单限提交一次。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.submissionWithValuesResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 提交记录不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取我的提交记录
+      tags:
+      - 提交记录
+securityDefinitions:
+  BearerAuth:
+    description: 登录后获取的 JWT token，格式：Bearer <token>
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
