@@ -9,7 +9,6 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "Lite Collector Team"
         },
@@ -23,7 +22,7 @@ const docTemplate = `{
     "paths": {
         "/auth/wx-login": {
             "post": {
-                "description": "Exchange a WeChat login code for a JWT token. Creates the user if first login.",
+                "description": "使用微信 wx.login() 返回的临时 code 换取 JWT token。首次登录时自动创建用户。",
                 "consumes": [
                     "application/json"
                 ],
@@ -31,12 +30,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "认证"
                 ],
-                "summary": "WeChat login",
+                "summary": "微信登录",
                 "parameters": [
                     {
-                        "description": "WeChat login code",
+                        "description": "微信登录 code",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -53,13 +52,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "请求参数错误",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
@@ -74,14 +73,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns all forms owned by the authenticated user.",
+                "description": "返回当前登录用户创建的所有表单（草稿和已发布均包含）。",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "forms"
+                    "表单"
                 ],
-                "summary": "List my forms",
+                "summary": "获取我的表单列表",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -90,13 +89,13 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "未登录或 token 已过期",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
@@ -109,7 +108,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Creates a new draft form owned by the authenticated user.",
+                "description": "创建一个新的草稿表单，归属于当前登录用户。创建后需调用发布接口才能开放填写。",
                 "consumes": [
                     "application/json"
                 ],
@@ -117,12 +116,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "forms"
+                    "表单"
                 ],
-                "summary": "Create a form",
+                "summary": "创建表单",
                 "parameters": [
                     {
-                        "description": "Form data",
+                        "description": "表单基本信息",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -139,19 +138,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "请求参数错误",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "未登录或 token 已过期",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
@@ -166,18 +165,18 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns a single form by ID. Only the owner can access it.",
+                "description": "根据 ID 获取单个表单的完整信息，包含 schema 字段结构。仅表单创建者可访问。",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "forms"
+                    "表单"
                 ],
-                "summary": "Get a form",
+                "summary": "获取表单详情",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Form ID",
+                        "description": "表单 ID",
                         "name": "formId",
                         "in": "path",
                         "required": true
@@ -191,19 +190,19 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "未登录或 token 已过期",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "403": {
-                        "description": "Forbidden",
+                        "description": "无权访问该表单",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "表单不存在",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
@@ -216,7 +215,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates title, description, and schema of a draft form. Owner only.",
+                "description": "修改草稿表单的标题、描述和字段结构（schema）。仅表单创建者可操作。",
                 "consumes": [
                     "application/json"
                 ],
@@ -224,19 +223,19 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "forms"
+                    "表单"
                 ],
-                "summary": "Update a form",
+                "summary": "更新表单",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Form ID",
+                        "description": "表单 ID",
                         "name": "formId",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Updated form data",
+                        "description": "需要更新的字段",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -253,31 +252,31 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "请求参数错误",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "未登录或 token 已过期",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "403": {
-                        "description": "Forbidden",
+                        "description": "无权操作该表单",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "表单不存在",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
@@ -292,18 +291,18 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Changes form status from draft to published. Submitters can then fill it in. Owner only.",
+                "description": "将表单状态从草稿（0）改为已发布（1）。发布后填写人才可提交数据。仅表单创建者可操作。",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "forms"
+                    "表单"
                 ],
-                "summary": "Publish a form",
+                "summary": "发布表单",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Form ID",
+                        "description": "表单 ID",
                         "name": "formId",
                         "in": "path",
                         "required": true
@@ -317,25 +316,25 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "未登录或 token 已过期",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "403": {
-                        "description": "Forbidden",
+                        "description": "无权操作该表单",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "表单不存在",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
@@ -350,7 +349,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Submit field values for a published form. Each user can submit once per form. AI anomaly detection is triggered asynchronously after submission.",
+                "description": "向已发布的表单提交字段数据。每位用户对每个表单只能提交一次。提交后后端自动触发 AI 异常检测（异步），status 会在后台更新。",
                 "consumes": [
                     "application/json"
                 ],
@@ -358,19 +357,19 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "submissions"
+                    "提交记录"
                 ],
-                "summary": "Submit a form",
+                "summary": "提交表单数据",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Form ID",
+                        "description": "表单 ID",
                         "name": "formId",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Field key→value map",
+                        "description": "字段 key→value 映射，key 对应表单 schema 中的 field_key",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -388,19 +387,19 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "请求参数错误",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "未登录或 token 已过期",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
@@ -415,18 +414,18 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns the authenticated user's submission for a given form, including all field values.",
+                "description": "获取当前登录用户在指定表单中的提交记录，包含所有填写的字段值。每人每表单限提交一次。",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "submissions"
+                    "提交记录"
                 ],
-                "summary": "Get my submission",
+                "summary": "获取我的提交记录",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Form ID",
+                        "description": "表单 ID",
                         "name": "formId",
                         "in": "path",
                         "required": true
@@ -440,13 +439,13 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "未登录或 token 已过期",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "提交记录不存在",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
@@ -465,7 +464,7 @@ const docTemplate = `{
             "properties": {
                 "description": {
                     "type": "string",
-                    "example": "Please fill in before Friday"
+                    "example": "请于周五前填写完毕"
                 },
                 "schema": {
                     "type": "string",
@@ -473,7 +472,7 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string",
-                    "example": "2024 Annual Report"
+                    "example": "2024年度部门报表"
                 }
             }
         },
@@ -506,7 +505,7 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string",
-                    "example": "Please fill in before Friday"
+                    "example": "请于周五前填写完毕"
                 },
                 "id": {
                     "type": "integer",
@@ -514,7 +513,7 @@ const docTemplate = `{
                 },
                 "schema": {
                     "type": "string",
-                    "example": "{\"fields\":[]}"
+                    "example": "{\"fields\":[{\"key\":\"f_001\",\"label\":\"姓名\",\"type\":\"text\",\"required\":true}]}"
                 },
                 "status": {
                     "type": "integer",
@@ -522,7 +521,7 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string",
-                    "example": "2024 Annual Report"
+                    "example": "2024年度部门报表"
                 },
                 "updated_at": {
                     "type": "string"
@@ -548,7 +547,7 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string",
-                    "example": "Please fill in before Friday"
+                    "example": "请于周五前填写完毕"
                 },
                 "id": {
                     "type": "integer",
@@ -560,7 +559,7 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string",
-                    "example": "2024 Annual Report"
+                    "example": "2024年度部门报表"
                 },
                 "updated_at": {
                     "type": "string"
@@ -617,7 +616,7 @@ const docTemplate = `{
             "properties": {
                 "description": {
                     "type": "string",
-                    "example": "Updated description"
+                    "example": "更新后的描述"
                 },
                 "schema": {
                     "type": "string",
@@ -625,7 +624,7 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string",
-                    "example": "Updated title"
+                    "example": "更新后的标题"
                 }
             }
         },
@@ -677,7 +676,7 @@ const docTemplate = `{
     },
     "securityDefinitions": {
         "BearerAuth": {
-            "description": "JWT token. Format: \"Bearer \u003ctoken\u003e\"",
+            "description": "登录后获取的 JWT token，格式：Bearer \u003ctoken\u003e",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
@@ -691,8 +690,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "Lite Collector API",
-	Description:      "Intelligent data collection platform — WeChat Mini Program backend.",
+	Title:            "Lite Collector 接口文档",
+	Description:      "轻量级智能数据收集平台后端接口。所有接口（除登录外）需在请求头携带 JWT token，格式：Bearer <token>。\n\n**状态码说明（提交记录 status）：** 0=待检测 1=正常 2=有异常\n**状态码说明（表单 status）：** 0=草稿 1=已发布 2=已归档",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

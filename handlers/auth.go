@@ -10,15 +10,15 @@ import (
 )
 
 // WxLogin godoc
-// @Summary      WeChat login
-// @Description  Exchange a WeChat login code for a JWT token. Creates the user if first login.
-// @Tags         auth
+// @Summary      微信登录
+// @Description  使用微信 wx.login() 返回的临时 code 换取 JWT token。首次登录时自动创建用户。
+// @Tags         认证
 // @Accept       json
 // @Produce      json
-// @Param        body  body      wxLoginRequest  true  "WeChat login code"
+// @Param        body  body      wxLoginRequest  true  "微信登录 code"
 // @Success      200   {object}  wxLoginResponse
-// @Failure      400   {object}  errorResponse
-// @Failure      500   {object}  errorResponse
+// @Failure      400   {object}  errorResponse   "请求参数错误"
+// @Failure      500   {object}  errorResponse   "服务器内部错误"
 // @Router       /auth/wx-login [post]
 func WxLogin(userService *services.UserService) gin.HandlerFunc {
 	return func(c *gin.Context) {

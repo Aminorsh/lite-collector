@@ -3,13 +3,13 @@ definitions:
   handlers.createFormRequest:
     properties:
       description:
-        example: Please fill in before Friday
+        example: 请于周五前填写完毕
         type: string
       schema:
         example: '{"fields":[{"key":"f_001","label":"姓名","type":"text","required":true}]}'
         type: string
       title:
-        example: 2024 Annual Report
+        example: 2024年度部门报表
         type: string
     required:
     - schema
@@ -34,19 +34,19 @@ definitions:
       created_at:
         type: string
       description:
-        example: Please fill in before Friday
+        example: 请于周五前填写完毕
         type: string
       id:
         example: 42
         type: integer
       schema:
-        example: '{"fields":[]}'
+        example: '{"fields":[{"key":"f_001","label":"姓名","type":"text","required":true}]}'
         type: string
       status:
         example: 1
         type: integer
       title:
-        example: 2024 Annual Report
+        example: 2024年度部门报表
         type: string
       updated_at:
         type: string
@@ -63,7 +63,7 @@ definitions:
       created_at:
         type: string
       description:
-        example: Please fill in before Friday
+        example: 请于周五前填写完毕
         type: string
       id:
         example: 42
@@ -72,7 +72,7 @@ definitions:
         example: 0
         type: integer
       title:
-        example: 2024 Annual Report
+        example: 2024年度部门报表
         type: string
       updated_at:
         type: string
@@ -111,13 +111,13 @@ definitions:
   handlers.updateFormRequest:
     properties:
       description:
-        example: Updated description
+        example: 更新后的描述
         type: string
       schema:
         example: '{"fields":[]}'
         type: string
       title:
-        example: Updated title
+        example: 更新后的标题
         type: string
     type: object
   handlers.userInfo:
@@ -155,21 +155,23 @@ host: localhost:8080
 info:
   contact:
     name: Lite Collector Team
-  description: Intelligent data collection platform — WeChat Mini Program backend.
+  description: |-
+    轻量级智能数据收集平台后端接口。所有接口（除登录外）需在请求头携带 JWT token，格式：Bearer <token>。
+
+    **状态码说明（提交记录 status）：** 0=待检测 1=正常 2=有异常
+    **状态码说明（表单 status）：** 0=草稿 1=已发布 2=已归档
   license:
     name: MIT
-  termsOfService: http://swagger.io/terms/
-  title: Lite Collector API
+  title: Lite Collector 接口文档
   version: "1.0"
 paths:
   /auth/wx-login:
     post:
       consumes:
       - application/json
-      description: Exchange a WeChat login code for a JWT token. Creates the user
-        if first login.
+      description: 使用微信 wx.login() 返回的临时 code 换取 JWT token。首次登录时自动创建用户。
       parameters:
-      - description: WeChat login code
+      - description: 微信登录 code
         in: body
         name: body
         required: true
@@ -183,19 +185,19 @@ paths:
           schema:
             $ref: '#/definitions/handlers.wxLoginResponse'
         "400":
-          description: Bad Request
+          description: 请求参数错误
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "500":
-          description: Internal Server Error
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/handlers.errorResponse'
-      summary: WeChat login
+      summary: 微信登录
       tags:
-      - auth
+      - 认证
   /forms:
     get:
-      description: Returns all forms owned by the authenticated user.
+      description: 返回当前登录用户创建的所有表单（草稿和已发布均包含）。
       produces:
       - application/json
       responses:
@@ -204,24 +206,24 @@ paths:
           schema:
             $ref: '#/definitions/handlers.formListResponse'
         "401":
-          description: Unauthorized
+          description: 未登录或 token 已过期
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "500":
-          description: Internal Server Error
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/handlers.errorResponse'
       security:
       - BearerAuth: []
-      summary: List my forms
+      summary: 获取我的表单列表
       tags:
-      - forms
+      - 表单
     post:
       consumes:
       - application/json
-      description: Creates a new draft form owned by the authenticated user.
+      description: 创建一个新的草稿表单，归属于当前登录用户。创建后需调用发布接口才能开放填写。
       parameters:
-      - description: Form data
+      - description: 表单基本信息
         in: body
         name: body
         required: true
@@ -235,27 +237,27 @@ paths:
           schema:
             $ref: '#/definitions/handlers.formResponse'
         "400":
-          description: Bad Request
+          description: 请求参数错误
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "401":
-          description: Unauthorized
+          description: 未登录或 token 已过期
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "500":
-          description: Internal Server Error
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/handlers.errorResponse'
       security:
       - BearerAuth: []
-      summary: Create a form
+      summary: 创建表单
       tags:
-      - forms
+      - 表单
   /forms/{formId}:
     get:
-      description: Returns a single form by ID. Only the owner can access it.
+      description: 根据 ID 获取单个表单的完整信息，包含 schema 字段结构。仅表单创建者可访问。
       parameters:
-      - description: Form ID
+      - description: 表单 ID
         in: path
         name: formId
         required: true
@@ -268,33 +270,33 @@ paths:
           schema:
             $ref: '#/definitions/handlers.formDetailResponse'
         "401":
-          description: Unauthorized
+          description: 未登录或 token 已过期
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "403":
-          description: Forbidden
+          description: 无权访问该表单
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "404":
-          description: Not Found
+          description: 表单不存在
           schema:
             $ref: '#/definitions/handlers.errorResponse'
       security:
       - BearerAuth: []
-      summary: Get a form
+      summary: 获取表单详情
       tags:
-      - forms
+      - 表单
     put:
       consumes:
       - application/json
-      description: Updates title, description, and schema of a draft form. Owner only.
+      description: 修改草稿表单的标题、描述和字段结构（schema）。仅表单创建者可操作。
       parameters:
-      - description: Form ID
+      - description: 表单 ID
         in: path
         name: formId
         required: true
         type: integer
-      - description: Updated form data
+      - description: 需要更新的字段
         in: body
         name: body
         required: true
@@ -308,36 +310,35 @@ paths:
           schema:
             $ref: '#/definitions/handlers.formResponse'
         "400":
-          description: Bad Request
+          description: 请求参数错误
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "401":
-          description: Unauthorized
+          description: 未登录或 token 已过期
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "403":
-          description: Forbidden
+          description: 无权操作该表单
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "404":
-          description: Not Found
+          description: 表单不存在
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "500":
-          description: Internal Server Error
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/handlers.errorResponse'
       security:
       - BearerAuth: []
-      summary: Update a form
+      summary: 更新表单
       tags:
-      - forms
+      - 表单
   /forms/{formId}/publish:
     post:
-      description: Changes form status from draft to published. Submitters can then
-        fill it in. Owner only.
+      description: 将表单状态从草稿（0）改为已发布（1）。发布后填写人才可提交数据。仅表单创建者可操作。
       parameters:
-      - description: Form ID
+      - description: 表单 ID
         in: path
         name: formId
         required: true
@@ -350,39 +351,38 @@ paths:
           schema:
             $ref: '#/definitions/handlers.messageResponse'
         "401":
-          description: Unauthorized
+          description: 未登录或 token 已过期
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "403":
-          description: Forbidden
+          description: 无权操作该表单
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "404":
-          description: Not Found
+          description: 表单不存在
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "500":
-          description: Internal Server Error
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/handlers.errorResponse'
       security:
       - BearerAuth: []
-      summary: Publish a form
+      summary: 发布表单
       tags:
-      - forms
+      - 表单
   /forms/{formId}/submissions:
     post:
       consumes:
       - application/json
-      description: Submit field values for a published form. Each user can submit
-        once per form. AI anomaly detection is triggered asynchronously after submission.
+      description: 向已发布的表单提交字段数据。每位用户对每个表单只能提交一次。提交后后端自动触发 AI 异常检测（异步），status 会在后台更新。
       parameters:
-      - description: Form ID
+      - description: 表单 ID
         in: path
         name: formId
         required: true
         type: integer
-      - description: Field key→value map
+      - description: 字段 key→value 映射，key 对应表单 schema 中的 field_key
         in: body
         name: body
         required: true
@@ -397,28 +397,27 @@ paths:
           schema:
             $ref: '#/definitions/handlers.submissionResponse'
         "400":
-          description: Bad Request
+          description: 请求参数错误
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "401":
-          description: Unauthorized
+          description: 未登录或 token 已过期
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "500":
-          description: Internal Server Error
+          description: 服务器内部错误
           schema:
             $ref: '#/definitions/handlers.errorResponse'
       security:
       - BearerAuth: []
-      summary: Submit a form
+      summary: 提交表单数据
       tags:
-      - submissions
+      - 提交记录
   /forms/{formId}/submissions/my:
     get:
-      description: Returns the authenticated user's submission for a given form, including
-        all field values.
+      description: 获取当前登录用户在指定表单中的提交记录，包含所有填写的字段值。每人每表单限提交一次。
       parameters:
-      - description: Form ID
+      - description: 表单 ID
         in: path
         name: formId
         required: true
@@ -431,21 +430,21 @@ paths:
           schema:
             $ref: '#/definitions/handlers.submissionWithValuesResponse'
         "401":
-          description: Unauthorized
+          description: 未登录或 token 已过期
           schema:
             $ref: '#/definitions/handlers.errorResponse'
         "404":
-          description: Not Found
+          description: 提交记录不存在
           schema:
             $ref: '#/definitions/handlers.errorResponse'
       security:
       - BearerAuth: []
-      summary: Get my submission
+      summary: 获取我的提交记录
       tags:
-      - submissions
+      - 提交记录
 securityDefinitions:
   BearerAuth:
-    description: 'JWT token. Format: "Bearer <token>"'
+    description: 登录后获取的 JWT token，格式：Bearer <token>
     in: header
     name: Authorization
     type: apiKey

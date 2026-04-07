@@ -11,18 +11,18 @@ import (
 )
 
 // CreateSubmission godoc
-// @Summary      Submit a form
-// @Description  Submit field values for a published form. Each user can submit once per form. AI anomaly detection is triggered asynchronously after submission.
-// @Tags         submissions
+// @Summary      提交表单数据
+// @Description  向已发布的表单提交字段数据。每位用户对每个表单只能提交一次。提交后后端自动触发 AI 异常检测（异步），status 会在后台更新。
+// @Tags         提交记录
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        formId  path      int                      true  "Form ID"
-// @Param        body    body      map[string]interface{}   true  "Field key→value map"
+// @Param        formId  path      int                    true  "表单 ID"
+// @Param        body    body      map[string]interface{} true  "字段 key→value 映射，key 对应表单 schema 中的 field_key"
 // @Success      201     {object}  submissionResponse
-// @Failure      400     {object}  errorResponse
-// @Failure      401     {object}  errorResponse
-// @Failure      500     {object}  errorResponse
+// @Failure      400     {object}  errorResponse  "请求参数错误"
+// @Failure      401     {object}  errorResponse  "未登录或 token 已过期"
+// @Failure      500     {object}  errorResponse  "服务器内部错误"
 // @Router       /forms/{formId}/submissions [post]
 func CreateSubmission(submissionService *services.SubmissionService) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -52,15 +52,15 @@ func CreateSubmission(submissionService *services.SubmissionService) gin.Handler
 }
 
 // GetMySubmission godoc
-// @Summary      Get my submission
-// @Description  Returns the authenticated user's submission for a given form, including all field values.
-// @Tags         submissions
+// @Summary      获取我的提交记录
+// @Description  获取当前登录用户在指定表单中的提交记录，包含所有填写的字段值。每人每表单限提交一次。
+// @Tags         提交记录
 // @Produce      json
 // @Security     BearerAuth
-// @Param        formId  path      int  true  "Form ID"
+// @Param        formId  path      int  true  "表单 ID"
 // @Success      200     {object}  submissionWithValuesResponse
-// @Failure      401     {object}  errorResponse
-// @Failure      404     {object}  errorResponse
+// @Failure      401     {object}  errorResponse  "未登录或 token 已过期"
+// @Failure      404     {object}  errorResponse  "提交记录不存在"
 // @Router       /forms/{formId}/submissions/my [get]
 func GetMySubmission(submissionService *services.SubmissionService) gin.HandlerFunc {
 	return func(c *gin.Context) {

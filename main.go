@@ -1,7 +1,9 @@
-// @title           Lite Collector API
+// @title           Lite Collector 接口文档
 // @version         1.0
-// @description     Intelligent data collection platform — WeChat Mini Program backend.
-// @termsOfService  http://swagger.io/terms/
+// @description     轻量级智能数据收集平台后端接口。所有接口（除登录外）需在请求头携带 JWT token，格式：Bearer <token>。
+// @description
+// @description     **状态码说明（提交记录 status）：** 0=待检测 1=正常 2=有异常
+// @description     **状态码说明（表单 status）：** 0=草稿 1=已发布 2=已归档
 
 // @contact.name   Lite Collector Team
 
@@ -13,7 +15,7 @@
 // @securityDefinitions.apikey  BearerAuth
 // @in                          header
 // @name                        Authorization
-// @description                 JWT token. Format: "Bearer <token>"
+// @description                 登录后获取的 JWT token，格式：Bearer <token>
 
 package main
 
