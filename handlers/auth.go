@@ -4,7 +4,9 @@ import (
 	"net/http"
 	"time"
 
+	"lite-collector/models"
 	"lite-collector/repository"
+	"lite-collector/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -12,7 +14,7 @@ import (
 
 // WxLogin handles WeChat login request
 // Expected request body: { "code": "wechat_login_code" }
-func WxLogin(userRepo repository.UserRepository) gin.HandlerFunc {
+func WxLogin(userRepo repository.UserRepository, jwtSecret []byte) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req struct {
 			Code string `json:"code" binding:"required"`
@@ -51,8 +53,6 @@ func WxLogin(userRepo repository.UserRepository) gin.HandlerFunc {
 			"exp":     time.Now().Add(time.Hour * 24).Unix(), // 24 hours expiry
 		})
 
-		// TODO: Get secret from config
-		jwtSecret := []byte("your-secret-key") // In real app, load from config
 		tokenString, err := token.SignedString(jwtSecret)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})

@@ -2,6 +2,8 @@ package repository
 
 import (
 	"lite-collector/models"
+
+	"gorm.io/gorm"
 )
 
 // SubmissionRepository defines the interface for submission data access

@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"lite-collector/db"
 	"lite-collector/handlers"
 	"lite-collector/repository"
 
@@ -9,11 +8,9 @@ import (
 )
 
 // RegisterAuthRoutes registers authentication routes
-func RegisterAuthRoutes(r *gin.RouterGroup) {
-	// Initialize user repository
-	userRepo := repository.NewUserRepository(db.DB)
+func RegisterAuthRoutes(r *gin.RouterGroup, userRepo repository.UserRepository, jwtSecret []byte) {
 	auth := r.Group("/auth")
 	{
-		auth.POST("/wx-login", handlers.WxLogin(userRepo))
+		auth.POST("/wx-login", handlers.WxLogin(userRepo, jwtSecret))
 	}
 }

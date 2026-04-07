@@ -16,6 +16,12 @@ type Config struct {
 	Wechat   WechatConfig
 	DeepSeek DeepSeekConfig
 	MinIO    MinIOConfig
+	JWT      JWTConfig
+}
+
+// JWTConfig holds JWT configuration
+type JWTConfig struct {
+	Secret string
 }
 
 // ServerConfig holds server configuration
@@ -92,6 +98,9 @@ func Load() *Config {
 			AccessKeyID:     getEnv("MINIO_ACCESS_KEY", "minioadmin"),
 			SecretAccessKey: getEnv("MINIO_SECRET_KEY", "minioadmin"),
 			UseSSL:          getEnvAsBool("MINIO_USE_SSL", false),
+		},
+		JWT: JWTConfig{
+			Secret: getEnv("JWT_SECRET", "change-me-in-production"),
 		},
 	}
 }
