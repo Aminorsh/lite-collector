@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"lite-collector/services"
+	"lite-collector/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,15 +16,17 @@ func CreateSubmission(submissionService *services.SubmissionService) gin.Handler
 		userID := c.MustGet("user_id").(uint64)
 		formID := c.Param("formId")
 
-		var values map[string]interface{}
+		var values map[string]any
 		if err := c.ShouldBindJSON(&values); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+			e := utils.ErrBadRequest
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": err.Error()}})
 			return
 		}
 
 		submission, err := submissionService.CreateSubmission(formID, userID, values)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create submission"})
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 
@@ -43,7 +46,8 @@ func GetMySubmission(submissionService *services.SubmissionService) gin.HandlerF
 
 		result, err := submissionService.GetMySubmissionWithValues(formID, userID)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "submission not found"})
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 

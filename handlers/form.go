@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"lite-collector/services"
+	"lite-collector/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +19,8 @@ func CreateForm(formService *services.FormService) gin.HandlerFunc {
 			Schema      string `json:"schema" binding:"required"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+			e := utils.ErrBadRequest
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": err.Error()}})
 			return
 		}
 
@@ -26,7 +28,8 @@ func CreateForm(formService *services.FormService) gin.HandlerFunc {
 
 		form, err := formService.CreateForm(userID, req.Title, req.Description, []byte(req.Schema))
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create form"})
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 
@@ -47,7 +50,8 @@ func GetForms(formService *services.FormService) gin.HandlerFunc {
 
 		forms, err := formService.GetFormsByOwner(userID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get forms"})
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 
@@ -63,7 +67,8 @@ func GetForm(formService *services.FormService) gin.HandlerFunc {
 
 		form, err := formService.GetFormByID(formID, userID)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "form not found"})
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 
@@ -92,13 +97,15 @@ func UpdateForm(formService *services.FormService) gin.HandlerFunc {
 			Schema      string `json:"schema"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+			e := utils.ErrBadRequest
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": err.Error()}})
 			return
 		}
 
 		form, err := formService.UpdateForm(formID, userID, req.Title, req.Description, []byte(req.Schema))
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update form"})
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 
@@ -119,7 +126,8 @@ func PublishForm(formService *services.FormService) gin.HandlerFunc {
 		formID := c.Param("formId")
 
 		if err := formService.PublishForm(formID, userID); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to publish form"})
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 

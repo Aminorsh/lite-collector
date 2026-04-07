@@ -1,11 +1,11 @@
 package services
 
 import (
-	"fmt"
 	"time"
 
 	"lite-collector/models"
 	"lite-collector/repository"
+	"lite-collector/utils"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -41,7 +41,7 @@ func (s *UserService) Login(code string) (string, *models.User, error) {
 			AvatarURL: avatarURL,
 		}
 		if err := s.userRepo.Create(user); err != nil {
-			return "", nil, fmt.Errorf("failed to create user: %w", err)
+			return "", nil, utils.ErrLoginFailed
 		}
 	}
 
@@ -52,7 +52,7 @@ func (s *UserService) Login(code string) (string, *models.User, error) {
 	})
 	tokenString, err := token.SignedString(s.jwtSecret)
 	if err != nil {
-		return "", nil, fmt.Errorf("failed to sign token: %w", err)
+		return "", nil, utils.ErrLoginFailed
 	}
 
 	return tokenString, user, nil

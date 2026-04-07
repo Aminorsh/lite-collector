@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"lite-collector/services"
+	"lite-collector/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,13 +17,15 @@ func WxLogin(userService *services.UserService) gin.HandlerFunc {
 			Code string `json:"code" binding:"required"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "code is required"})
+			e := utils.ErrBadRequest
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": "code is required"}})
 			return
 		}
 
 		token, user, err := userService.Login(req.Code)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "login failed"})
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 
