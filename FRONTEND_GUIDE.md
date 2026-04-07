@@ -1,69 +1,71 @@
-# Frontend Developer Guide — Lite Collector
+# 前端开发指南 — Lite Collector
 
-## What are we building?
+## 我们在构建什么？
 
-Lite Collector is a lightweight intelligent data collection platform designed to replace Excel-based workflows. Think of it as a WeChat-native Google Forms with AI built in.
+Lite Collector 是一个轻量级智能数据收集平台，旨在替代基于 Excel 的工作流程。可以把它理解为一个内置于微信的原生版 Google Forms，并集成了 AI 功能。
 
-**The problem it solves:** teams currently collect data by sharing Excel files over WeChat. This is slow, error-prone, and impossible to aggregate cleanly.
+**它要解决的问题：** 目前团队通过微信分享 Excel 文件来收集数据。这种方式效率低下、容易出错，且无法进行清晰的数据汇总。
 
-**How it works:**
-- A **form owner** (e.g. a manager) designs a form on their phone and publishes it
-- **Submitters** (e.g. team members) receive a link, open it in WeChat, and fill it in — no registration needed, identity comes from WeChat OpenID
-- The owner reviews all submissions in one place
-- **AI runs in the background** to flag suspicious entries (anomaly detection) and generate summary reports on demand
+**工作流程：**
 
-**Platform:** WeChat Mini Program (frontend) + Go/Gin REST API (backend)
+- **表单创建者**（如团队经理）在手机上设计表单并发布
+- **提交者**（如团队成员）收到链接，在微信中打开并填写 — 无需注册，身份信息来自微信 OpenID
+- 创建者可在统一界面查看所有提交记录
+- **AI 在后台运行**，标记可疑条目（异常检测）并按需生成汇总报告
+
+**平台：** 微信小程序（前端）+ Go/Gin REST API（后端）
 
 ---
 
-## Authentication
+## 身份认证
 
-All users authenticate via WeChat. There is no username/password.
+所有用户通过微信进行身份认证，不采用用户名/密码方式。
 
-### Login flow
+### 登录流程
 
 ```
-1. Mini Program calls wx.login() → gets a temporary `code`
-2. Send code to our backend → get a JWT token back
-3. Store the token locally
-4. Attach token to every subsequent request as: Authorization: Bearer <token>
+1. 小程序调用 wx.login() → 获取临时 `code`
+2. 将 code 发送至后端 → 获取 JWT token
+3. 将 token 保存在本地
+4. 在后续每个请求中携带 token：Authorization: Bearer <token>
 ```
 
-### Login endpoint
+### 登录接口
 
 ```
 POST /api/v1/auth/wx-login
 Content-Type: application/json
 
-{ "code": "<code from wx.login()>" }
+{ "code": "<wx.login() 获取的 code>" }
 ```
 
-**Success response `200`:**
+**成功响应 `200`：**
+
 ```json
 {
   "token": "eyJhbGci...",
   "user": {
     "id": 1,
     "openid": "oXxxx...",
-    "nickname": "WeChat User",
+    "nickname": "微信用户",
     "avatar_url": ""
   }
 }
 ```
 
-> **Note:** Token expiry is 24 hours. When a request returns `401`, call wx.login() again and refresh the token.
+> **注意：** Token 有效期为 24 小时。当请求返回 `401` 时，需重新调用 wx.login() 并刷新 token。
 
 ---
 
-## Base URL & versioning
+## 基础 URL 与版本
 
-All API endpoints are under:
+所有 API 接口的基础路径为：
 
 ```
 http://<host>/api/v1/
 ```
 
-Every request except login requires:
+除登录接口外，每个请求都需要携带：
 
 ```
 Authorization: Bearer <token>
@@ -71,9 +73,9 @@ Authorization: Bearer <token>
 
 ---
 
-## Error format
+## 错误格式
 
-All errors follow the same structure regardless of endpoint:
+所有错误均遵循统一结构，与具体接口无关：
 
 ```json
 {
@@ -84,44 +86,46 @@ All errors follow the same structure regardless of endpoint:
 }
 ```
 
-You should switch on `code` in your error handling, not on `message` (messages may change). Common codes:
+错误处理时应根据 `code` 进行判断，而非 `message`（message 内容可能会变化）。常见错误码：
 
-| Code | HTTP Status | Meaning |
-|---|---|---|
-| `BAD_REQUEST` | 400 | Missing or malformed fields |
-| `UNAUTHORIZED` | 401 | Missing or expired token |
-| `FORBIDDEN` | 403 | You don't have access to this resource |
-| `FORM_NOT_FOUND` | 404 | Form doesn't exist |
-| `FORM_FORBIDDEN` | 403 | You don't own this form |
-| `SUBMISSION_NOT_FOUND` | 404 | No submission found |
-| `SUBMISSION_CREATE_FAILED` | 500 | Server error saving submission |
-| `INTERNAL_ERROR` | 500 | Unexpected server error |
+| Code                       | HTTP 状态码 | 含义                       |
+| -------------------------- | ----------- | -------------------------- |
+| `BAD_REQUEST`              | 400         | 缺少字段或字段格式错误     |
+| `UNAUTHORIZED`             | 401         | 缺少 token 或 token 已过期 |
+| `FORBIDDEN`                | 403         | 无权访问该资源             |
+| `FORM_NOT_FOUND`           | 404         | 表单不存在                 |
+| `FORM_FORBIDDEN`           | 403         | 你不是该表单的创建者       |
+| `SUBMISSION_NOT_FOUND`     | 404         | 未找到提交记录             |
+| `SUBMISSION_CREATE_FAILED` | 500         | 服务器保存提交记录失败     |
+| `INTERNAL_ERROR`           | 500         | 服务器内部错误             |
 
 ---
 
-## API Endpoints
+## API 接口
 
-### Forms
+### 表单
 
-#### Create a form
+#### 创建表单
+
 ```
 POST /api/v1/forms
 Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "title": "2024 Annual Department Report",
-  "description": "Please fill in before Friday",
-  "schema": "<JSON string — see Form Schema section below>"
+  "title": "2024 年度部门报告",
+  "description": "请于周五前填写",
+  "schema": "<JSON 字符串 — 详见下方表单结构说明>"
 }
 ```
 
-**Success `201`:**
+**成功响应 `201`：**
+
 ```json
 {
   "id": 42,
-  "title": "2024 Annual Department Report",
-  "description": "Please fill in before Friday",
+  "title": "2024 年度部门报告",
+  "description": "请于周五前填写",
   "status": 0,
   "created_at": "2026-04-07T10:00:00Z"
 }
@@ -129,19 +133,21 @@ Content-Type: application/json
 
 ---
 
-#### List my forms
+#### 获取我的表单列表
+
 ```
 GET /api/v1/forms
 Authorization: Bearer <token>
 ```
 
-**Success `200`:**
+**成功响应 `200`：**
+
 ```json
 {
   "forms": [
     {
       "id": 42,
-      "title": "2024 Annual Department Report",
+      "title": "2024 年度部门报告",
       "status": 1,
       "created_at": "2026-04-07T10:00:00Z",
       "updated_at": "2026-04-07T12:00:00Z"
@@ -152,18 +158,20 @@ Authorization: Bearer <token>
 
 ---
 
-#### Get a single form
+#### 获取单个表单
+
 ```
 GET /api/v1/forms/:formId
 Authorization: Bearer <token>
 ```
 
-**Success `200`:**
+**成功响应 `200`：**
+
 ```json
 {
   "id": 42,
-  "title": "2024 Annual Department Report",
-  "description": "Please fill in before Friday",
+  "title": "2024 年度部门报告",
+  "description": "请于周五前填写",
   "schema": "{...}",
   "status": 1,
   "created_at": "2026-04-07T10:00:00Z",
@@ -173,41 +181,45 @@ Authorization: Bearer <token>
 
 ---
 
-#### Update a form
+#### 更新表单
+
 ```
 PUT /api/v1/forms/:formId
 Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "title": "Updated title",
-  "description": "Updated description",
-  "schema": "<JSON string>"
+  "title": "更新后的标题",
+  "description": "更新后的描述",
+  "schema": "<JSON 字符串>"
 }
 ```
 
-**Success `200`:** same shape as Create response.
+**成功响应 `200`：** 结构与创建响应相同。
 
 ---
 
-#### Publish a form
-Moves status from `draft (0)` to `published (1)`. Once published, submitters can fill it in.
+#### 发布表单
+
+将表单状态从 `草稿 (0)` 变更为 `已发布 (1)`。发布后，提交者即可填写。
 
 ```
 POST /api/v1/forms/:formId/publish
 Authorization: Bearer <token>
 ```
 
-**Success `200`:**
+**成功响应 `200`：**
+
 ```json
 { "message": "form published successfully" }
 ```
 
 ---
 
-### Submissions
+### 提交记录
 
-#### Submit a form
+#### 提交表单
+
 ```
 POST /api/v1/forms/:formId/submissions
 Authorization: Bearer <token>
@@ -220,9 +232,10 @@ Content-Type: application/json
 }
 ```
 
-The request body is a flat key→value map where keys are the `field_key` values defined in the form schema.
+请求体是一个扁平化的 key→value 映射，其中 key 是表单结构中定义的 `field_key` 值。
 
-**Success `201`:**
+**成功响应 `201`：**
+
 ```json
 {
   "id": 7,
@@ -231,19 +244,21 @@ The request body is a flat key→value map where keys are the `field_key` values
 }
 ```
 
-> After submission, the backend automatically enqueues an AI anomaly detection job in the background. The `status` will update asynchronously (0 = pending, 1 = normal, 2 = has anomaly).
+> 提交后，后端会自动在后台将 AI 异常检测任务加入队列。`status` 状态会异步更新（0 = 处理中，1 = 正常，2 = 存在异常）。
 
 ---
 
-#### Get my submission for a form
-Each user can only submit once per form. This returns that submission along with the values they entered.
+#### 获取我在某个表单中的提交记录
+
+每个用户对每个表单只能提交一次。该接口返回用户的提交记录及填写的内容。
 
 ```
 GET /api/v1/forms/:formId/submissions/my
 Authorization: Bearer <token>
 ```
 
-**Success `200`:**
+**成功响应 `200`：**
+
 ```json
 {
   "id": 7,
@@ -259,11 +274,11 @@ Authorization: Bearer <token>
 
 ---
 
-## Form Schema
+## 表单结构
 
-The form schema is a JSON string stored in the `schema` field. It describes what fields the form contains.
+表单结构是一个存储在 `schema` 字段中的 JSON 字符串，用于描述表单包含的字段。
 
-Proposed structure (subject to finalisation with backend):
+建议结构（待与后端最终确认）：
 
 ```json
 {
@@ -291,61 +306,63 @@ Proposed structure (subject to finalisation with backend):
 }
 ```
 
-### Supported field types
+### 支持的字段类型
 
-| Type | Description | Notes |
-|---|---|---|
-| `text` | Single-line text | |
-| `textarea` | Multi-line text | |
-| `number` | Numeric input | Validate ≥ 0 where applicable |
-| `select` | Single choice dropdown | Requires `options` array |
-| `radio` | Single choice inline | Requires `options` array |
-| `checkbox` | Multiple choice | Returns array of selected values |
-| `date` | Date picker | ISO 8601 format: `YYYY-MM-DD` |
-| `phone` | Phone number | Client-side format validation |
-| `id_card` | Chinese ID card | 18-digit validation |
-| `image` | Image upload | Returns file URL after upload |
+| 类型       | 说明           | 备注                        |
+| ---------- | -------------- | --------------------------- |
+| `text`     | 单行文本       |                             |
+| `textarea` | 多行文本       |                             |
+| `number`   | 数字输入       | 适用时验证 ≥ 0              |
+| `select`   | 单选下拉框     | 需要 `options` 数组         |
+| `radio`    | 单选框（行内） | 需要 `options` 数组         |
+| `checkbox` | 多选框         | 返回选中值的数组            |
+| `date`     | 日期选择器     | ISO 8601 格式：`YYYY-MM-DD` |
+| `phone`    | 手机号         | 客户端进行格式校验          |
+| `id_card`  | 身份证号       | 18 位校验                   |
+| `image`    | 图片上传       | 上传成功后返回文件 URL      |
 
-> The `key` value (e.g. `f_001`) is what you use as the field key when submitting. Convention is `f_` + zero-padded index, but any unique string works.
-
----
-
-## Form & Submission status codes
-
-**Form status (`status` field):**
-| Value | Meaning |
-|---|---|
-| `0` | Draft — only visible to owner, cannot be submitted |
-| `1` | Published — open for submissions |
-| `2` | Archived — closed |
-
-**Submission status (`status` field):**
-| Value | Meaning |
-|---|---|
-| `0` | Pending — AI review in progress |
-| `1` | Normal — no anomalies found |
-| `2` | Has anomaly — AI flagged something, show a warning indicator |
+> `key` 值（如 `f_001`）是在提交时用作字段键的值。约定使用 `f_` + 补零后的索引，但任何唯一字符串均可。
 
 ---
 
-## Current API status
+## 表单与提交记录状态码
 
-> **Important:** The backend is under active development. Some endpoints currently return mock/placeholder data while the database layer is being implemented. The **request/response shapes and error codes are final** — you can build against them safely.
+**表单状态（`status` 字段）：**
 
-| Endpoint | Status |
-|---|---|
-| `POST /auth/wx-login` | Mock (simulated OpenID, no real WeChat exchange yet) |
-| `POST /forms` | Real (writes to DB) |
-| `GET /forms` | Real (reads from DB) |
-| `GET /forms/:id` | Real (reads from DB) |
-| `PUT /forms/:id` | Real (writes to DB) |
-| `POST /forms/:id/publish` | Real (writes to DB) |
-| `POST /forms/:id/submissions` | Mock (returns placeholder, not persisted yet) |
-| `GET /forms/:id/submissions/my` | Mock (returns hardcoded values) |
+| 值   | 含义                          |
+| ---- | ----------------------------- |
+| `0`  | 草稿 — 仅创建者可见，不可提交 |
+| `1`  | 已发布 — 开放提交             |
+| `2`  | 已归档 — 关闭提交             |
+
+**提交记录状态（`status` 字段）：**
+
+| 值   | 含义                               |
+| ---- | ---------------------------------- |
+| `0`  | 处理中 — AI 审核进行中             |
+| `1`  | 正常 — 未发现异常                  |
+| `2`  | 存在异常 — AI 标记，需显示警告标识 |
 
 ---
 
-## Health check
+## 当前 API 状态
+
+> **重要提示：** 后端正在积极开发中。部分接口当前返回模拟/占位数据，数据库层正在实现中。**请求/响应结构和错误码已最终确定** — 可安全地基于此进行开发。
+
+| 接口                            | 状态                                  |
+| ------------------------------- | ------------------------------------- |
+| `POST /auth/wx-login`           | 模拟（模拟 OpenID，尚未对接真实微信） |
+| `POST /forms`                   | 真实（写入数据库）                    |
+| `GET /forms`                    | 真实（从数据库读取）                  |
+| `GET /forms/:id`                | 真实（从数据库读取）                  |
+| `PUT /forms/:id`                | 真实（写入数据库）                    |
+| `POST /forms/:id/publish`       | 真实（写入数据库）                    |
+| `POST /forms/:id/submissions`   | 模拟（返回占位数据，尚未持久化）      |
+| `GET /forms/:id/submissions/my` | 模拟（返回硬编码值）                  |
+
+---
+
+## 健康检查
 
 ```
 GET /health
@@ -355,21 +372,30 @@ GET /health
 { "status": "ok" }
 ```
 
-No auth required. Use this to check if the server is up.
+无需认证。用于检查服务器是否正常运行。
 
 ---
 
-## Local development
+## 本地开发
 
-Start the backend locally with Docker Compose:
+使用 Docker Compose 启动本地后端：
 
 ```bash
 docker-compose up
 ```
 
-Base URL: `http://localhost:8080`
+基础 URL：`http://localhost:8080`
 
-The backend will be ready when you see:
+当看到以下输出时，表示后端已就绪：
+
 ```
 Server starting on :8080
 ```
+
+接口在线文档（Swagger UI）：
+
+```
+http://localhost:8080/swagger/index.html
+```
+
+在 Swagger UI 中可以直接测试接口——点击右上角「Authorize」，输入登录后获取的 token，之后所有请求会自动携带认证信息。
