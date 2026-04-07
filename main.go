@@ -31,6 +31,8 @@ func main() {
 	formRepo := repository.NewFormRepository(db.GetDB())
 	submissionRepo := repository.NewSubmissionRepository(db.GetDB())
 
+	jwtSecret := []byte(cfg.JWT.Secret)
+
 	// Health check endpoint (no auth required)
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
@@ -40,13 +42,13 @@ func main() {
 	v1 := r.Group("/api/v1")
 	{
 		// Auth routes (no auth required)
-		routes.RegisterAuthRoutes(v1, userRepo)
+		routes.RegisterAuthRoutes(v1, userRepo, jwtSecret)
 
 		// Protected routes (require auth)
 		protected := v1.Group("")
-		protected.Use(middleware.AuthMiddleware()) // Apply auth middleware
+		protected.Use(middleware.AuthMiddleware(jwtSecret)) // Apply auth middleware
 		{
-			routes.RegisterFormRoutes(protected, formRepo)
+			routes.RegisterFormRoutes(protected, formRepo, submissionRepo)
 			// Submission routes are now handled within form routes as nested routes
 			// routes.RegisterSubmissionRoutes(protected) // Removed to avoid conflicts
 		}

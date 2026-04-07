@@ -9,7 +9,7 @@ import (
 )
 
 // AuthMiddleware validates JWT token from Authorization header
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(jwtSecret []byte) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get token from Authorization header
 		authHeader := c.GetHeader("Authorization")
@@ -34,8 +34,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, jwt.ErrSignatureInvalid
 			}
-			// TODO: Get secret from config
-			return []byte("your-secret-key"), nil
+			return jwtSecret, nil
 		})
 
 		if err != nil || !token.Valid {

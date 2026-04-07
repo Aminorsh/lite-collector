@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"lite-collector/services"
 	"lite-collector/repository"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,7 @@ import (
 
 // CreateForm handles creating a new form
 func CreateForm(formRepo repository.FormRepository) gin.HandlerFunc {
+	formService := services.NewFormService(formRepo)
 	return func(c *gin.Context) {
 		var req struct {
 			Title       string `json:"title" binding:"required"`
@@ -29,7 +31,6 @@ func CreateForm(formRepo repository.FormRepository) gin.HandlerFunc {
 		}
 
 		// Create form
-		formService := services.NewFormService(formRepo)
 		form, err := formService.CreateForm(userID.(uint64), req.Title, req.Description, []byte(req.Schema))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create form"})
@@ -48,6 +49,7 @@ func CreateForm(formRepo repository.FormRepository) gin.HandlerFunc {
 
 // GetForms handles getting list of forms for the current user
 func GetForms(formRepo repository.FormRepository) gin.HandlerFunc {
+	formService := services.NewFormService(formRepo)
 	return func(c *gin.Context) {
 		// Get user ID from context
 		userID, exists := c.Get("user_id")
@@ -57,7 +59,6 @@ func GetForms(formRepo repository.FormRepository) gin.HandlerFunc {
 		}
 
 		// Get forms
-		formService := services.NewFormService(formRepo)
 		forms, err := formService.GetFormsByOwner(userID.(uint64))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get forms"})
@@ -72,6 +73,7 @@ func GetForms(formRepo repository.FormRepository) gin.HandlerFunc {
 
 // GetForm handles getting a specific form by ID
 func GetForm(formRepo repository.FormRepository) gin.HandlerFunc {
+	formService := services.NewFormService(formRepo)
 	return func(c *gin.Context) {
 		// Get user ID from context
 		userID, exists := c.Get("user_id")
@@ -87,7 +89,6 @@ func GetForm(formRepo repository.FormRepository) gin.HandlerFunc {
 		}
 
 		// Get form
-		formService := services.NewFormService(formRepo)
 		form, err := formService.GetFormByID(formID, userID.(uint64))
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Form not found"})
@@ -108,6 +109,7 @@ func GetForm(formRepo repository.FormRepository) gin.HandlerFunc {
 
 // UpdateForm handles updating an existing form
 func UpdateForm(formRepo repository.FormRepository) gin.HandlerFunc {
+	formService := services.NewFormService(formRepo)
 	return func(c *gin.Context) {
 		// Get user ID from context
 		userID, exists := c.Get("user_id")
@@ -133,7 +135,6 @@ func UpdateForm(formRepo repository.FormRepository) gin.HandlerFunc {
 		}
 
 		// Update form
-		formService := services.NewFormService(formRepo)
 		form, err := formService.UpdateForm(formID, userID.(uint64), req.Title, req.Description, []byte(req.Schema))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update form"})
@@ -152,6 +153,7 @@ func UpdateForm(formRepo repository.FormRepository) gin.HandlerFunc {
 
 // PublishForm handles publishing a form (changing status to published)
 func PublishForm(formRepo repository.FormRepository) gin.HandlerFunc {
+	formService := services.NewFormService(formRepo)
 	return func(c *gin.Context) {
 		// Get user ID from context
 		userID, exists := c.Get("user_id")
@@ -167,7 +169,6 @@ func PublishForm(formRepo repository.FormRepository) gin.HandlerFunc {
 		}
 
 		// Publish form
-		formService := services.NewFormService(formRepo)
 		err := formService.PublishForm(formID, userID.(uint64))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to publish form"})

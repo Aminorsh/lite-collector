@@ -1,8 +1,9 @@
 package repository
 
 import (
-	"lite-collector/db"
 	"lite-collector/models"
+
+	"gorm.io/gorm"
 )
 
 // UserRepository defines the interface for user data access

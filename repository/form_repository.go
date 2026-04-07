@@ -2,6 +2,8 @@ package repository
 
 import (
 	"lite-collector/models"
+
+	"gorm.io/gorm"
 )
 
 // FormRepository defines the interface for form data access
@@ -15,11 +17,11 @@ type FormRepository interface {
 
 // formRepository implements FormRepository using GORM
 type formRepository struct {
-	db *models.DB
+	db *gorm.DB
 }
 
 // NewFormRepository creates a new form repository instance
-func NewFormRepository(db *models.DB) FormRepository {
+func NewFormRepository(db *gorm.DB) FormRepository {
 	return &formRepository{db: db}
 }
 
