@@ -1,0 +1,51 @@
+package utils
+
+import (
+	"errors"
+	"net/http"
+)
+
+// AppError is a typed application error carrying an HTTP status, a machine-readable
+// code for the frontend, and a human-readable message.
+type AppError struct {
+	HTTPStatus int
+	Code       string
+	Message    string
+}
+
+func (e *AppError) Error() string {
+	return e.Message
+}
+
+// Predefined errors — add new ones here as the app grows.
+var (
+	ErrBadRequest = &AppError{http.StatusBadRequest, "BAD_REQUEST", "invalid request"}
+	ErrUnauthorized = &AppError{http.StatusUnauthorized, "UNAUTHORIZED", "unauthorized"}
+	ErrForbidden    = &AppError{http.StatusForbidden, "FORBIDDEN", "forbidden"}
+	ErrNotFound     = &AppError{http.StatusNotFound, "NOT_FOUND", "resource not found"}
+	ErrInternal     = &AppError{http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error"}
+
+	// Auth
+	ErrLoginFailed = &AppError{http.StatusInternalServerError, "LOGIN_FAILED", "login failed"}
+
+	// Forms
+	ErrFormNotFound   = &AppError{http.StatusNotFound, "FORM_NOT_FOUND", "form not found"}
+	ErrFormForbidden  = &AppError{http.StatusForbidden, "FORM_FORBIDDEN", "you do not own this form"}
+	ErrFormCreateFail = &AppError{http.StatusInternalServerError, "FORM_CREATE_FAILED", "failed to create form"}
+	ErrFormUpdateFail = &AppError{http.StatusInternalServerError, "FORM_UPDATE_FAILED", "failed to update form"}
+	ErrFormPublishFail = &AppError{http.StatusInternalServerError, "FORM_PUBLISH_FAILED", "failed to publish form"}
+
+	// Submissions
+	ErrSubmissionNotFound   = &AppError{http.StatusNotFound, "SUBMISSION_NOT_FOUND", "submission not found"}
+	ErrSubmissionCreateFail = &AppError{http.StatusInternalServerError, "SUBMISSION_CREATE_FAILED", "failed to create submission"}
+)
+
+// AsAppError unwraps err into an *AppError. If err is not an *AppError,
+// it returns ErrInternal so handlers always have a typed error to work with.
+func AsAppError(err error) *AppError {
+	var appErr *AppError
+	if errors.As(err, &appErr) {
+		return appErr
+	}
+	return ErrInternal
+}

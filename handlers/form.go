@@ -4,179 +4,133 @@ import (
 	"net/http"
 
 	"lite-collector/services"
-	"lite-collector/repository"
+	"lite-collector/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
-// CreateForm handles creating a new form
-func CreateForm(formRepo repository.FormRepository) gin.HandlerFunc {
-	formService := services.NewFormService(formRepo)
+// CreateForm handles creating a new form.
+// Request body: { "title": "...", "description": "...", "schema": "<json string>" }
+func CreateForm(formService *services.FormService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req struct {
 			Title       string `json:"title" binding:"required"`
 			Description string `json:"description"`
-			Schema      string `json:"schema" binding:"required"` // JSON string
+			Schema      string `json:"schema" binding:"required"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			e := utils.ErrBadRequest
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": err.Error()}})
 			return
 		}
 
-		// Get user ID from context
-		userID, exists := c.Get("user_id")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-			return
-		}
+		userID := c.MustGet("user_id").(uint64)
 
-		// Create form
-		form, err := formService.CreateForm(userID.(uint64), req.Title, req.Description, []byte(req.Schema))
+		form, err := formService.CreateForm(userID, req.Title, req.Description, []byte(req.Schema))
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create form"})
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 
 		c.JSON(http.StatusCreated, gin.H{
-			"id":        form.ID,
-			"title":     form.Title,
+			"id":          form.ID,
+			"title":       form.Title,
 			"description": form.Description,
-			"status":    form.Status,
-			"created_at": form.CreatedAt,
+			"status":      form.Status,
+			"created_at":  form.CreatedAt,
 		})
 	}
 }
 
-// GetForms handles getting list of forms for the current user
-func GetForms(formRepo repository.FormRepository) gin.HandlerFunc {
-	formService := services.NewFormService(formRepo)
+// GetForms returns all forms owned by the current user.
+func GetForms(formService *services.FormService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get user ID from context
-		userID, exists := c.Get("user_id")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		userID := c.MustGet("user_id").(uint64)
+
+		forms, err := formService.GetFormsByOwner(userID)
+		if err != nil {
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 
-		// Get forms
-		forms, err := formService.GetFormsByOwner(userID.(uint64))
+		c.JSON(http.StatusOK, gin.H{"forms": forms})
+	}
+}
+
+// GetForm returns a single form by ID (owner only).
+func GetForm(formService *services.FormService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.MustGet("user_id").(uint64)
+		formID := c.Param("formId")
+
+		form, err := formService.GetFormByID(formID, userID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get forms"})
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"forms": forms,
-		})
-	}
-}
-
-// GetForm handles getting a specific form by ID
-func GetForm(formRepo repository.FormRepository) gin.HandlerFunc {
-	formService := services.NewFormService(formRepo)
-	return func(c *gin.Context) {
-		// Get user ID from context
-		userID, exists := c.Get("user_id")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-			return
-		}
-
-		formID := c.Param("formId")
-		if formID == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Form ID required"})
-			return
-		}
-
-		// Get form
-		form, err := formService.GetFormByID(formID, userID.(uint64))
-		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Form not found"})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"id":        form.ID,
-			"title":     form.Title,
+			"id":          form.ID,
+			"title":       form.Title,
 			"description": form.Description,
-			"schema":    string(form.Schema),
-			"status":    form.Status,
-			"created_at": form.CreatedAt,
-			"updated_at": form.UpdatedAt,
+			"schema":      string(form.Schema),
+			"status":      form.Status,
+			"created_at":  form.CreatedAt,
+			"updated_at":  form.UpdatedAt,
 		})
 	}
 }
 
-// UpdateForm handles updating an existing form
-func UpdateForm(formRepo repository.FormRepository) gin.HandlerFunc {
-	formService := services.NewFormService(formRepo)
+// UpdateForm updates an existing form (owner only).
+// Request body: { "title": "...", "description": "...", "schema": "<json string>" }
+func UpdateForm(formService *services.FormService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get user ID from context
-		userID, exists := c.Get("user_id")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-			return
-		}
-
+		userID := c.MustGet("user_id").(uint64)
 		formID := c.Param("formId")
-		if formID == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Form ID required"})
-			return
-		}
 
 		var req struct {
 			Title       string `json:"title"`
 			Description string `json:"description"`
-			Schema      string `json:"schema"` // JSON string
+			Schema      string `json:"schema"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+			e := utils.ErrBadRequest
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": err.Error()}})
 			return
 		}
 
-		// Update form
-		form, err := formService.UpdateForm(formID, userID.(uint64), req.Title, req.Description, []byte(req.Schema))
+		form, err := formService.UpdateForm(formID, userID, req.Title, req.Description, []byte(req.Schema))
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update form"})
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"id":        form.ID,
-			"title":     form.Title,
+			"id":          form.ID,
+			"title":       form.Title,
 			"description": form.Description,
-			"status":    form.Status,
-			"updated_at": form.UpdatedAt,
+			"status":      form.Status,
+			"updated_at":  form.UpdatedAt,
 		})
 	}
 }
 
-// PublishForm handles publishing a form (changing status to published)
-func PublishForm(formRepo repository.FormRepository) gin.HandlerFunc {
-	formService := services.NewFormService(formRepo)
+// PublishForm publishes a form (owner only).
+func PublishForm(formService *services.FormService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get user ID from context
-		userID, exists := c.Get("user_id")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-			return
-		}
-
+		userID := c.MustGet("user_id").(uint64)
 		formID := c.Param("formId")
-		if formID == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Form ID required"})
+
+		if err := formService.PublishForm(formID, userID); err != nil {
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, gin.H{"error": gin.H{"code": e.Code, "message": e.Message}})
 			return
 		}
 
-		// Publish form
-		err := formService.PublishForm(formID, userID.(uint64))
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to publish form"})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Form published successfully",
-		})
+		c.JSON(http.StatusOK, gin.H{"message": "form published successfully"})
 	}
 }

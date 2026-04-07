@@ -2,15 +2,15 @@ package routes
 
 import (
 	"lite-collector/handlers"
-	"lite-collector/repository"
+	"lite-collector/services"
 
 	"github.com/gin-gonic/gin"
 )
 
 // RegisterAuthRoutes registers authentication routes
-func RegisterAuthRoutes(r *gin.RouterGroup, userRepo repository.UserRepository, jwtSecret []byte) {
+func RegisterAuthRoutes(r *gin.RouterGroup, userService *services.UserService) {
 	auth := r.Group("/auth")
 	{
-		auth.POST("/wx-login", handlers.WxLogin(userRepo, jwtSecret))
+		auth.POST("/wx-login", handlers.WxLogin(userService))
 	}
 }
