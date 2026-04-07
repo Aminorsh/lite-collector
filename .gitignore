@@ -1,0 +1,61 @@
+# Go
+*.exe
+*.test
+*.out
+vendor/
+*.cover
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Build artifacts
+lite-collector
+bin/
+obj/
+
+# Docker
+docker-compose.override.yml
+
+# Cache
+.cache/
+
+# Test coverage
+coverage.out
+coverage.html/
+
+# Mockery generated files
+mocks/
+mock_*.go
+
+# WeChat Mini Program (if frontend is added)
+project.private.config.json
+node_modules/
+dist/
+build/
+tmp/
+
+# Claude AI settings
+.claude/
+CLAUDE.md
+
+# Secrets
+*.key
+*.pem
+*.p12
+*.pfx
