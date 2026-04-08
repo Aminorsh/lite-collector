@@ -278,6 +278,64 @@
                 }
             }
         },
+        "/forms/{formId}/archive": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "将表单状态改为已归档（2），归档后不再接受新提交。仅表单创建者可操作。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "表单"
+                ],
+                "summary": "归档表单",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "表单 ID",
+                        "name": "formId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.messageResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或 token 已过期",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "无权操作该表单",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "表单不存在",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/forms/{formId}/publish": {
             "post": {
                 "security": [
@@ -336,7 +394,109 @@
                 }
             }
         },
+        "/forms/{formId}/schema": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据 ID 获取已发布表单的字段结构，供填写人渲染表单。不限创建者，任何登录用户均可访问。草稿或已归档表单返回 403。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "表单"
+                ],
+                "summary": "获取已发布表单（填写用）",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "表单 ID",
+                        "name": "formId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.formDetailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或 token 已过期",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "表单未发布",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "表单不存在",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/forms/{formId}/submissions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取指定表单下所有用户的提交记录（不含字段值）。仅表单创建者可访问。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "提交记录"
+                ],
+                "summary": "获取表单的所有提交记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "表单 ID",
+                        "name": "formId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.submissionListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或 token 已过期",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "无权访问该表单",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "表单不存在",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -440,6 +600,111 @@
                     },
                     "404": {
                         "description": "提交记录不存在",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/forms/{formId}/submissions/{submissionId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取指定提交记录及其所有字段值。仅表单创建者可访问。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "提交记录"
+                ],
+                "summary": "获取单条提交记录详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "表单 ID",
+                        "name": "formId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "提交记录 ID",
+                        "name": "submissionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.submissionWithValuesResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或 token 已过期",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "无权访问该表单",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "表单或提交记录不存在",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/jobs/{jobId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据任务 ID 查询异步 AI 任务的当前状态及结果。状态值：0=排队中 1=处理中 2=已完成 3=失败。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI任务"
+                ],
+                "summary": "查询 AI 任务状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "AI 任务 ID",
+                        "name": "jobId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.jobStatusResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或 token 已过期",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "任务不存在",
                         "schema": {
                             "$ref": "#/definitions/handlers.errorResponse"
                         }
@@ -560,12 +825,52 @@
                 }
             }
         },
+        "handlers.jobStatusResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "finished_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "input": {
+                    "type": "string"
+                },
+                "job_type": {
+                    "type": "string",
+                    "example": "detect_anomaly"
+                },
+                "output": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 0
+                }
+            }
+        },
         "handlers.messageResponse": {
             "type": "object",
             "properties": {
                 "message": {
                     "type": "string",
                     "example": "form published successfully"
+                }
+            }
+        },
+        "handlers.submissionListResponse": {
+            "type": "object",
+            "properties": {
+                "submissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.submissionResponse"
+                    }
                 }
             }
         },
@@ -670,7 +975,7 @@
     },
     "securityDefinitions": {
         "BearerAuth": {
-            "description": "登录后获取的 JWT token，格式：Bearer \u003ctoken\u003e",
+            "description": "登录后获取的 JWT token。在 Swagger UI 中直接粘贴 token 即可（无需加 Bearer 前缀）；实际客户端请求格式为：Bearer \u003ctoken\u003e",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

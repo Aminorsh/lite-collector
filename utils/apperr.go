@@ -31,9 +31,11 @@ var (
 	// Forms
 	ErrFormNotFound   = &AppError{http.StatusNotFound, "FORM_NOT_FOUND", "form not found"}
 	ErrFormForbidden  = &AppError{http.StatusForbidden, "FORM_FORBIDDEN", "you do not own this form"}
-	ErrFormCreateFail = &AppError{http.StatusInternalServerError, "FORM_CREATE_FAILED", "failed to create form"}
-	ErrFormUpdateFail = &AppError{http.StatusInternalServerError, "FORM_UPDATE_FAILED", "failed to update form"}
+	ErrFormCreateFail  = &AppError{http.StatusInternalServerError, "FORM_CREATE_FAILED", "failed to create form"}
+	ErrFormUpdateFail  = &AppError{http.StatusInternalServerError, "FORM_UPDATE_FAILED", "failed to update form"}
 	ErrFormPublishFail = &AppError{http.StatusInternalServerError, "FORM_PUBLISH_FAILED", "failed to publish form"}
+	ErrFormArchiveFail = &AppError{http.StatusInternalServerError, "FORM_ARCHIVE_FAILED", "failed to archive form"}
+	ErrFormNotPublished = &AppError{http.StatusForbidden, "FORM_NOT_PUBLISHED", "form is not published"}
 
 	// Submissions
 	ErrSubmissionNotFound   = &AppError{http.StatusNotFound, "SUBMISSION_NOT_FOUND", "submission not found"}

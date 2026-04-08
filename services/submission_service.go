@@ -101,6 +101,42 @@ func (s *SubmissionService) GetMySubmissionWithValues(formID string, userID uint
 	}, nil
 }
 
+// GetSubmissionsByFormID returns all submissions for a form.
+// Ownership of the form must be verified by the caller before invoking this.
+func (s *SubmissionService) GetSubmissionsByFormID(formID string) ([]models.Submission, error) {
+	id, err := parseFormID(formID)
+	if err != nil {
+		return nil, utils.ErrBadRequest
+	}
+	submissions, err := s.submissionRepo.FindByFormID(id)
+	if err != nil {
+		return nil, utils.ErrInternal
+	}
+	return submissions, nil
+}
+
+// GetSubmissionByIDWithValues returns a single submission with its field values.
+// Ownership of the parent form must be verified by the caller before invoking this.
+func (s *SubmissionService) GetSubmissionByIDWithValues(submissionID string) (*SubmissionWithValues, error) {
+	id, err := parseFormID(submissionID)
+	if err != nil {
+		return nil, utils.ErrBadRequest
+	}
+	submission, err := s.submissionRepo.FindByID(id)
+	if err != nil {
+		return nil, utils.ErrSubmissionNotFound
+	}
+	rows, err := s.submissionRepo.FindValuesBySubmissionID(submission.ID)
+	if err != nil {
+		return nil, utils.ErrInternal
+	}
+	values := make(map[string]interface{}, len(rows))
+	for _, row := range rows {
+		values[row.FieldKey] = row.Value
+	}
+	return &SubmissionWithValues{Submission: submission, Values: values}, nil
+}
+
 func parseFormID(s string) (uint64, error) {
 	var id uint64
 	_, err := fmt.Sscanf(s, "%d", &id)

@@ -15,7 +15,7 @@
 // @securityDefinitions.apikey  BearerAuth
 // @in                          header
 // @name                        Authorization
-// @description                 登录后获取的 JWT token，格式：Bearer <token>
+// @description                 登录后获取的 JWT token。在 Swagger UI 中直接粘贴 token 即可（无需加 Bearer 前缀）；实际客户端请求格式为：Bearer <token>
 
 package main
 
@@ -68,6 +68,7 @@ func main() {
 	userService := services.NewUserService(userRepo, jwtSecret)
 	formService := services.NewFormService(formRepo)
 	submissionService := services.NewSubmissionService(submissionRepo, aiJobRepo)
+	aiJobService := services.NewAIJobService(aiJobRepo)
 
 	// Health check (no auth)
 	r.GET("/health", func(c *gin.Context) {
@@ -86,6 +87,7 @@ func main() {
 		protected.Use(middleware.AuthMiddleware(jwtSecret))
 		{
 			routes.RegisterFormRoutes(protected, formService, submissionService)
+			routes.RegisterJobRoutes(protected, aiJobService)
 		}
 	}
 

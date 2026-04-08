@@ -77,11 +77,38 @@ definitions:
       updated_at:
         type: string
     type: object
+  handlers.jobStatusResponse:
+    properties:
+      created_at:
+        type: string
+      finished_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      input:
+        type: string
+      job_type:
+        example: detect_anomaly
+        type: string
+      output:
+        type: string
+      status:
+        example: 0
+        type: integer
+    type: object
   handlers.messageResponse:
     properties:
       message:
         example: form published successfully
         type: string
+    type: object
+  handlers.submissionListResponse:
+    properties:
+      submissions:
+        items:
+          $ref: '#/definitions/handlers.submissionResponse'
+        type: array
     type: object
   handlers.submissionResponse:
     properties:
@@ -334,6 +361,43 @@ paths:
       summary: 更新表单
       tags:
       - 表单
+  /forms/{formId}/archive:
+    post:
+      description: 将表单状态改为已归档（2），归档后不再接受新提交。仅表单创建者可操作。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.messageResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: 无权操作该表单
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 表单不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 归档表单
+      tags:
+      - 表单
   /forms/{formId}/publish:
     post:
       description: 将表单状态从草稿（0）改为已发布（1）。发布后填写人才可提交数据。仅表单创建者可操作。
@@ -371,7 +435,72 @@ paths:
       summary: 发布表单
       tags:
       - 表单
+  /forms/{formId}/schema:
+    get:
+      description: 根据 ID 获取已发布表单的字段结构，供填写人渲染表单。不限创建者，任何登录用户均可访问。草稿或已归档表单返回 403。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.formDetailResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: 表单未发布
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 表单不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取已发布表单（填写用）
+      tags:
+      - 表单
   /forms/{formId}/submissions:
+    get:
+      description: 获取指定表单下所有用户的提交记录（不含字段值）。仅表单创建者可访问。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.submissionListResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: 无权访问该表单
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 表单不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取表单的所有提交记录
+      tags:
+      - 提交记录
     post:
       consumes:
       - application/json
@@ -413,6 +542,44 @@ paths:
       summary: 提交表单数据
       tags:
       - 提交记录
+  /forms/{formId}/submissions/{submissionId}:
+    get:
+      description: 获取指定提交记录及其所有字段值。仅表单创建者可访问。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      - description: 提交记录 ID
+        in: path
+        name: submissionId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.submissionWithValuesResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: 无权访问该表单
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 表单或提交记录不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取单条提交记录详情
+      tags:
+      - 提交记录
   /forms/{formId}/submissions/my:
     get:
       description: 获取当前登录用户在指定表单中的提交记录，包含所有填写的字段值。每人每表单限提交一次。
@@ -442,9 +609,39 @@ paths:
       summary: 获取我的提交记录
       tags:
       - 提交记录
+  /jobs/{jobId}:
+    get:
+      description: 根据任务 ID 查询异步 AI 任务的当前状态及结果。状态值：0=排队中 1=处理中 2=已完成 3=失败。
+      parameters:
+      - description: AI 任务 ID
+        in: path
+        name: jobId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.jobStatusResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 任务不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 查询 AI 任务状态
+      tags:
+      - AI任务
 securityDefinitions:
   BearerAuth:
-    description: 登录后获取的 JWT token，格式：Bearer <token>
+    description: 登录后获取的 JWT token。在 Swagger UI 中直接粘贴 token 即可（无需加 Bearer 前缀）；实际客户端请求格式为：Bearer
+      <token>
     in: header
     name: Authorization
     type: apiKey
