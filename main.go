@@ -68,6 +68,7 @@ func main() {
 	userService := services.NewUserService(userRepo, jwtSecret)
 	formService := services.NewFormService(formRepo)
 	submissionService := services.NewSubmissionService(submissionRepo, aiJobRepo)
+	aiJobService := services.NewAIJobService(aiJobRepo)
 
 	// Health check (no auth)
 	r.GET("/health", func(c *gin.Context) {
@@ -86,6 +87,7 @@ func main() {
 		protected.Use(middleware.AuthMiddleware(jwtSecret))
 		{
 			routes.RegisterFormRoutes(protected, formService, submissionService)
+			routes.RegisterJobRoutes(protected, aiJobService)
 		}
 	}
 

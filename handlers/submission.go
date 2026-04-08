@@ -83,12 +83,101 @@ func GetMySubmission(submissionService *services.SubmissionService) gin.HandlerF
 	}
 }
 
+// ListSubmissions godoc
+// @Summary      获取表单的所有提交记录
+// @Description  获取指定表单下所有用户的提交记录（不含字段值）。仅表单创建者可访问。
+// @Tags         提交记录
+// @Produce      json
+// @Security     BearerAuth
+// @Param        formId  path      int  true  "表单 ID"
+// @Success      200     {object}  submissionListResponse
+// @Failure      401     {object}  errorResponse  "未登录或 token 已过期"
+// @Failure      403     {object}  errorResponse  "无权访问该表单"
+// @Failure      404     {object}  errorResponse  "表单不存在"
+// @Router       /forms/{formId}/submissions [get]
+func ListSubmissions(formService *services.FormService, submissionService *services.SubmissionService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.MustGet("user_id").(uint64)
+		formID := c.Param("formId")
+
+		// Verify ownership via form service
+		if _, err := formService.GetFormByID(formID, userID); err != nil {
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
+			return
+		}
+
+		submissions, err := submissionService.GetSubmissionsByFormID(formID)
+		if err != nil {
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
+			return
+		}
+
+		items := make([]submissionResponse, 0, len(submissions))
+		for _, s := range submissions {
+			items = append(items, submissionResponse{
+				ID:          s.ID,
+				Status:      s.Status,
+				SubmittedAt: s.SubmittedAt,
+			})
+		}
+		c.JSON(http.StatusOK, submissionListResponse{Submissions: items})
+	}
+}
+
+// GetSubmission godoc
+// @Summary      获取单条提交记录详情
+// @Description  获取指定提交记录及其所有字段值。仅表单创建者可访问。
+// @Tags         提交记录
+// @Produce      json
+// @Security     BearerAuth
+// @Param        formId        path      int  true  "表单 ID"
+// @Param        submissionId  path      int  true  "提交记录 ID"
+// @Success      200           {object}  submissionWithValuesResponse
+// @Failure      401           {object}  errorResponse  "未登录或 token 已过期"
+// @Failure      403           {object}  errorResponse  "无权访问该表单"
+// @Failure      404           {object}  errorResponse  "表单或提交记录不存在"
+// @Router       /forms/{formId}/submissions/{submissionId} [get]
+func GetSubmission(formService *services.FormService, submissionService *services.SubmissionService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.MustGet("user_id").(uint64)
+		formID := c.Param("formId")
+		submissionID := c.Param("submissionId")
+
+		// Verify ownership via form service
+		if _, err := formService.GetFormByID(formID, userID); err != nil {
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
+			return
+		}
+
+		result, err := submissionService.GetSubmissionByIDWithValues(submissionID)
+		if err != nil {
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
+			return
+		}
+
+		c.JSON(http.StatusOK, submissionWithValuesResponse{
+			ID:          result.Submission.ID,
+			Status:      result.Submission.Status,
+			SubmittedAt: result.Submission.SubmittedAt,
+			Values:      result.Values,
+		})
+	}
+}
+
 // Request / response types
 
 type submissionResponse struct {
 	ID          uint64    `json:"id"           example:"7"`
 	Status      int8      `json:"status"       example:"0"`
 	SubmittedAt time.Time `json:"submitted_at"`
+}
+
+type submissionListResponse struct {
+	Submissions []submissionResponse `json:"submissions"`
 }
 
 type submissionWithValuesResponse struct {

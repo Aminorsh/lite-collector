@@ -85,6 +85,42 @@ func (s *FormService) UpdateForm(formID string, userID uint64, title, descriptio
 	return form, nil
 }
 
+// GetPublishedFormByID returns a form by ID without ownership check.
+// Only published forms are accessible this way (submitters need to read the schema).
+func (s *FormService) GetPublishedFormByID(formID string) (*models.Form, error) {
+	id, err := parseID(formID)
+	if err != nil {
+		return nil, utils.ErrBadRequest
+	}
+	form, err := s.formRepo.FindByID(id)
+	if err != nil {
+		return nil, utils.ErrFormNotFound
+	}
+	if form.Status != 1 {
+		return nil, utils.ErrFormNotPublished
+	}
+	return form, nil
+}
+
+// ArchiveForm changes a form's status to archived, enforcing ownership.
+func (s *FormService) ArchiveForm(formID string, userID uint64) error {
+	id, err := parseID(formID)
+	if err != nil {
+		return utils.ErrBadRequest
+	}
+	form, err := s.formRepo.FindByID(id)
+	if err != nil {
+		return utils.ErrFormNotFound
+	}
+	if form.OwnerID != userID {
+		return utils.ErrFormForbidden
+	}
+	if err := s.formRepo.Archive(id); err != nil {
+		return utils.ErrFormArchiveFail
+	}
+	return nil
+}
+
 // PublishForm changes a form's status to published, enforcing ownership.
 func (s *FormService) PublishForm(formID string, userID uint64) error {
 	id, err := parseID(formID)

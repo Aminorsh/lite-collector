@@ -13,6 +13,7 @@ type FormRepository interface {
 	FindByOwnerID(ownerID uint64) ([]models.Form, error)
 	Update(form *models.Form) error
 	Publish(formID uint64) error
+	Archive(formID uint64) error
 }
 
 // formRepository implements FormRepository using GORM
@@ -52,4 +53,9 @@ func (r *formRepository) Update(form *models.Form) error {
 // Publish publishes a form (changes status to published)
 func (r *formRepository) Publish(formID uint64) error {
 	return r.db.Model(&models.Form{}).Where("id = ?", formID).Update("status", 1).Error
+}
+
+// Archive archives a form (changes status to archived)
+func (r *formRepository) Archive(formID uint64) error {
+	return r.db.Model(&models.Form{}).Where("id = ?", formID).Update("status", 2).Error
 }
