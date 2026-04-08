@@ -975,7 +975,7 @@
     },
     "securityDefinitions": {
         "BearerAuth": {
-            "description": "登录后获取的 JWT token，格式：Bearer \u003ctoken\u003e",
+            "description": "登录后获取的 JWT token。在 Swagger UI 中直接粘贴 token 即可（无需加 Bearer 前缀）；实际客户端请求格式为：Bearer \u003ctoken\u003e",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

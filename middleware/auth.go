@@ -19,16 +19,17 @@ func AuthMiddleware(jwtSecret []byte) gin.HandlerFunc {
 			return
 		}
 
-		// Check Bearer prefix
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
+		// Accept both "Bearer <token>" and a raw token (for Swagger UI convenience)
+		var tokenString string
+		if after, ok := strings.CutPrefix(authHeader, "Bearer "); ok {
+			tokenString = after
+		} else if !strings.Contains(authHeader, " ") {
+			tokenString = authHeader
+		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization format"})
 			c.Abort()
 			return
 		}
-
-		// Parse token
-		tokenString := parts[1]
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			// Validate signing method
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
