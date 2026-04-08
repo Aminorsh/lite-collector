@@ -29,6 +29,7 @@ import (
 	"lite-collector/services"
 	"log"
 
+	mysqlDriver "github.com/go-sql-driver/mysql"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -38,11 +39,17 @@ func main() {
 	// Load configuration
 	cfg := config.Load()
 
-	// Initialize database connection
-	dsn := cfg.Database.User + ":" + cfg.Database.Password +
-		"@tcp(" + cfg.Database.Host + ":" + cfg.Database.Port + ")/" +
-		cfg.Database.DBName + "?charset=utf8mb4&parseTime=True&loc=Local"
-	db.Init(dsn)
+	// Build DSN using the driver's config struct so special characters in
+	// the password (e.g. @, #) are handled correctly.
+	mysqlCfg := mysqlDriver.NewConfig()
+	mysqlCfg.User = cfg.Database.User
+	mysqlCfg.Passwd = cfg.Database.Password
+	mysqlCfg.Net = "tcp"
+	mysqlCfg.Addr = cfg.Database.Host + ":" + cfg.Database.Port
+	mysqlCfg.DBName = cfg.Database.DBName
+	mysqlCfg.ParseTime = true
+	mysqlCfg.Params = map[string]string{"charset": "utf8mb4", "loc": "Local"}
+	db.Init(mysqlCfg.FormatDSN())
 
 	// Initialize Gin router
 	r := gin.New()

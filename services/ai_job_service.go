@@ -1,8 +1,11 @@
 package services
 
 import (
+	"fmt"
+
 	"lite-collector/models"
 	"lite-collector/repository"
+	"lite-collector/utils"
 )
 
 // AIJobService handles AI job-related operations
@@ -15,20 +18,26 @@ func NewAIJobService(aiJobRepo repository.AIJobRepository) *AIJobService {
 	return &AIJobService{aiJobRepo: aiJobRepo}
 }
 
-// EnqueueAnomalyDetection creates an anomaly detection job for a submission.
-// TODO Phase 3: persist job to DB and dispatch to async worker
-func (s *AIJobService) EnqueueAnomalyDetection(submissionID uint64) {
-	// placeholder — real implementation will call s.aiJobRepo.Create(...)
+// EnqueueAnomalyDetection creates a queued AI job record for the given submission.
+// Actual processing happens in Phase 3 when the async worker is implemented.
+func (s *AIJobService) EnqueueAnomalyDetection(userID, submissionID uint64) error {
+	job := &models.AIJob{
+		UserID:  userID,
+		JobType: "detect_anomaly",
+		Status:  0, // queued
+		Input:   fmt.Sprintf(`{"submission_id":%d}`, submissionID),
+	}
+	if err := s.aiJobRepo.Create(job); err != nil {
+		return utils.ErrInternal
+	}
+	return nil
 }
 
 // GetJobStatus returns the current status of an AI job.
-// TODO Phase 3: replace mock with s.aiJobRepo.FindByID(jobID)
 func (s *AIJobService) GetJobStatus(jobID uint64) (*models.AIJob, error) {
-	return &models.AIJob{
-		ID:      jobID,
-		UserID:  1,
-		JobType: "detect_anomaly",
-		Status:  2,
-		Output:  `{"anomalies": []}`,
-	}, nil
+	job, err := s.aiJobRepo.FindByID(jobID)
+	if err != nil {
+		return nil, utils.ErrNotFound
+	}
+	return job, nil
 }
