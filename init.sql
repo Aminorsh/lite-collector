@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS forms (
     owner_id      BIGINT NOT NULL,
     title         VARCHAR(128) NOT NULL,
     description   TEXT,
-    schema        JSON NOT NULL,
+    `schema`      JSON NOT NULL,
     status        TINYINT DEFAULT 0,
     template_year YEAR NULL,
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
