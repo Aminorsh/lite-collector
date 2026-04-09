@@ -617,6 +617,64 @@
                 }
             }
         },
+        "/forms/{formId}/report": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "触发 AI 对指定表单的所有提交数据进行汇总分析，生成报告。异步处理，返回任务 ID，前端轮询 GET /jobs/:jobId 获取结果。仅表单创建者可操作。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI任务"
+                ],
+                "summary": "生成表单数据报告",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "表单 ID",
+                        "name": "formId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.generateReportResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或 token 已过期",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "无权操作该表单",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "表单不存在",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/forms/{formId}/schema": {
             "get": {
                 "security": [
@@ -1221,6 +1279,19 @@
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.generateReportResponse": {
+            "type": "object",
+            "properties": {
+                "job_id": {
+                    "type": "integer",
+                    "example": 6
+                },
+                "message": {
+                    "type": "string",
+                    "example": "报告生成已排队，请通过 GET /api/v1/jobs/6 查询进度"
                 }
             }
         },
