@@ -65,7 +65,7 @@ func main() {
 	aiJobRepo := repository.NewAIJobRepository(db.GetDB())
 
 	// Services
-	userService := services.NewUserService(userRepo, jwtSecret)
+	userService := services.NewUserService(userRepo, jwtSecret, cfg.Wechat.AppID, cfg.Wechat.AppSecret)
 	formService := services.NewFormService(formRepo)
 	submissionService := services.NewSubmissionService(submissionRepo, aiJobRepo)
 	aiJobService := services.NewAIJobService(aiJobRepo)
@@ -86,6 +86,7 @@ func main() {
 		protected := v1.Group("")
 		protected.Use(middleware.AuthMiddleware(jwtSecret))
 		{
+			routes.RegisterUserRoutes(protected, userService)
 			routes.RegisterFormRoutes(protected, formService, submissionService)
 			routes.RegisterJobRoutes(protected, aiJobService)
 		}
