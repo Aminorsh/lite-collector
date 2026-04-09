@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterFormRoutes registers form and nested submission routes
-func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, submissionService *services.SubmissionService) {
+// RegisterFormRoutes registers form and nested submission/base-data routes
+func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, submissionService *services.SubmissionService, baseDataService *services.BaseDataService) {
 	forms := r.Group("/forms")
 	{
 		forms.POST("/", handlers.CreateForm(formService))
@@ -18,6 +18,14 @@ func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, s
 		forms.PUT("/:formId", handlers.UpdateForm(formService))
 		forms.POST("/:formId/publish", handlers.PublishForm(formService))
 		forms.POST("/:formId/archive", handlers.ArchiveForm(formService))
+
+		baseData := forms.Group("/:formId/base-data")
+		{
+			baseData.POST("/", handlers.BatchImportBaseData(formService, baseDataService))
+			baseData.GET("/", handlers.ListBaseData(formService, baseDataService))
+			baseData.GET("/lookup", handlers.LookupBaseData(formService, baseDataService))
+			baseData.DELETE("/", handlers.DeleteBaseData(formService, baseDataService))
+		}
 
 		submissions := forms.Group("/:formId/submissions")
 		{

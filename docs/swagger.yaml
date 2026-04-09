@@ -1,5 +1,50 @@
 basePath: /api/v1
 definitions:
+  handlers.baseDataItem:
+    properties:
+      data:
+        type: object
+      id:
+        example: 1
+        type: integer
+      row_key:
+        example: EMP001
+        type: string
+    type: object
+  handlers.baseDataListResponse:
+    properties:
+      rows:
+        items:
+          $ref: '#/definitions/handlers.baseDataItem'
+        type: array
+    type: object
+  handlers.batchImportRequest:
+    properties:
+      rows:
+        items:
+          $ref: '#/definitions/handlers.batchImportRow'
+        type: array
+    required:
+    - rows
+    type: object
+  handlers.batchImportResponse:
+    properties:
+      imported:
+        example: 10
+        type: integer
+    type: object
+  handlers.batchImportRow:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+      row_key:
+        example: EMP001
+        type: string
+    required:
+    - data
+    - row_key
+    type: object
   handlers.createFormRequest:
     properties:
       description:
@@ -436,6 +481,149 @@ paths:
       summary: 归档表单
       tags:
       - 表单
+  /forms/{formId}/base-data:
+    delete:
+      description: 删除指定表单的所有底表数据。仅表单创建者可操作。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.messageResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: 无权操作该表单
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 表单不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 清空底表数据
+      tags:
+      - 底表数据
+    get:
+      description: 获取指定表单的所有底表数据。仅表单创建者可访问。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.baseDataListResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: 无权访问该表单
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 表单不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取底表数据列表
+      tags:
+      - 底表数据
+    post:
+      consumes:
+      - application/json
+      description: 为指定表单批量导入底表数据（用于预填充）。如果 row_key 已存在则更新。仅表单创建者可操作。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      - description: 底表数据列表
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.batchImportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.batchImportResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: 无权操作该表单
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 表单不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 批量导入底表数据
+      tags:
+      - 底表数据
+  /forms/{formId}/base-data/lookup:
+    get:
+      description: 根据 row_key 查询底表数据，用于填写表单时自动预填充字段。任何登录用户均可查询已发布表单的底表数据。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      - description: 查询键（如工号）
+        in: query
+        name: row_key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.baseDataItem'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 未找到匹配的底表数据
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 查询底表数据（预填充）
+      tags:
+      - 底表数据
   /forms/{formId}/publish:
     post:
       description: 将表单状态从草稿（0）改为已发布（1）。发布后填写人才可提交数据。仅表单创建者可操作。
