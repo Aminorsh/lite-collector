@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"lite-collector/models"
 
 	"gorm.io/gorm"
@@ -15,6 +17,8 @@ type AIJobRepository interface {
 	// Returns nil if no queued jobs exist.
 	ClaimQueued() (*models.AIJob, error)
 	Update(job *models.AIJob) error
+	// FindBySubmissionIDs returns completed detect_anomaly jobs keyed by submission ID.
+	FindBySubmissionIDs(submissionIDs []uint64) ([]models.AIJob, error)
 }
 
 // aiJobRepository implements AIJobRepository using GORM
@@ -58,4 +62,30 @@ func (r *aiJobRepository) ClaimQueued() (*models.AIJob, error) {
 // Update updates an AI job
 func (r *aiJobRepository) Update(job *models.AIJob) error {
 	return r.db.Save(job).Error
+}
+
+// FindBySubmissionIDs returns completed detect_anomaly jobs matching the given submission IDs.
+// The caller extracts submission_id from each job's Input JSON field.
+func (r *aiJobRepository) FindBySubmissionIDs(submissionIDs []uint64) ([]models.AIJob, error) {
+	if len(submissionIDs) == 0 {
+		return nil, nil
+	}
+	// Build LIKE conditions to match {"submission_id":N} in the input field
+	var jobs []models.AIJob
+	tx := r.db.Where("job_type = ? AND status = 2", "detect_anomaly")
+	conditions := make([]string, len(submissionIDs))
+	args := make([]interface{}, len(submissionIDs))
+	for i, sid := range submissionIDs {
+		conditions[i] = "input LIKE ?"
+		args[i] = fmt.Sprintf(`%%"submission_id":%d%%`, sid)
+	}
+	query := ""
+	for i, c := range conditions {
+		if i > 0 {
+			query += " OR "
+		}
+		query += c
+	}
+	result := tx.Where(query, args...).Find(&jobs)
+	return jobs, result.Error
 }

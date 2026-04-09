@@ -613,6 +613,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/forms/{formId}/submissions/overview": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "返回指定表单下所有提交记录的完整信息，包括每条提交的字段值和 AI 异常检测原因。适用于表格展示。仅表单创建者可访问。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "提交记录"
+                ],
+                "summary": "获取表单提交总览（含字段值和异常原因）",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "表单 ID",
+                        "name": "formId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.submissionOverviewResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或 token 已过期",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "无权访问该表单",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "表单不存在",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/forms/{formId}/submissions/{submissionId}": {
             "get": {
                 "security": [
@@ -937,6 +989,28 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.submissionOverviewResponse": {
+            "type": "object",
+            "properties": {
+                "form_id": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "schema": {
+                    "type": "string"
+                },
+                "submissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/services.SubmissionOverviewItem"
+                    }
+                },
+                "title": {
+                    "type": "string",
+                    "example": "员工信息登记"
+                }
+            }
+        },
         "handlers.submissionResponse": {
             "type": "object",
             "properties": {
@@ -1045,6 +1119,27 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/handlers.userInfo"
+                }
+            }
+        },
+        "services.SubmissionOverviewItem": {
+            "type": "object",
+            "properties": {
+                "anomaly_reasons": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "values": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             }
         }

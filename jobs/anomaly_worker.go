@@ -108,16 +108,16 @@ func (w *AnomalyWorker) processOne() {
 	schemaStr := string(form.Schema)
 
 	// Call DeepSeek
-	systemPrompt := `You are a data quality inspector. You will receive a form schema (field definitions) and a user's submission values. Analyze the values for anomalies:
+	systemPrompt := `你是一个数据质量检查员。你会收到一份表单结构（字段定义）和一份用户提交的数据。请分析数据是否存在异常：
 
-1. Values that don't match the expected type or format (e.g. letters in a number field)
-2. Values that are unrealistic (e.g. age = 500, negative counts)
-3. Cross-field inconsistencies (e.g. age doesn't match birth year)
+1. 值与预期类型或格式不符（如数字字段出现字母）
+2. 值不合理（如年龄=500、负数金额）
+3. 字段之间不一致（如年龄与出生年份矛盾）
 
-Respond ONLY with a JSON object, no markdown, no explanation:
-{"is_anomalous": true/false, "reasons": ["reason1", "reason2"]}
+请仅返回一个 JSON 对象，不要使用 markdown，不要附加说明：
+{"is_anomalous": true/false, "reasons": ["原因1", "原因2"]}
 
-If the data looks normal, return: {"is_anomalous": false, "reasons": []}`
+如果数据正常，返回：{"is_anomalous": false, "reasons": []}`
 
 	userPrompt := fmt.Sprintf("Form schema:\n%s\n\nSubmission values:\n%s", schemaStr, string(valuesJSON))
 

@@ -110,6 +110,21 @@ definitions:
           $ref: '#/definitions/handlers.submissionResponse'
         type: array
     type: object
+  handlers.submissionOverviewResponse:
+    properties:
+      form_id:
+        example: 3
+        type: integer
+      schema:
+        type: string
+      submissions:
+        items:
+          $ref: '#/definitions/services.SubmissionOverviewItem'
+        type: array
+      title:
+        example: 员工信息登记
+        type: string
+    type: object
   handlers.submissionResponse:
     properties:
       id:
@@ -186,6 +201,20 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/handlers.userInfo'
+    type: object
+  services.SubmissionOverviewItem:
+    properties:
+      anomaly_reasons:
+        items:
+          type: string
+        type: array
+      id:
+        type: integer
+      status:
+        type: integer
+      values:
+        additionalProperties: true
+        type: object
     type: object
 host: localhost:8080
 info:
@@ -616,6 +645,39 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取我的提交记录
+      tags:
+      - 提交记录
+  /forms/{formId}/submissions/overview:
+    get:
+      description: 返回指定表单下所有提交记录的完整信息，包括每条提交的字段值和 AI 异常检测原因。适用于表格展示。仅表单创建者可访问。
+      parameters:
+      - description: 表单 ID
+        in: path
+        name: formId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.submissionOverviewResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "403":
+          description: 无权访问该表单
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: 表单不存在
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: 获取表单提交总览（含字段值和异常原因）
       tags:
       - 提交记录
   /jobs/{jobId}:
