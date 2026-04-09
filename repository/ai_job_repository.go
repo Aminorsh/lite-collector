@@ -4,6 +4,7 @@ import (
 	"lite-collector/models"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // AIJobRepository defines the interface for AI job data access
@@ -41,7 +42,9 @@ func (r *aiJobRepository) FindByID(id uint64) (*models.AIJob, error) {
 // ClaimQueued atomically finds one queued job and sets its status to processing.
 func (r *aiJobRepository) ClaimQueued() (*models.AIJob, error) {
 	var job models.AIJob
-	result := r.db.Where("status = 0").Order("created_at ASC").First(&job)
+	// Silence "record not found" — it's expected when the queue is empty
+	silent := r.db.Session(&gorm.Session{Logger: r.db.Logger.LogMode(logger.Silent)})
+	result := silent.Where("status = 0").Order("created_at ASC").First(&job)
 	if result.Error != nil {
 		return nil, result.Error
 	}
