@@ -26,7 +26,8 @@ var (
 	ErrInternal     = &AppError{http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error"}
 
 	// Auth
-	ErrLoginFailed = &AppError{http.StatusInternalServerError, "LOGIN_FAILED", "login failed"}
+	ErrLoginFailed       = &AppError{http.StatusInternalServerError, "LOGIN_FAILED", "login failed"}
+	ErrWxCodeExchangeFail = &AppError{http.StatusBadGateway, "WX_CODE_EXCHANGE_FAILED", "failed to exchange WeChat code for session"}
 
 	// Forms
 	ErrFormNotFound   = &AppError{http.StatusNotFound, "FORM_NOT_FOUND", "form not found"}
