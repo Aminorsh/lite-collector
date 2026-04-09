@@ -64,12 +64,14 @@ func main() {
 	formRepo := repository.NewFormRepository(db.GetDB())
 	submissionRepo := repository.NewSubmissionRepository(db.GetDB())
 	aiJobRepo := repository.NewAIJobRepository(db.GetDB())
+	baseDataRepo := repository.NewBaseDataRepository(db.GetDB())
 
 	// Services
 	userService := services.NewUserService(userRepo, jwtSecret, cfg.Wechat.AppID, cfg.Wechat.AppSecret)
 	formService := services.NewFormService(formRepo)
 	submissionService := services.NewSubmissionService(submissionRepo, aiJobRepo)
 	aiJobService := services.NewAIJobService(aiJobRepo)
+	baseDataService := services.NewBaseDataService(baseDataRepo)
 
 	// Start anomaly detection worker if DeepSeek API key is configured
 	if cfg.DeepSeek.APIKey != "" {
@@ -97,7 +99,7 @@ func main() {
 		protected.Use(middleware.AuthMiddleware(jwtSecret))
 		{
 			routes.RegisterUserRoutes(protected, userService)
-			routes.RegisterFormRoutes(protected, formService, submissionService)
+			routes.RegisterFormRoutes(protected, formService, submissionService, baseDataService)
 			routes.RegisterJobRoutes(protected, aiJobService)
 		}
 	}
