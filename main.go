@@ -86,6 +86,7 @@ func main() {
 		protected := v1.Group("")
 		protected.Use(middleware.AuthMiddleware(jwtSecret))
 		{
+			routes.RegisterUserRoutes(protected, userService)
 			routes.RegisterFormRoutes(protected, formService, submissionService)
 			routes.RegisterJobRoutes(protected, aiJobService)
 		}

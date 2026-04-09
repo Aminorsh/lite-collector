@@ -717,6 +717,63 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/profile": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新当前登录用户的昵称和头像。字段为空则不更新。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "更新用户资料",
+                "parameters": [
+                    {
+                        "description": "用户资料",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.updateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.wxLoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或 token 已过期",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -930,6 +987,19 @@ const docTemplate = `{
                 "title": {
                     "type": "string",
                     "example": "更新后的标题"
+                }
+            }
+        },
+        "handlers.updateProfileRequest": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string",
+                    "example": "https://example.com/avatar.jpg"
+                },
+                "nickname": {
+                    "type": "string",
+                    "example": "小明"
                 }
             }
         },

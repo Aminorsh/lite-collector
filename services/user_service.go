@@ -113,3 +113,21 @@ func (s *UserService) exchangeCode(code string) (string, error) {
 func (s *UserService) FindByID(id uint64) (*models.User, error) {
 	return s.userRepo.FindByID(id)
 }
+
+// UpdateProfile updates the user's nickname and avatar URL.
+func (s *UserService) UpdateProfile(userID uint64, nickname, avatarURL string) (*models.User, error) {
+	user, err := s.userRepo.FindByID(userID)
+	if err != nil {
+		return nil, utils.ErrNotFound
+	}
+	if nickname != "" {
+		user.Nickname = nickname
+	}
+	if avatarURL != "" {
+		user.AvatarURL = avatarURL
+	}
+	if err := s.userRepo.Update(user); err != nil {
+		return nil, utils.ErrInternal
+	}
+	return user, nil
+}
