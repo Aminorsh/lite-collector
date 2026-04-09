@@ -24,6 +24,7 @@ func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, s
 			submissions.POST("/", handlers.CreateSubmission(submissionService))
 			submissions.GET("/", handlers.ListSubmissions(formService, submissionService))   // owner: all submissions
 			submissions.GET("/my", handlers.GetMySubmission(submissionService))             // submitter: own submission
+			submissions.GET("/overview", handlers.GetSubmissionsOverview(formService, submissionService)) // owner: table view with values + anomaly reasons
 			submissions.GET("/:submissionId", handlers.GetSubmission(formService, submissionService)) // owner: one submission detail
 		}
 	}

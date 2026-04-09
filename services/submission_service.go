@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"lite-collector/models"
@@ -135,6 +136,91 @@ func (s *SubmissionService) GetSubmissionByIDWithValues(submissionID string) (*S
 		values[row.FieldKey] = row.Value
 	}
 	return &SubmissionWithValues{Submission: submission, Values: values}, nil
+}
+
+// SubmissionOverviewItem is one row in the overview table.
+type SubmissionOverviewItem struct {
+	ID             uint64                 `json:"id"`
+	Status         int8                   `json:"status"`
+	Values         map[string]interface{} `json:"values"`
+	AnomalyReasons []string               `json:"anomaly_reasons"`
+}
+
+// GetSubmissionsOverview returns all submissions for a form with their values
+// and anomaly reasons in a single call. Ownership must be verified by caller.
+func (s *SubmissionService) GetSubmissionsOverview(formID string) ([]SubmissionOverviewItem, error) {
+	id, err := parseFormID(formID)
+	if err != nil {
+		return nil, utils.ErrBadRequest
+	}
+
+	submissions, err := s.submissionRepo.FindByFormID(id)
+	if err != nil {
+		return nil, utils.ErrInternal
+	}
+	if len(submissions) == 0 {
+		return []SubmissionOverviewItem{}, nil
+	}
+
+	// Collect all submission IDs
+	subIDs := make([]uint64, len(submissions))
+	for i, sub := range submissions {
+		subIDs[i] = sub.ID
+	}
+
+	// Batch load all values
+	allValues := make(map[uint64]map[string]interface{})
+	for _, sub := range submissions {
+		rows, err := s.submissionRepo.FindValuesBySubmissionID(sub.ID)
+		if err != nil {
+			continue
+		}
+		vm := make(map[string]interface{}, len(rows))
+		for _, row := range rows {
+			vm[row.FieldKey] = row.Value
+		}
+		allValues[sub.ID] = vm
+	}
+
+	// Batch load anomaly reasons from ai_jobs
+	reasonMap := make(map[uint64][]string)
+	aiJobs, err := s.aiJobRepo.FindBySubmissionIDs(subIDs)
+	if err == nil {
+		for _, job := range aiJobs {
+			var input struct {
+				SubmissionID uint64 `json:"submission_id"`
+			}
+			if json.Unmarshal([]byte(job.Input), &input) != nil {
+				continue
+			}
+			var result struct {
+				Reasons []string `json:"reasons"`
+			}
+			if json.Unmarshal([]byte(job.Output), &result) != nil {
+				continue
+			}
+			if len(result.Reasons) > 0 {
+				reasonMap[input.SubmissionID] = result.Reasons
+			}
+		}
+	}
+
+	// Assemble overview items
+	items := make([]SubmissionOverviewItem, 0, len(submissions))
+	for _, sub := range submissions {
+		reasons := reasonMap[sub.ID]
+		if reasons == nil {
+			reasons = []string{}
+		}
+		items = append(items, SubmissionOverviewItem{
+			ID:             sub.ID,
+			Status:         sub.Status,
+			Values:         allValues[sub.ID],
+			AnomalyReasons: reasons,
+		})
+	}
+
+	return items, nil
 }
 
 func parseFormID(s string) (uint64, error) {

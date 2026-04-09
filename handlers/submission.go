@@ -168,6 +168,47 @@ func GetSubmission(formService *services.FormService, submissionService *service
 	}
 }
 
+// GetSubmissionsOverview godoc
+// @Summary      获取表单提交总览（含字段值和异常原因）
+// @Description  返回指定表单下所有提交记录的完整信息，包括每条提交的字段值和 AI 异常检测原因。适用于表格展示。仅表单创建者可访问。
+// @Tags         提交记录
+// @Produce      json
+// @Security     BearerAuth
+// @Param        formId  path      int  true  "表单 ID"
+// @Success      200     {object}  submissionOverviewResponse
+// @Failure      401     {object}  errorResponse  "未登录或 token 已过期"
+// @Failure      403     {object}  errorResponse  "无权访问该表单"
+// @Failure      404     {object}  errorResponse  "表单不存在"
+// @Router       /forms/{formId}/submissions/overview [get]
+func GetSubmissionsOverview(formService *services.FormService, submissionService *services.SubmissionService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.MustGet("user_id").(uint64)
+		formID := c.Param("formId")
+
+		// Verify ownership and get form details
+		form, err := formService.GetFormByID(formID, userID)
+		if err != nil {
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
+			return
+		}
+
+		items, err := submissionService.GetSubmissionsOverview(formID)
+		if err != nil {
+			e := utils.AsAppError(err)
+			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
+			return
+		}
+
+		c.JSON(http.StatusOK, submissionOverviewResponse{
+			FormID: form.ID,
+			Title:  form.Title,
+			Schema: string(form.Schema),
+			Submissions: items,
+		})
+	}
+}
+
 // Request / response types
 
 type submissionResponse struct {
@@ -178,6 +219,13 @@ type submissionResponse struct {
 
 type submissionListResponse struct {
 	Submissions []submissionResponse `json:"submissions"`
+}
+
+type submissionOverviewResponse struct {
+	FormID      uint64                            `json:"form_id"      example:"3"`
+	Title       string                            `json:"title"        example:"员工信息登记"`
+	Schema      string                            `json:"schema"`
+	Submissions []services.SubmissionOverviewItem  `json:"submissions"`
 }
 
 type submissionWithValuesResponse struct {
