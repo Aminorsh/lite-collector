@@ -33,6 +33,20 @@ func (s *AIJobService) EnqueueAnomalyDetection(userID, submissionID uint64) erro
 	return nil
 }
 
+// EnqueueReport creates a queued AI job to generate a summary report for a form.
+func (s *AIJobService) EnqueueReport(userID, formID uint64) (uint64, error) {
+	job := &models.AIJob{
+		UserID:  userID,
+		JobType: "generate_report",
+		Status:  0,
+		Input:   fmt.Sprintf(`{"form_id":%d}`, formID),
+	}
+	if err := s.aiJobRepo.Create(job); err != nil {
+		return 0, utils.ErrInternal
+	}
+	return job.ID, nil
+}
+
 // GetJobStatus returns the current status of an AI job.
 func (s *AIJobService) GetJobStatus(jobID uint64) (*models.AIJob, error) {
 	job, err := s.aiJobRepo.FindByID(jobID)

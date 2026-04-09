@@ -8,7 +8,7 @@ import (
 )
 
 // RegisterFormRoutes registers form and nested submission/base-data routes
-func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, submissionService *services.SubmissionService, baseDataService *services.BaseDataService) {
+func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, submissionService *services.SubmissionService, baseDataService *services.BaseDataService, aiJobService *services.AIJobService) {
 	forms := r.Group("/forms")
 	{
 		forms.POST("/", handlers.CreateForm(formService))
@@ -18,6 +18,7 @@ func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, s
 		forms.PUT("/:formId", handlers.UpdateForm(formService))
 		forms.POST("/:formId/publish", handlers.PublishForm(formService))
 		forms.POST("/:formId/archive", handlers.ArchiveForm(formService))
+		forms.POST("/:formId/report", handlers.GenerateReport(formService, aiJobService))
 
 		baseData := forms.Group("/:formId/base-data")
 		{

@@ -76,8 +76,8 @@ func main() {
 	// Start anomaly detection worker if DeepSeek API key is configured
 	if cfg.DeepSeek.APIKey != "" {
 		deepseekClient := services.NewDeepSeekClient(cfg.DeepSeek.APIKey)
-		anomalyWorker := jobs.NewAnomalyWorker(aiJobRepo, submissionRepo, formRepo, deepseekClient)
-		anomalyWorker.Start()
+		worker := jobs.NewWorker(aiJobRepo, submissionRepo, formRepo, deepseekClient)
+		worker.Start()
 	} else {
 		log.Println("DEEPSEEK_API_KEY not set — anomaly detection worker disabled")
 	}
@@ -99,7 +99,7 @@ func main() {
 		protected.Use(middleware.AuthMiddleware(jwtSecret))
 		{
 			routes.RegisterUserRoutes(protected, userService)
-			routes.RegisterFormRoutes(protected, formService, submissionService, baseDataService)
+			routes.RegisterFormRoutes(protected, formService, submissionService, baseDataService, aiJobService)
 			routes.RegisterJobRoutes(protected, aiJobService)
 		}
 	}
