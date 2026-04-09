@@ -10,6 +10,10 @@ import (
 type AIJobRepository interface {
 	Create(job *models.AIJob) error
 	FindByID(id uint64) (*models.AIJob, error)
+	// ClaimQueued atomically finds one queued job and sets its status to processing.
+	// Returns nil if no queued jobs exist.
+	ClaimQueued() (*models.AIJob, error)
+	Update(job *models.AIJob) error
 }
 
 // aiJobRepository implements AIJobRepository using GORM
@@ -32,4 +36,23 @@ func (r *aiJobRepository) FindByID(id uint64) (*models.AIJob, error) {
 	var job models.AIJob
 	result := r.db.First(&job, id)
 	return &job, result.Error
+}
+
+// ClaimQueued atomically finds one queued job and sets its status to processing.
+func (r *aiJobRepository) ClaimQueued() (*models.AIJob, error) {
+	var job models.AIJob
+	result := r.db.Where("status = 0").Order("created_at ASC").First(&job)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	job.Status = 1 // processing
+	if err := r.db.Save(&job).Error; err != nil {
+		return nil, err
+	}
+	return &job, nil
+}
+
+// Update updates an AI job
+func (r *aiJobRepository) Update(job *models.AIJob) error {
+	return r.db.Save(job).Error
 }

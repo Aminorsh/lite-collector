@@ -23,6 +23,7 @@ import (
 	"lite-collector/config"
 	"lite-collector/db"
 	_ "lite-collector/docs" // swag generated docs
+	"lite-collector/jobs"
 	"lite-collector/middleware"
 	"lite-collector/repository"
 	"lite-collector/routes"
@@ -69,6 +70,15 @@ func main() {
 	formService := services.NewFormService(formRepo)
 	submissionService := services.NewSubmissionService(submissionRepo, aiJobRepo)
 	aiJobService := services.NewAIJobService(aiJobRepo)
+
+	// Start anomaly detection worker if DeepSeek API key is configured
+	if cfg.DeepSeek.APIKey != "" {
+		deepseekClient := services.NewDeepSeekClient(cfg.DeepSeek.APIKey)
+		anomalyWorker := jobs.NewAnomalyWorker(aiJobRepo, submissionRepo, formRepo, deepseekClient)
+		anomalyWorker.Start()
+	} else {
+		log.Println("DEEPSEEK_API_KEY not set — anomaly detection worker disabled")
+	}
 
 	// Health check (no auth)
 	r.GET("/health", func(c *gin.Context) {
