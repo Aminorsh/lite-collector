@@ -122,6 +122,26 @@ definitions:
       updated_at:
         type: string
     type: object
+  handlers.generateFormRequest:
+    properties:
+      description:
+        example: 员工信息登记表，包含姓名、年龄、部门、手机号、月薪
+        type: string
+    required:
+    - description
+    type: object
+  handlers.generateFormResponse:
+    properties:
+      description:
+        example: 请填写个人基本信息
+        type: string
+      schema:
+        example: '{"fields":[...]}'
+        type: string
+      title:
+        example: 员工信息登记
+        type: string
+    type: object
   handlers.generateReportResponse:
     properties:
       job_id:
@@ -915,6 +935,46 @@ paths:
       summary: 获取表单提交总览（含字段值和异常原因）
       tags:
       - 提交记录
+  /forms/generate:
+    post:
+      consumes:
+      - application/json
+      description: 根据自然语言描述，使用 AI 生成表单标题、描述和字段结构（schema）。返回结果可直接用于创建表单。
+      parameters:
+      - description: 表单描述
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.generateFormRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.generateFormResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: 未登录或 token 已过期
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "502":
+          description: AI 生成失败
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "503":
+          description: AI 服务未配置
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: AI 生成表单
+      tags:
+      - AI任务
   /jobs/{jobId}:
     get:
       description: 根据任务 ID 查询异步 AI 任务的当前状态及结果。状态值：0=排队中 1=处理中 2=已完成 3=失败。
