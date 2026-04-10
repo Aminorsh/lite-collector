@@ -152,6 +152,69 @@
                 }
             }
         },
+        "/forms/generate": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据自然语言描述，使用 AI 生成表单标题、描述和字段结构（schema）。返回结果可直接用于创建表单。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI任务"
+                ],
+                "summary": "AI 生成表单",
+                "parameters": [
+                    {
+                        "description": "表单描述",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.generateFormRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.generateFormResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录或 token 已过期",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "502": {
+                        "description": "AI 生成失败",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "AI 服务未配置",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/forms/{formId}": {
             "get": {
                 "security": [
@@ -1279,6 +1342,35 @@
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.generateFormRequest": {
+            "type": "object",
+            "required": [
+                "description"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "员工信息登记表，包含姓名、年龄、部门、手机号、月薪"
+                }
+            }
+        },
+        "handlers.generateFormResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "请填写个人基本信息"
+                },
+                "schema": {
+                    "type": "string",
+                    "example": "{\"fields\":[...]}"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "员工信息登记"
                 }
             }
         },

@@ -41,6 +41,10 @@ var (
 	// Submissions
 	ErrSubmissionNotFound   = &AppError{http.StatusNotFound, "SUBMISSION_NOT_FOUND", "submission not found"}
 	ErrSubmissionCreateFail = &AppError{http.StatusInternalServerError, "SUBMISSION_CREATE_FAILED", "failed to create submission"}
+
+	// AI
+	ErrAINotConfigured = &AppError{http.StatusServiceUnavailable, "AI_NOT_CONFIGURED", "AI service is not configured (DEEPSEEK_API_KEY not set)"}
+	ErrAIGenerateFail  = &AppError{http.StatusBadGateway, "AI_GENERATE_FAILED", "AI failed to generate form schema"}
 )
 
 // AsAppError unwraps err into an *AppError. If err is not an *AppError,
