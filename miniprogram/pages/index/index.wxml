@@ -1,0 +1,15 @@
+<view class="container">
+  <view class="page-header">
+    <text class="page-title">我的表单</text>
+  </view>
+
+  <view class="empty-state" wx:if="{{!loading}}">
+    <view class="empty-icon">📋</view>
+    <text class="empty-text">暂无表单</text>
+    <text class="empty-hint">点击下方按钮创建第一个表单</text>
+  </view>
+
+  <view class="loading-state" wx:if="{{loading}}">
+    <text class="text-secondary">加载中...</text>
+  </view>
+</view>
