@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "表单详情",
+  "usingComponents": {
+    "status-badge": "/components/status-badge/status-badge"
+  }
+}

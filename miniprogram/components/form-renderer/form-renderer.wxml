@@ -1,0 +1,11 @@
+<view class="form-renderer">
+  <field-renderer
+    wx:for="{{fields}}"
+    wx:key="key"
+    field="{{item}}"
+    value="{{values[item.key]}}"
+    error="{{errors[item.key]}}"
+    readonly="{{readonly}}"
+    bind:change="onFieldChange"
+  />
+</view>

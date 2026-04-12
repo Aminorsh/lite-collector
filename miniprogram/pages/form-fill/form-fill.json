@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "填写表单",
+  "usingComponents": {
+    "form-renderer": "/components/form-renderer/form-renderer"
+  }
+}

@@ -1,7 +1,10 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/form-editor/form-editor",
+    "pages/form-detail/form-detail",
+    "pages/form-fill/form-fill"
   ],
   "window": {
     "navigationBarBackgroundColor": "#4A90D9",

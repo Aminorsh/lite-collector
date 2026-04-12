@@ -1,0 +1,118 @@
+.field-item {
+  margin-bottom: 32rpx;
+}
+
+.field-label {
+  font-size: 28rpx;
+  font-weight: 500;
+  margin-bottom: 12rpx;
+}
+
+.required-mark {
+  color: #FA5151;
+  margin-left: 4rpx;
+}
+
+.field-input {
+  width: 100%;
+  padding: 16rpx 24rpx;
+  border: 2rpx solid #E5E5E5;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+  background-color: #FFFFFF;
+}
+
+.field-textarea {
+  width: 100%;
+  padding: 16rpx 24rpx;
+  border: 2rpx solid #E5E5E5;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  min-height: 160rpx;
+  box-sizing: border-box;
+  background-color: #FFFFFF;
+}
+
+.text-placeholder {
+  color: #CCCCCC;
+}
+
+/* Picker */
+.picker-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.picker-arrow {
+  color: #CCCCCC;
+  font-size: 32rpx;
+}
+
+/* Radio / Checkbox groups */
+.option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 28rpx;
+}
+
+/* Image */
+.image-area {
+  margin-top: 8rpx;
+}
+
+.image-preview {
+  width: 100%;
+  max-width: 400rpx;
+  border-radius: 8rpx;
+}
+
+.image-upload-btn {
+  width: 200rpx;
+  height: 200rpx;
+  border: 2rpx dashed #CCCCCC;
+  border-radius: 8rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-upload-btn:active {
+  border-color: #4A90D9;
+}
+
+.image-upload-icon {
+  font-size: 60rpx;
+  color: #CCCCCC;
+  line-height: 1;
+}
+
+.image-upload-text {
+  font-size: 22rpx;
+  color: #CCCCCC;
+  margin-top: 8rpx;
+}
+
+/* Read-only */
+.field-value-readonly {
+  font-size: 28rpx;
+  color: #333333;
+  padding: 12rpx 0;
+}
+
+/* Error */
+.field-error {
+  display: block;
+  font-size: 24rpx;
+  color: #FA5151;
+  margin-top: 8rpx;
+}

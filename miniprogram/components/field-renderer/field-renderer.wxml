@@ -1,0 +1,151 @@
+<view class="field-item">
+  <view class="field-label">
+    <text>{{field.label}}</text>
+    <text class="required-mark" wx:if="{{field.required}}">*</text>
+  </view>
+
+  <!-- Read-only display -->
+  <view class="field-value-readonly" wx:if="{{readonly}}">
+    <!-- Checkbox shows comma-joined list -->
+    <text wx:if="{{field.type === 'checkbox'}}">{{displayValue}}</text>
+    <!-- Image shows preview -->
+    <image wx:elif="{{field.type === 'image' && value}}" class="image-preview" src="{{value}}" mode="widthFix" />
+    <text wx:elif="{{field.type === 'image' && !value}}" class="text-placeholder">未上传</text>
+    <!-- Everything else as text -->
+    <text wx:else>{{value !== undefined && value !== '' ? value : '未填写'}}</text>
+  </view>
+
+  <!-- Editable inputs -->
+  <block wx:if="{{!readonly}}">
+    <!-- text -->
+    <input
+      wx:if="{{field.type === 'text'}}"
+      class="field-input"
+      placeholder="请输入{{field.label}}"
+      value="{{value}}"
+      bindinput="onInput"
+    />
+
+    <!-- textarea -->
+    <textarea
+      wx:elif="{{field.type === 'textarea'}}"
+      class="field-textarea"
+      placeholder="请输入{{field.label}}"
+      value="{{value}}"
+      bindinput="onInput"
+      auto-height
+      maxlength="2000"
+    />
+
+    <!-- number -->
+    <input
+      wx:elif="{{field.type === 'number'}}"
+      class="field-input"
+      type="digit"
+      placeholder="请输入{{field.label}}"
+      value="{{value}}"
+      bindinput="onNumberInput"
+    />
+
+    <!-- phone -->
+    <input
+      wx:elif="{{field.type === 'phone'}}"
+      class="field-input"
+      type="number"
+      maxlength="11"
+      placeholder="请输入手机号"
+      value="{{value}}"
+      bindinput="onInput"
+    />
+
+    <!-- id_card -->
+    <input
+      wx:elif="{{field.type === 'id_card'}}"
+      class="field-input"
+      type="idcard"
+      maxlength="18"
+      placeholder="请输入身份证号"
+      value="{{value}}"
+      bindinput="onInput"
+    />
+
+    <!-- select -->
+    <picker
+      wx:elif="{{field.type === 'select'}}"
+      mode="selector"
+      range="{{field.options}}"
+      value="{{pickerIndex}}"
+      bindchange="onPickerChange"
+    >
+      <view class="field-input picker-display">
+        <text class="{{value ? '' : 'text-placeholder'}}">{{value || '请选择'}}</text>
+        <text class="picker-arrow">›</text>
+      </view>
+    </picker>
+
+    <!-- radio -->
+    <radio-group
+      wx:elif="{{field.type === 'radio'}}"
+      bindchange="onRadioChange"
+      class="option-group"
+    >
+      <label
+        class="option-item"
+        wx:for="{{field.options}}"
+        wx:for-item="opt"
+        wx:key="*this"
+      >
+        <radio value="{{opt}}" checked="{{value === opt}}" color="#4A90D9" />
+        <text>{{opt}}</text>
+      </label>
+    </radio-group>
+
+    <!-- checkbox -->
+    <checkbox-group
+      wx:elif="{{field.type === 'checkbox'}}"
+      bindchange="onCheckboxChange"
+      class="option-group"
+    >
+      <label
+        class="option-item"
+        wx:for="{{field.options}}"
+        wx:for-item="opt"
+        wx:key="*this"
+      >
+        <checkbox value="{{opt}}" checked="{{checkedMap[opt]}}" color="#4A90D9" />
+        <text>{{opt}}</text>
+      </label>
+    </checkbox-group>
+
+    <!-- date -->
+    <picker
+      wx:elif="{{field.type === 'date'}}"
+      mode="date"
+      value="{{value}}"
+      bindchange="onDateChange"
+    >
+      <view class="field-input picker-display">
+        <text class="{{value ? '' : 'text-placeholder'}}">{{value || '请选择日期'}}</text>
+        <text class="picker-arrow">›</text>
+      </view>
+    </picker>
+
+    <!-- image -->
+    <view wx:elif="{{field.type === 'image'}}" class="image-area">
+      <image
+        wx:if="{{value}}"
+        class="image-preview"
+        src="{{value}}"
+        mode="widthFix"
+        bindtap="onChooseImage"
+      />
+      <view wx:else class="image-upload-btn" bindtap="onChooseImage">
+        <text class="image-upload-icon">+</text>
+        <text class="image-upload-text">选择图片</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- Error message -->
+  <text class="field-error" wx:if="{{error}}">{{error}}</text>
+</view>

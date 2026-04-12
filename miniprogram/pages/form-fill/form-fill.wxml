@@ -1,0 +1,55 @@
+<view class="container">
+  <!-- Loading -->
+  <view class="loading-center" wx:if="{{loading}}">
+    <text class="text-secondary">加载中...</text>
+  </view>
+
+  <!-- Error -->
+  <view class="error-state" wx:if="{{errorMsg}}">
+    <text class="text-secondary">{{errorMsg}}</text>
+  </view>
+
+  <!-- Already submitted: read-only view -->
+  <block wx:if="{{!loading && !errorMsg && submitted}}">
+    <view class="success-banner">
+      <text class="success-icon">✓</text>
+      <text class="success-text">已提交</text>
+    </view>
+    <view class="form-card">
+      <text class="form-title">{{formTitle}}</text>
+      <text class="form-desc" wx:if="{{formDesc}}">{{formDesc}}</text>
+    </view>
+    <view class="form-body">
+      <form-renderer fields="{{fields}}" values="{{values}}" readonly="{{true}}" />
+    </view>
+  </block>
+
+  <!-- Submission success -->
+  <view class="success-full" wx:if="{{!loading && !errorMsg && submitSuccess}}">
+    <text class="success-full-icon">✓</text>
+    <text class="success-full-title">提交成功</text>
+    <text class="success-full-hint">感谢您的填写</text>
+    <button class="btn-primary mt-lg" bindtap="onGoBack">返回</button>
+  </view>
+
+  <!-- Fill mode -->
+  <block wx:if="{{!loading && !errorMsg && !submitted && !submitSuccess}}">
+    <view class="form-card">
+      <text class="form-title">{{formTitle}}</text>
+      <text class="form-desc" wx:if="{{formDesc}}">{{formDesc}}</text>
+    </view>
+    <view class="form-body">
+      <form-renderer
+        fields="{{fields}}"
+        values="{{values}}"
+        errors="{{errors}}"
+        bind:change="onFieldChange"
+      />
+    </view>
+    <view class="submit-area">
+      <button class="btn-primary submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
+        {{submitting ? '提交中...' : '提交'}}
+      </button>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,40 @@
+<view class="container" wx:if="{{form}}">
+  <!-- Header -->
+  <view class="detail-card">
+    <view class="detail-header">
+      <text class="detail-title">{{form.title}}</text>
+      <status-badge status="{{form.status}}" type="form" />
+    </view>
+    <text class="detail-desc" wx:if="{{form.description}}">{{form.description}}</text>
+    <view class="detail-meta">
+      <text class="text-secondary text-sm">创建于 {{createdAtText}}</text>
+      <text class="text-secondary text-sm">更新于 {{updatedAtText}}</text>
+    </view>
+    <view class="detail-stats">
+      <text class="text-secondary text-sm">{{fieldCount}} 个字段</text>
+    </view>
+  </view>
+
+  <!-- Actions: Draft -->
+  <view class="action-section" wx:if="{{form.status === 0}}">
+    <button class="action-btn-full" bindtap="onEdit">编辑表单</button>
+    <button class="action-btn-full action-primary" bindtap="onPublish">发布表单</button>
+  </view>
+
+  <!-- Actions: Published -->
+  <view class="action-section" wx:if="{{form.status === 1}}">
+    <button class="action-btn-full action-primary" open-type="share">分享表单</button>
+    <button class="action-btn-full" bindtap="onViewSubmissions">查看提交</button>
+    <button class="action-btn-full action-warn" bindtap="onArchive">归档表单</button>
+  </view>
+
+  <!-- Actions: Archived -->
+  <view class="action-section" wx:if="{{form.status === 2}}">
+    <button class="action-btn-full" bindtap="onViewSubmissions">查看提交</button>
+  </view>
+</view>
+
+<!-- Loading -->
+<view class="loading-center" wx:if="{{!form}}">
+  <text class="text-secondary">加载中...</text>
+</view>

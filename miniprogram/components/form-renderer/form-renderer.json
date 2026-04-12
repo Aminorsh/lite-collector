@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "field-renderer": "/components/field-renderer/field-renderer"
+  }
+}

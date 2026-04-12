@@ -1,0 +1,130 @@
+<view class="container">
+  <!-- Form meta -->
+  <view class="section">
+    <view class="section-title">基本信息</view>
+    <view class="input-group">
+      <input
+        class="input"
+        placeholder="表单标题（必填）"
+        value="{{title}}"
+        bindinput="onTitleInput"
+      />
+    </view>
+    <view class="input-group">
+      <textarea
+        class="textarea"
+        placeholder="表单描述（选填）"
+        value="{{description}}"
+        bindinput="onDescInput"
+        auto-height
+        maxlength="500"
+      />
+    </view>
+  </view>
+
+  <!-- Field list -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">字段列表</text>
+      <text class="field-count text-secondary text-sm">{{fields.length}} 个字段</text>
+    </view>
+
+    <view
+      class="field-card"
+      wx:for="{{fields}}"
+      wx:key="key"
+    >
+      <view class="field-header">
+        <text class="field-type-label">{{item.typeLabel}}</text>
+        <view class="field-actions">
+          <text
+            class="action-btn"
+            wx:if="{{index > 0}}"
+            bindtap="onMoveUp"
+            data-index="{{index}}"
+          >↑</text>
+          <text
+            class="action-btn"
+            wx:if="{{index < fields.length - 1}}"
+            bindtap="onMoveDown"
+            data-index="{{index}}"
+          >↓</text>
+          <text
+            class="action-btn action-delete"
+            bindtap="onDeleteField"
+            data-index="{{index}}"
+          >删除</text>
+        </view>
+      </view>
+
+      <!-- Label input -->
+      <view class="input-group">
+        <input
+          class="input"
+          placeholder="字段名称"
+          value="{{item.label}}"
+          bindinput="onFieldLabelInput"
+          data-index="{{index}}"
+        />
+      </view>
+
+      <!-- Required toggle -->
+      <view class="toggle-row">
+        <text>必填</text>
+        <switch
+          checked="{{item.required}}"
+          bindchange="onFieldRequiredChange"
+          data-index="{{index}}"
+          color="#4A90D9"
+        />
+      </view>
+
+      <!-- Options for select/radio/checkbox -->
+      <view class="options-section" wx:if="{{item.hasOptions}}">
+        <view class="options-title">选项</view>
+        <view
+          class="option-row"
+          wx:for="{{item.options}}"
+          wx:for-item="opt"
+          wx:for-index="optIdx"
+          wx:key="*this"
+        >
+          <input
+            class="input option-input"
+            value="{{opt}}"
+            placeholder="选项内容"
+            bindinput="onOptionInput"
+            data-field-index="{{index}}"
+            data-opt-index="{{optIdx}}"
+          />
+          <text
+            class="action-btn action-delete"
+            bindtap="onDeleteOption"
+            data-field-index="{{index}}"
+            data-opt-index="{{optIdx}}"
+            wx:if="{{item.options.length > 1}}"
+          >×</text>
+        </view>
+        <view
+          class="add-option-btn"
+          bindtap="onAddOption"
+          data-field-index="{{index}}"
+        >
+          <text>+ 添加选项</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Add field button -->
+  <view class="add-field-btn" bindtap="onAddField">
+    <text>+ 添加字段</text>
+  </view>
+
+  <!-- Save button -->
+  <view class="save-area">
+    <button class="btn-primary save-btn" bindtap="onSave" disabled="{{saving}}">
+      {{saving ? '保存中...' : '保存草稿'}}
+    </button>
+  </view>
+</view>

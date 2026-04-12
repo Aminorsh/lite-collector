@@ -1,0 +1,105 @@
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+
+.error-state {
+  display: flex;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+
+/* Success banner (already submitted) */
+.success-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  background-color: #07C160;
+  color: #FFFFFF;
+  padding: 20rpx;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.success-icon {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.success-text {
+  font-size: var(--font-size-lg);
+}
+
+/* Success full screen */
+.success-full {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 200rpx;
+}
+
+.success-full-icon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background-color: #07C160;
+  color: #FFFFFF;
+  font-size: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.success-full-title {
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  margin-bottom: var(--spacing-sm);
+}
+
+.success-full-hint {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+/* Form header */
+.form-card {
+  background-color: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.form-title {
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  display: block;
+  margin-bottom: var(--spacing-sm);
+}
+
+.form-desc {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  display: block;
+  line-height: 1.6;
+}
+
+/* Form body */
+.form-body {
+  background-color: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Submit */
+.submit-area {
+  padding: var(--spacing-lg) 0;
+  padding-bottom: 80rpx;
+}
+
+.submit-btn {
+  width: 100%;
+}
