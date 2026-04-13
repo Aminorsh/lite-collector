@@ -1,0 +1,25 @@
+<view class="container">
+  <!-- Generating state -->
+  <view class="generating-state" wx:if="{{!completed && !failed}}">
+    <text class="generating-icon">🤖</text>
+    <text class="generating-title">{{statusText}}</text>
+    <text class="generating-hint text-secondary text-sm mt-sm">{{statusHint}}</text>
+  </view>
+
+  <!-- Failed -->
+  <view class="failed-state" wx:if="{{failed}}">
+    <text class="failed-icon">⚠️</text>
+    <text class="failed-title">生成失败</text>
+    <text class="failed-msg text-secondary text-sm mt-sm">{{failedMsg}}</text>
+    <button class="btn-primary mt-lg" bindtap="onRetry">重新生成</button>
+  </view>
+
+  <!-- Completed -->
+  <view class="report-card" wx:if="{{completed}}">
+    <text class="report-title">数据分析报告</text>
+    <view class="report-content">
+      <text class="report-text">{{reportOutput}}</text>
+    </view>
+    <button class="btn-primary mt-lg" bindtap="onRetry">重新生成</button>
+  </view>
+</view>

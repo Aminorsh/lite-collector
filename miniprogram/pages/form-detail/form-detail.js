@@ -99,6 +99,18 @@ Page({
     })
   },
 
+  onBaseData() {
+    wx.navigateTo({
+      url: '/pages/base-data/base-data?formId=' + this.data.formId,
+    })
+  },
+
+  onGenerateReport() {
+    wx.navigateTo({
+      url: '/pages/report/report?formId=' + this.data.formId,
+    })
+  },
+
   onShareAppMessage() {
     var form = this.data.form
     return {

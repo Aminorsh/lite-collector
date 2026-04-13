@@ -1,0 +1,31 @@
+<view class="container">
+  <view class="loading-center" wx:if="{{loading}}">
+    <text class="text-secondary">加载中...</text>
+  </view>
+
+  <block wx:if="{{!loading && submission}}">
+    <!-- Status header -->
+    <view class="status-card">
+      <view class="status-row">
+        <text class="submission-label">提交 #{{submission.id}}</text>
+        <status-badge status="{{submission.status}}" type="submission" />
+      </view>
+      <text class="text-secondary text-sm">{{submittedAtText}}</text>
+    </view>
+
+    <!-- Anomaly warning -->
+    <view class="anomaly-card" wx:if="{{submission.status === 2}}">
+      <text class="anomaly-title">AI 检测到异常</text>
+      <text class="anomaly-hint text-sm">该提交的数据可能存在问题，请人工核实</text>
+    </view>
+
+    <!-- Values -->
+    <view class="values-card">
+      <form-renderer
+        fields="{{fields}}"
+        values="{{submission.values}}"
+        readonly="{{true}}"
+      />
+    </view>
+  </block>
+</view>

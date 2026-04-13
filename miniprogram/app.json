@@ -4,7 +4,12 @@
     "pages/profile/profile",
     "pages/form-editor/form-editor",
     "pages/form-detail/form-detail",
-    "pages/form-fill/form-fill"
+    "pages/form-fill/form-fill",
+    "pages/submissions/submissions",
+    "pages/submission-detail/submission-detail",
+    "pages/base-data/base-data",
+    "pages/ai-generate/ai-generate",
+    "pages/report/report"
   ],
   "window": {
     "navigationBarBackgroundColor": "#4A90D9",

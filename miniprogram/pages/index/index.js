@@ -41,7 +41,16 @@ Page({
   },
 
   onCreateTap() {
-    wx.navigateTo({ url: '/pages/form-editor/form-editor' })
+    wx.showActionSheet({
+      itemList: ['手动创建', 'AI 创建'],
+      success: function (res) {
+        if (res.tapIndex === 0) {
+          wx.navigateTo({ url: '/pages/form-editor/form-editor' })
+        } else if (res.tapIndex === 1) {
+          wx.navigateTo({ url: '/pages/ai-generate/ai-generate' })
+        }
+      },
+    })
   },
 })
 

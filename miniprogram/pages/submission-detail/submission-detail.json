@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "提交详情",
+  "usingComponents": {
+    "status-badge": "/components/status-badge/status-badge",
+    "form-renderer": "/components/form-renderer/form-renderer"
+  }
+}

@@ -38,6 +38,23 @@
       <text class="form-title">{{formTitle}}</text>
       <text class="form-desc" wx:if="{{formDesc}}">{{formDesc}}</text>
     </view>
+
+    <!-- Prefill lookup -->
+    <view class="lookup-card" wx:if="{{hasBaseData}}">
+      <text class="lookup-title">查询预填</text>
+      <view class="lookup-row">
+        <input
+          class="lookup-input"
+          placeholder="输入查询键（如工号）"
+          value="{{lookupKey}}"
+          bindinput="onLookupInput"
+        />
+        <button class="lookup-btn" bindtap="onLookup" disabled="{{lookingUp}}" size="mini">
+          {{lookingUp ? '查询中' : '查询'}}
+        </button>
+      </view>
+    </view>
+
     <view class="form-body">
       <form-renderer
         fields="{{fields}}"

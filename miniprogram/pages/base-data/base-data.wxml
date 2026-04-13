@@ -1,0 +1,54 @@
+<view class="container">
+  <!-- Loading -->
+  <view class="loading-center" wx:if="{{loading}}">
+    <text class="text-secondary">加载中...</text>
+  </view>
+
+  <block wx:if="{{!loading}}">
+    <!-- Stats & actions -->
+    <view class="header-card">
+      <text class="header-title">底表数据管理</text>
+      <text class="text-secondary text-sm mt-sm">共 {{rows.length}} 条记录</text>
+      <view class="header-actions mt-md">
+        <button class="action-btn" bindtap="onShowImport">导入数据</button>
+        <button class="action-btn action-danger" bindtap="onClearAll" wx:if="{{rows.length > 0}}">清空数据</button>
+      </view>
+    </view>
+
+    <!-- Import panel -->
+    <view class="import-panel" wx:if="{{showImport}}">
+      <view class="import-hint">
+        <text class="text-sm">请粘贴 JSON 数组格式的数据，每项包含 row_key 和 data 字段：</text>
+        <text class="text-sm text-secondary mt-sm">[{{"{"}} "row_key":"EMP001", "data":{{"{"}} "f_001":"张三" {{"}"}} {{"}"}}, ...]</text>
+      </view>
+      <textarea
+        class="import-textarea"
+        placeholder='[{"row_key":"EMP001","data":{"f_001":"张三","f_002":"技术部"}}]'
+        value="{{importText}}"
+        bindinput="onImportInput"
+        maxlength="50000"
+      />
+      <view class="import-actions">
+        <button class="action-btn" bindtap="onCancelImport">取消</button>
+        <button class="action-btn action-primary" bindtap="onDoImport" disabled="{{importing}}">
+          {{importing ? '导入中...' : '确认导入'}}
+        </button>
+      </view>
+    </view>
+
+    <!-- Data list -->
+    <empty-state
+      wx:if="{{rows.length === 0 && !showImport}}"
+      icon="📊"
+      text="暂无底表数据"
+      hint="点击「导入数据」添加预填充数据"
+    />
+
+    <view class="data-list" wx:if="{{rows.length > 0}}">
+      <view class="data-card" wx:for="{{rows}}" wx:key="id">
+        <view class="data-key">{{item.row_key}}</view>
+        <view class="data-preview text-secondary text-sm">{{item.preview}}</view>
+      </view>
+    </view>
+  </block>
+</view>

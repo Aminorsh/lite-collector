@@ -1,0 +1,119 @@
+.input-card, .result-card {
+  background-color: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.card-title {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  display: block;
+}
+
+.card-hint {
+  display: block;
+}
+
+.desc-textarea {
+  width: 100%;
+  min-height: 200rpx;
+  padding: var(--spacing-md);
+  border: 2rpx solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  box-sizing: border-box;
+  margin-top: var(--spacing-md);
+}
+
+.generate-btn {
+  width: 100%;
+  margin-top: var(--spacing-lg);
+}
+
+/* Generating */
+.generating-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 100rpx;
+}
+
+.generating-icon {
+  font-size: 100rpx;
+  margin-bottom: var(--spacing-lg);
+}
+
+.generating-text {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+}
+
+/* Preview */
+.preview-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.preview-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.preview-value {
+  font-size: var(--font-size-base);
+  display: block;
+}
+
+.field-preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  margin-top: 8rpx;
+}
+
+.field-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 12rpx 20rpx;
+  background-color: var(--color-bg);
+  border-radius: var(--radius-sm);
+}
+
+.field-preview-label {
+  font-size: var(--font-size-base);
+  flex: 1;
+}
+
+.field-preview-type {
+  flex-shrink: 0;
+}
+
+.field-preview-required {
+  font-size: 20rpx;
+  color: var(--color-danger);
+  border: 2rpx solid var(--color-danger);
+  border-radius: 8rpx;
+  padding: 2rpx 10rpx;
+  flex-shrink: 0;
+}
+
+/* Actions */
+.result-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.result-actions button {
+  flex: 1;
+}
+
+.action-btn-outline {
+  background-color: var(--color-bg-white);
+  color: var(--color-text);
+  border: 2rpx solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  line-height: 2;
+}

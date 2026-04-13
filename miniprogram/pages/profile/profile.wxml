@@ -18,6 +18,36 @@
     <view class="user-name text-secondary">未登录</view>
   </view>
 
+  <!-- Edit nickname -->
+  <view class="menu-section" wx:if="{{userInfo}}">
+    <view class="menu-item" bindtap="onEditNickname">
+      <text>修改昵称</text>
+      <view class="menu-right">
+        <text class="menu-value text-secondary text-sm">{{userInfo.nickname || '未设置'}}</text>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Edit nickname panel -->
+  <view class="edit-panel" wx:if="{{editing}}">
+    <view class="edit-title">修改昵称</view>
+    <input
+      class="edit-input"
+      placeholder="请输入新昵称"
+      value="{{editNickname}}"
+      bindinput="onNicknameInput"
+      focus="{{editing}}"
+      maxlength="20"
+    />
+    <view class="edit-actions">
+      <button class="edit-cancel" bindtap="onCancelEdit">取消</button>
+      <button class="btn-primary edit-save" bindtap="onSaveNickname" disabled="{{saving}}">
+        {{saving ? '保存中...' : '保存'}}
+      </button>
+    </view>
+  </view>
+
   <view class="menu-section">
     <view class="menu-item" bindtap="onLogout">
       <text>退出登录</text>

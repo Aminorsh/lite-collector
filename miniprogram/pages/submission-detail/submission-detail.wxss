@@ -1,0 +1,50 @@
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+
+.status-card {
+  background-color: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.submission-label {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+}
+
+.anomaly-card {
+  background-color: rgba(250, 81, 81, 0.08);
+  border: 2rpx solid var(--color-danger);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.anomaly-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-danger);
+  display: block;
+  margin-bottom: var(--spacing-xs);
+}
+
+.anomaly-hint {
+  color: var(--color-danger);
+}
+
+.values-card {
+  background-color: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}

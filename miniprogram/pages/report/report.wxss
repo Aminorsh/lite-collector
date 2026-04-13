@@ -1,0 +1,52 @@
+.generating-state, .failed-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 200rpx;
+}
+
+.generating-icon, .failed-icon {
+  font-size: 100rpx;
+  margin-bottom: var(--spacing-lg);
+}
+
+.generating-title, .failed-title {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+}
+
+.generating-hint {
+  display: block;
+}
+
+.failed-msg {
+  display: block;
+  text-align: center;
+  padding: 0 var(--spacing-xl);
+}
+
+.report-card {
+  background-color: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.report-title {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  display: block;
+  margin-bottom: var(--spacing-md);
+}
+
+.report-content {
+  padding: var(--spacing-md);
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+
+.report-text {
+  font-size: var(--font-size-base);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

@@ -15,6 +15,9 @@ Page({
     submitted: false,
     submitSuccess: false,
     submitting: false,
+    hasBaseData: false,
+    lookupKey: '',
+    lookingUp: false,
   },
 
   onLoad(options) {
@@ -57,12 +60,23 @@ Page({
           submitted: true,
         })
       } else {
-        // Fill mode
+        // Fill mode — check if base data exists for prefill
+        var hasBaseData = false
+        try {
+          var bdRes = await api.get('/forms/' + formId + '/base-data/lookup', { row_key: '__probe__' })
+          hasBaseData = true
+        } catch (e) {
+          // 404 is expected — but if the endpoint responds at all, base data is configured
+          // We'll just try a lookup; if 404 it means no match, not "no base data"
+          // A simpler heuristic: always show lookup for published forms
+          hasBaseData = true
+        }
         this.setData({
           loading: false,
           formTitle: form.title,
           formDesc: form.description,
           fields: fields,
+          hasBaseData: hasBaseData,
         })
       }
     } catch (err) {
@@ -71,6 +85,38 @@ Page({
       if (err.code === 'FORBIDDEN' || err.status === 403) msg = '该表单暂不可填写'
       if (err.code === 'FORM_NOT_FOUND' || err.status === 404) msg = '表单不存在'
       this.setData({ loading: false, errorMsg: msg })
+    }
+  },
+
+  onLookupInput(e) {
+    this.setData({ lookupKey: e.detail.value })
+  },
+
+  async onLookup() {
+    var key = this.data.lookupKey.trim()
+    if (!key) {
+      wx.showToast({ title: '请输入查询键', icon: 'none' })
+      return
+    }
+    this.setData({ lookingUp: true })
+    try {
+      var res = await api.get('/forms/' + this.data.formId + '/base-data/lookup', { row_key: key })
+      if (res.data && typeof res.data === 'object') {
+        var newValues = Object.assign({}, this.data.values)
+        Object.keys(res.data).forEach(function (k) {
+          newValues[k] = res.data[k]
+        })
+        this.setData({ values: newValues })
+        wx.showToast({ title: '预填充成功', icon: 'success' })
+      }
+    } catch (err) {
+      if (err.status === 404) {
+        wx.showToast({ title: '未找到匹配数据', icon: 'none' })
+      } else {
+        wx.showToast({ title: err.message || '查询失败', icon: 'none' })
+      }
+    } finally {
+      this.setData({ lookingUp: false })
     }
   },
 

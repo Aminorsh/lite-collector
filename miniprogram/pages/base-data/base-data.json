@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "底表数据",
+  "usingComponents": {
+    "empty-state": "/components/empty-state/empty-state"
+  }
+}

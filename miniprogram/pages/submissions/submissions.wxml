@@ -1,0 +1,90 @@
+<view class="container">
+  <!-- Loading -->
+  <view class="loading-center" wx:if="{{loading}}">
+    <text class="text-secondary">加载中...</text>
+  </view>
+
+  <block wx:if="{{!loading}}">
+    <!-- Tab bar -->
+    <view class="tab-bar">
+      <view class="tab-item {{viewMode === 'list' ? 'tab-active' : ''}}" bindtap="onSwitchView" data-mode="list">
+        <text>列表视图</text>
+      </view>
+      <view class="tab-item {{viewMode === 'overview' ? 'tab-active' : ''}}" bindtap="onSwitchView" data-mode="overview">
+        <text>总览视图</text>
+      </view>
+    </view>
+
+    <!-- Stats -->
+    <view class="stats-bar" wx:if="{{submissions.length > 0}}">
+      <text class="text-secondary text-sm">共 {{submissions.length}} 条提交</text>
+      <text class="anomaly-count text-sm" wx:if="{{anomalyCount > 0}}">{{anomalyCount}} 条异常</text>
+    </view>
+
+    <!-- Empty -->
+    <empty-state
+      wx:if="{{submissions.length === 0}}"
+      icon="📝"
+      text="暂无提交记录"
+      hint="分享表单后等待用户填写"
+    />
+
+    <!-- List view -->
+    <view class="submission-list" wx:if="{{viewMode === 'list' && submissions.length > 0}}">
+      <view
+        class="submission-card"
+        wx:for="{{submissions}}"
+        wx:key="id"
+        bindtap="onSubmissionTap"
+        data-id="{{item.id}}"
+      >
+        <view class="submission-row">
+          <text class="submission-id">#{{item.id}}</text>
+          <status-badge status="{{item.status}}" type="submission" />
+        </view>
+        <text class="text-secondary text-sm">{{item.submittedAtText}}</text>
+      </view>
+    </view>
+
+    <!-- Overview table -->
+    <view class="overview-wrap" wx:if="{{viewMode === 'overview' && overviewData.length > 0}}">
+      <view class="table-container">
+        <!-- Fixed left column -->
+        <view class="table-fixed">
+          <view class="table-th">#</view>
+          <view
+            class="table-td {{row.status === 2 ? 'anomaly-row' : ''}}"
+            wx:for="{{overviewData}}"
+            wx:key="id"
+          >{{row.id}}</view>
+        </view>
+        <!-- Scrollable columns -->
+        <scroll-view class="table-scroll" scroll-x>
+          <view class="table-scroll-inner" style="width: {{(overviewColumns.length + 1) * 240}}rpx;">
+            <!-- Header row -->
+            <view class="table-header-row">
+              <view class="table-th" wx:for="{{overviewColumns}}" wx:key="key">{{item.label}}</view>
+              <view class="table-th">状态</view>
+            </view>
+            <!-- Data rows -->
+            <view
+              class="table-data-row {{row.status === 2 ? 'anomaly-row' : ''}}"
+              wx:for="{{overviewData}}"
+              wx:for-item="row"
+              wx:key="id"
+              bindtap="onOverviewRowTap"
+              data-index="{{index}}"
+            >
+              <view class="table-td" wx:for="{{overviewColumns}}" wx:for-item="col" wx:key="key">
+                {{row.values[col.key] != null ? row.values[col.key] : '-'}}
+              </view>
+              <view class="table-td">
+                <status-badge status="{{row.status}}" type="submission" />
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+  </block>
+</view>

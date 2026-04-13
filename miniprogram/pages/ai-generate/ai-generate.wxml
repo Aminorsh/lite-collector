@@ -1,0 +1,59 @@
+<view class="container">
+  <!-- Input -->
+  <view class="input-card" wx:if="{{!result}}">
+    <text class="card-title">描述你要创建的表单</text>
+    <text class="card-hint text-secondary text-sm mt-sm">例如：员工信息登记表，包含姓名、年龄、部门、手机号、月薪</text>
+    <textarea
+      class="desc-textarea"
+      placeholder="请描述表单内容..."
+      value="{{description}}"
+      bindinput="onDescInput"
+      maxlength="500"
+      auto-height
+    />
+    <button
+      class="btn-primary generate-btn"
+      bindtap="onGenerate"
+      disabled="{{generating}}"
+    >
+      {{generating ? 'AI 正在生成...' : 'AI 生成'}}
+    </button>
+  </view>
+
+  <!-- Loading animation -->
+  <view class="generating-state" wx:if="{{generating}}">
+    <text class="generating-icon">🤖</text>
+    <text class="generating-text">AI 正在分析您的描述并生成表单...</text>
+  </view>
+
+  <!-- Result preview -->
+  <view class="result-card" wx:if="{{result && !generating}}">
+    <text class="card-title">生成结果</text>
+
+    <view class="preview-section mt-md">
+      <text class="preview-label">标题</text>
+      <text class="preview-value">{{result.title}}</text>
+    </view>
+
+    <view class="preview-section" wx:if="{{result.description}}">
+      <text class="preview-label">描述</text>
+      <text class="preview-value">{{result.description}}</text>
+    </view>
+
+    <view class="preview-section">
+      <text class="preview-label">字段 ({{previewFields.length}})</text>
+      <view class="field-preview-list">
+        <view class="field-preview-item" wx:for="{{previewFields}}" wx:key="key">
+          <text class="field-preview-label">{{item.label}}</text>
+          <text class="field-preview-type text-secondary text-sm">{{item.typeLabel}}</text>
+          <text class="field-preview-required" wx:if="{{item.required}}">必填</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="result-actions mt-lg">
+      <button class="action-btn-outline" bindtap="onRegenerate">重新生成</button>
+      <button class="btn-primary" bindtap="onUseForm">使用此表单</button>
+    </view>
+  </view>
+</view>
