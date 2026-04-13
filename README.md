@@ -16,6 +16,7 @@ An intelligent data collection platform with AI-powered anomaly detection and re
 
 | Component | Technology |
 |-----------|-----------|
+| Frontend | WeChat Mini Program (native) |
 | Backend | Go + Gin + GORM |
 | Database | MySQL 8.0 |
 | Cache | Redis |
@@ -52,6 +53,15 @@ go run main.go
 ```
 
 The server starts at `http://localhost:8080`. Swagger UI is available at `http://localhost:8080/swagger/index.html`.
+
+### Frontend (WeChat Mini Program)
+
+1. Open [WeChat DevTools](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html) (macOS / Windows)
+2. Import the `miniprogram/` directory as a Mini Program project
+3. Set `appid` in `project.config.json` to your own, or use the test AppID
+4. The app connects to `http://localhost:8080` by default — make sure the backend is running
+
+> **Note:** WeChat DevTools is not available on Linux. The code is standard Mini Program JS/WXML/WXSS and can be developed on any platform, then previewed on a machine with DevTools.
 
 ### Docker Compose (Full Stack)
 
@@ -178,7 +188,23 @@ Returns `title`, `description`, and `schema` ready to pass to `POST /forms/`.
 ├── docs/                    # Generated Swagger docs
 ├── docker-compose.yml       # Dev: MySQL + Redis
 ├── docker-compose.prod.yml  # Prod: MySQL + Redis + backend
-└── Dockerfile               # Multi-stage build
+├── Dockerfile               # Multi-stage build
+└── miniprogram/             # WeChat Mini Program frontend
+    ├── app.js / app.json    # App entry and config (2-tab layout)
+    ├── services/            # API client, auth, storage
+    ├── utils/               # Constants, schema helpers, validation
+    ├── components/          # field-renderer, form-renderer, status-badge, empty-state
+    └── pages/               # 10 pages (see below)
+        ├── index/           # Form list + create FAB
+        ├── form-editor/     # Visual schema editor (10 field types)
+        ├── form-detail/     # Status actions (publish, share, archive)
+        ├── form-fill/       # Form filling with validation + prefill
+        ├── submissions/     # List + overview table with anomaly flags
+        ├── submission-detail/ # Single submission read-only view
+        ├── base-data/       # Import/list/clear reference data
+        ├── ai-generate/     # AI form generation from description
+        ├── report/          # AI report with async job polling
+        └── profile/         # Nickname editing + logout
 ```
 
 ## License
