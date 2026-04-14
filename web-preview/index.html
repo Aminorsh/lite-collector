@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Lite Collector - Web Preview</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navigation bar -->
+  <div id="nav-bar">
+    <button id="nav-back" onclick="router.back()" style="display:none;">&#x2039;</button>
+    <span id="nav-title">Lite Collector</span>
+  </div>
+
+  <!-- Page container -->
+  <div id="page-container"></div>
+
+  <!-- Tab bar -->
+  <div id="tab-bar">
+    <div class="tab-item active" data-tab="index" onclick="router.switchTab('index')">
+      <span class="tab-label">我的表单</span>
+    </div>
+    <div class="tab-item" data-tab="profile" onclick="router.switchTab('profile')">
+      <span class="tab-label">我的</span>
+    </div>
+  </div>
+
+  <!-- Toast overlay -->
+  <div id="toast" class="toast-hidden">
+    <span id="toast-icon"></span>
+    <span id="toast-text"></span>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="loading-hidden">
+    <div class="loading-spinner"></div>
+    <span id="loading-text">加载中...</span>
+  </div>
+
+  <!-- Modal overlay -->
+  <div id="modal-overlay" class="modal-hidden">
+    <div class="modal-box">
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-content" id="modal-content"></div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+
+  <!-- Action Sheet overlay -->
+  <div id="actionsheet-overlay" class="modal-hidden">
+    <div class="actionsheet-box" id="actionsheet-box"></div>
+  </div>
+
+  <script src="wx-shim.js"></script>
+  <script src="router.js"></script>
+  <script src="services.js"></script>
+  <script src="pages.js"></script>
+  <script>
+    // Boot
+    (async function() {
+      await services.auth.silentLogin();
+      router.switchTab('index');
+    })();
+  </script>
+</body>
+</html>
