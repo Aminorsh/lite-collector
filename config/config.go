@@ -26,7 +26,8 @@ type JWTConfig struct {
 
 // ServerConfig holds server configuration
 type ServerConfig struct {
-	Port string
+	Port       string
+	CORSOrigin string
 }
 
 // DatabaseConfig holds database configuration
@@ -72,7 +73,8 @@ func Load() *Config {
 
 	return &Config{
 		Server: ServerConfig{
-			Port: getEnv("SERVER_PORT", "8080"),
+			Port:       getEnv("SERVER_PORT", "8080"),
+			CORSOrigin: getEnv("CORS_ORIGIN", "*"),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
