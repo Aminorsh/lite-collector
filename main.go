@@ -54,6 +54,7 @@ func main() {
 
 	// Initialize Gin router
 	r := gin.New()
+	r.Use(middleware.CORSMiddleware(cfg.Server.CORSOrigin))
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
