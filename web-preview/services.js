@@ -6,6 +6,18 @@ var services = (function() {
   var BASE_URL = 'http://localhost:8080/api/v1';
   var _refreshPromise = null;
 
+  function normalizeApiPath(url) {
+    if (!url || typeof url !== 'string') return url;
+
+    // Gin routes in this backend use trailing slashes for collection resources.
+    // Avoid browser-visible 301 redirects (which may not include CORS headers).
+    if (url === '/forms') return '/forms/';
+    if (/^\/forms\/[^/]+\/base-data$/.test(url)) return url + '/';
+    if (/^\/forms\/[^/]+\/submissions$/.test(url)) return url + '/';
+
+    return url;
+  }
+
   // --- Storage ---
   var storage = {
     getToken: function() { return wx.getStorageSync('auth_token') || ''; },
@@ -22,13 +34,14 @@ var services = (function() {
   function request(options) {
     return new Promise(function(resolve, reject) {
       var header = Object.assign({ 'Content-Type': 'application/json' }, options.header || {});
+      var apiPath = normalizeApiPath(options.url);
       if (!options.skipAuth) {
         var token = storage.getToken();
         if (token) header['Authorization'] = 'Bearer ' + token;
       }
 
       wx.request({
-        url: BASE_URL + options.url,
+        url: BASE_URL + apiPath,
         method: options.method || 'GET',
         data: options.data,
         header: header,
