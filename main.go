@@ -75,12 +75,11 @@ func main() {
 	baseDataService := services.NewBaseDataService(baseDataRepo)
 
 	// DeepSeek client + AI worker + form generator
-	var formGenerator *services.FormGenerator
 	if cfg.DeepSeek.APIKey != "" {
 		deepseekClient := services.NewDeepSeekClient(cfg.DeepSeek.APIKey)
-		worker := jobs.NewWorker(aiJobRepo, submissionRepo, formRepo, deepseekClient)
+		formGenerator := services.NewFormGenerator(deepseekClient)
+		worker := jobs.NewWorker(aiJobRepo, submissionRepo, formRepo, deepseekClient, formGenerator)
 		worker.Start()
-		formGenerator = services.NewFormGenerator(deepseekClient)
 	} else {
 		log.Println("DEEPSEEK_API_KEY not set — AI features disabled")
 	}
@@ -102,7 +101,7 @@ func main() {
 		protected.Use(middleware.AuthMiddleware(jwtSecret))
 		{
 			routes.RegisterUserRoutes(protected, userService)
-			routes.RegisterFormRoutes(protected, formService, submissionService, baseDataService, aiJobService, formGenerator)
+			routes.RegisterFormRoutes(protected, formService, submissionService, baseDataService, aiJobService)
 			routes.RegisterJobRoutes(protected, aiJobService)
 		}
 	}
