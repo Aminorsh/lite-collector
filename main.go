@@ -73,6 +73,10 @@ func main() {
 	submissionService := services.NewSubmissionService(submissionRepo, aiJobRepo)
 	aiJobService := services.NewAIJobService(aiJobRepo)
 	baseDataService := services.NewBaseDataService(baseDataRepo)
+	pdfService := services.NewPDFService()
+	if pdfService == nil {
+		log.Println("chromium not found in PATH — PDF export will return 503 until a chromium/chrome binary is installed")
+	}
 
 	// DeepSeek client + AI worker + form generator
 	if cfg.DeepSeek.APIKey != "" {
@@ -102,7 +106,7 @@ func main() {
 		{
 			routes.RegisterUserRoutes(protected, userService)
 			routes.RegisterFormRoutes(protected, formService, submissionService, baseDataService, aiJobService)
-			routes.RegisterJobRoutes(protected, aiJobService)
+			routes.RegisterJobRoutes(protected, formService, aiJobService, pdfService)
 		}
 	}
 
