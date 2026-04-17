@@ -8,6 +8,7 @@ import (
 )
 
 // RegisterJobRoutes registers AI job status routes
-func RegisterJobRoutes(r *gin.RouterGroup, aiJobService *services.AIJobService) {
+func RegisterJobRoutes(r *gin.RouterGroup, formService *services.FormService, aiJobService *services.AIJobService, pdfService *services.PDFService) {
 	r.GET("/jobs/:jobId", handlers.GetJobStatus(aiJobService))
+	r.GET("/jobs/:jobId/pdf", handlers.GetReportPDF(formService, aiJobService, pdfService))
 }

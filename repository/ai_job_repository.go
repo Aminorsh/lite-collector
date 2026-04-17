@@ -19,6 +19,9 @@ type AIJobRepository interface {
 	Update(job *models.AIJob) error
 	// FindBySubmissionIDs returns completed detect_anomaly jobs keyed by submission ID.
 	FindBySubmissionIDs(submissionIDs []uint64) ([]models.AIJob, error)
+	// FindLatestCompletedByForm returns the most recent completed job of the given type for a form.
+	// Returns gorm.ErrRecordNotFound when none exists.
+	FindLatestCompletedByForm(formID uint64, jobType string) (*models.AIJob, error)
 }
 
 // aiJobRepository implements AIJobRepository using GORM
@@ -62,6 +65,20 @@ func (r *aiJobRepository) ClaimQueued() (*models.AIJob, error) {
 // Update updates an AI job
 func (r *aiJobRepository) Update(job *models.AIJob) error {
 	return r.db.Save(job).Error
+}
+
+// FindLatestCompletedByForm returns the most recent completed job of the given type for the given form.
+func (r *aiJobRepository) FindLatestCompletedByForm(formID uint64, jobType string) (*models.AIJob, error) {
+	var job models.AIJob
+	silent := r.db.Session(&gorm.Session{Logger: r.db.Logger.LogMode(logger.Silent)})
+	result := silent.
+		Where("form_id = ? AND job_type = ? AND status = 2", formID, jobType).
+		Order("finished_at DESC").
+		First(&job)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &job, nil
 }
 
 // FindBySubmissionIDs returns completed detect_anomaly jobs matching the given submission IDs.
