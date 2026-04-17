@@ -20,6 +20,7 @@ func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, s
 		forms.POST("/:formId/publish", handlers.PublishForm(formService))
 		forms.POST("/:formId/archive", handlers.ArchiveForm(formService))
 		forms.POST("/:formId/report", handlers.GenerateReport(formService, aiJobService))
+		forms.GET("/:formId/report/latest", handlers.GetLatestReport(formService, aiJobService))
 
 		baseData := forms.Group("/:formId/base-data")
 		{

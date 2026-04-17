@@ -11,6 +11,7 @@ type AIJob struct {
 	ID        uint64    `gorm:"primaryKey;autoIncrement" json:"id"`
 	UserID    uint64    `gorm:"not null;index" json:"user_id"`
 	JobType   string    `gorm:"size:32;not null;index" json:"type"` // generate_form | generate_report | detect_anomaly
+	FormID    *uint64   `gorm:"index" json:"form_id,omitempty"`     // Optional form association (set for generate_report)
 	Status    int8      `gorm:"default:0" json:"status"`            // 0:queued 1:processing 2:done 3:failed
 	Input     string    `gorm:"type:text" json:"input,omitempty"`   // Input data for the AI job
 	Output    string    `gorm:"type:text" json:"output,omitempty"`  // Output/result from the AI job
