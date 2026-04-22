@@ -367,6 +367,8 @@ pages['form-editor'] = function(root, params) {
 
       html += '<div class="input-group"><input class="input field-label-input" data-index="' + idx + '" placeholder="字段名称" value="' + escHtml(field.label) + '"></div>';
 
+      html += '<div class="input-group"><input class="input field-placeholder-input" data-index="' + idx + '" placeholder="占位提示（可选，默认：请输入{字段名}）" value="' + escHtml(field.placeholder || '') + '"></div>';
+
       html += '<div class="toggle-row"><span>必填</span><input type="checkbox" class="field-required-toggle" data-index="' + idx + '"' + (field.required ? ' checked' : '') + '></div>';
 
       if (field.hasOptions) {
@@ -400,6 +402,12 @@ pages['form-editor'] = function(root, params) {
     root.querySelectorAll('.field-label-input').forEach(function(el) {
       el.addEventListener('input', function() {
         state.fields[parseInt(el.dataset.index)].label = el.value;
+      });
+    });
+
+    root.querySelectorAll('.field-placeholder-input').forEach(function(el) {
+      el.addEventListener('input', function() {
+        state.fields[parseInt(el.dataset.index)].placeholder = el.value;
       });
     });
 
@@ -615,32 +623,33 @@ pages['form-fill'] = function(root, params) {
   var state = {
     loading: true, errorMsg: '', formTitle: '', formDesc: '',
     fields: [], values: {}, errors: {},
-    submitted: false, submitSuccess: false, submitting: false,
-    hasBaseData: true, lookupKey: '', lookingUp: false,
+    submitSuccess: false, submitting: false,
+    prefilled: false,
   };
 
   async function init() {
     try {
-      var mySubmission = null;
-      try { mySubmission = await services.api.get('/forms/' + formId + '/submissions/my'); }
-      catch(e) { if (e.code !== 'SUBMISSION_NOT_FOUND' && e.status !== 404) throw e; }
-
       var form = await services.api.get('/forms/' + formId + '/schema');
       var fields = schemaUtils.schemaToFields(form.schema);
 
-      if (mySubmission && mySubmission.id) {
-        state.loading = false;
-        state.formTitle = form.title;
-        state.formDesc = form.description;
-        state.fields = fields;
-        state.values = mySubmission.values || {};
-        state.submitted = true;
-      } else {
-        state.loading = false;
-        state.formTitle = form.title;
-        state.formDesc = form.description;
-        state.fields = fields;
+      var prefillValues = {};
+      var prefilled = false;
+      try {
+        var mySubmission = await services.api.get('/forms/' + formId + '/submissions/my');
+        if (mySubmission && mySubmission.values) {
+          prefillValues = mySubmission.values;
+          prefilled = Object.keys(prefillValues).length > 0;
+        }
+      } catch (e) {
+        if (e.code !== 'SUBMISSION_NOT_FOUND' && e.status !== 404) throw e;
       }
+
+      state.loading = false;
+      state.formTitle = form.title;
+      state.formDesc = form.description;
+      state.fields = fields;
+      state.values = prefillValues;
+      state.prefilled = prefilled;
     } catch(e) {
       state.loading = false;
       var msg = '加载失败';
@@ -656,16 +665,6 @@ pages['form-fill'] = function(root, params) {
     if (state.errorMsg) { root.innerHTML = '<div class="error-state"><span class="text-secondary">' + escHtml(state.errorMsg) + '</span></div>'; return; }
 
     var html = '';
-
-    if (state.submitted) {
-      html += '<div class="success-banner"><span class="success-icon">✓</span><span class="success-text">已提交</span></div>';
-      html += '<div class="form-header-card"><span class="form-title" style="display:block;margin-bottom:8px;">' + escHtml(state.formTitle) + '</span>';
-      if (state.formDesc) html += '<span class="text-secondary">' + escHtml(state.formDesc) + '</span>';
-      html += '</div>';
-      html += '<div class="form-body">' + renderFieldRenderer(state.fields, state.values, {}, { readonly: true }) + '</div>';
-      root.innerHTML = html;
-      return;
-    }
 
     if (state.submitSuccess) {
       html += '<div class="success-full">';
@@ -684,12 +683,11 @@ pages['form-fill'] = function(root, params) {
     if (state.formDesc) html += '<span class="text-secondary">' + escHtml(state.formDesc) + '</span>';
     html += '</div>';
 
-    if (state.hasBaseData) {
-      html += '<div class="lookup-card"><span class="lookup-title">查询预填</span>';
-      html += '<div class="lookup-row">';
-      html += '<input class="lookup-input" id="lookup-key" placeholder="输入查询键（如工号）" value="' + escHtml(state.lookupKey) + '">';
-      html += '<button class="lookup-btn" id="lookup-btn"' + (state.lookingUp ? ' disabled' : '') + '>' + (state.lookingUp ? '查询中' : '查询') + '</button>';
-      html += '</div></div>';
+    if (state.prefilled) {
+      html += '<div class="prefill-banner">';
+      html += '<span class="prefill-text">已根据你上次的填写自动预填</span>';
+      html += '<span class="prefill-clear" id="prefill-clear">清空</span>';
+      html += '</div>';
     }
 
     html += '<div class="form-body" id="form-fields">';
@@ -709,25 +707,12 @@ pages['form-fill'] = function(root, params) {
       });
     }
 
-    var lookupInput = document.getElementById('lookup-key');
-    if (lookupInput) lookupInput.addEventListener('input', function() { state.lookupKey = lookupInput.value; });
-
-    var lookupBtn = document.getElementById('lookup-btn');
-    if (lookupBtn) lookupBtn.addEventListener('click', async function() {
-      var key = state.lookupKey.trim();
-      if (!key) { wx.showToast({ title: '请输入查询键', icon: 'none' }); return; }
-      state.lookingUp = true; render();
-      try {
-        var res = await services.api.get('/forms/' + formId + '/base-data/lookup', { row_key: key });
-        if (res.data && typeof res.data === 'object') {
-          Object.keys(res.data).forEach(function(k) { state.values[k] = res.data[k]; });
-          wx.showToast({ title: '预填充成功', icon: 'success' });
-        }
-      } catch(e) {
-        if (e.status === 404) wx.showToast({ title: '未找到匹配数据', icon: 'none' });
-        else wx.showToast({ title: e.message || '查询失败', icon: 'none' });
-      }
-      state.lookingUp = false; render();
+    var clearBtn = document.getElementById('prefill-clear');
+    if (clearBtn) clearBtn.addEventListener('click', function() {
+      state.values = {};
+      state.errors = {};
+      state.prefilled = false;
+      render();
     });
 
     var submitBtn = document.getElementById('submit-btn');

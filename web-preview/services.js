@@ -293,21 +293,24 @@ function renderFieldRenderer(fields, values, errors, opts) {
       html += '</div>';
     } else {
       var inputId = 'field-' + field.key;
+      var genericPh = field.placeholder || ('请输入' + field.label);
+      var phonePh = field.placeholder || '请输入手机号';
+      var idPh = field.placeholder || '请输入身份证号';
       switch (field.type) {
         case 'text':
-          html += '<input class="field-input" id="' + inputId + '" placeholder="请输入' + escHtml(field.label) + '" value="' + escHtml(val || '') + '">';
+          html += '<input class="field-input" id="' + inputId + '" placeholder="' + escHtml(genericPh) + '" value="' + escHtml(val || '') + '">';
           break;
         case 'textarea':
-          html += '<textarea class="field-textarea" id="' + inputId + '" placeholder="请输入' + escHtml(field.label) + '">' + escHtml(val || '') + '</textarea>';
+          html += '<textarea class="field-textarea" id="' + inputId + '" placeholder="' + escHtml(genericPh) + '">' + escHtml(val || '') + '</textarea>';
           break;
         case 'number':
-          html += '<input class="field-input" id="' + inputId + '" type="number" step="any" placeholder="请输入' + escHtml(field.label) + '" value="' + escHtml(val != null ? val : '') + '">';
+          html += '<input class="field-input" id="' + inputId + '" type="number" step="any" placeholder="' + escHtml(genericPh) + '" value="' + escHtml(val != null ? val : '') + '">';
           break;
         case 'phone':
-          html += '<input class="field-input" id="' + inputId + '" type="tel" maxlength="11" placeholder="请输入手机号" value="' + escHtml(val || '') + '">';
+          html += '<input class="field-input" id="' + inputId + '" type="tel" maxlength="11" placeholder="' + escHtml(phonePh) + '" value="' + escHtml(val || '') + '">';
           break;
         case 'id_card':
-          html += '<input class="field-input" id="' + inputId + '" maxlength="18" placeholder="请输入身份证号" value="' + escHtml(val || '') + '">';
+          html += '<input class="field-input" id="' + inputId + '" maxlength="18" placeholder="' + escHtml(idPh) + '" value="' + escHtml(val || '') + '">';
           break;
         case 'select':
           html += '<select class="field-input" id="' + inputId + '">';

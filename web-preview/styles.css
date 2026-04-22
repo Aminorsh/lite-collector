@@ -614,30 +614,24 @@ body {
   margin-bottom: 12px;
 }
 
-.lookup-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 16px;
+.prefill-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(74, 144, 217, 0.08);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 6px;
+  padding: 10px 14px;
   margin-bottom: 12px;
+  font-size: 13px;
 }
-.lookup-title { font-size: 14px; font-weight: 600; display: block; margin-bottom: 8px; }
-.lookup-row { display: flex; gap: 8px; align-items: center; }
-.lookup-input {
-  flex: 1;
-  padding: 6px 10px;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  font-size: 14px;
-}
-.lookup-btn {
-  background: var(--color-primary);
-  color: #fff;
-  border: none;
-  font-size: 12px;
-  padding: 6px 12px;
-  border-radius: 4px;
+.prefill-text { color: var(--color-text); }
+.prefill-clear {
+  color: var(--color-primary);
   cursor: pointer;
+  padding: 2px 10px;
 }
+.prefill-clear:hover { text-decoration: underline; }
 
 .form-body {
   background: #fff;
