@@ -77,6 +77,7 @@ func main() {
 	if pdfService == nil {
 		log.Println("chromium not found in PATH — PDF export will return 503 until a chromium/chrome binary is installed")
 	}
+	storageService := services.NewStorageService("./data", cfg.Server.PublicBaseURL+"/static")
 
 	// DeepSeek client + AI worker + form generator
 	if cfg.DeepSeek.APIKey != "" {
@@ -96,6 +97,9 @@ func main() {
 	// Swagger UI
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// Serve user-uploaded assets (avatars etc.) as static files.
+	r.Static("/static", "./data")
+
 	// API routes
 	v1 := r.Group("/api/v1")
 	{
@@ -104,7 +108,7 @@ func main() {
 		protected := v1.Group("")
 		protected.Use(middleware.AuthMiddleware(jwtSecret))
 		{
-			routes.RegisterUserRoutes(protected, userService)
+			routes.RegisterUserRoutes(protected, userService, storageService)
 			routes.RegisterFormRoutes(protected, formService, submissionService, baseDataService, aiJobService)
 			routes.RegisterJobRoutes(protected, formService, aiJobService, pdfService)
 		}

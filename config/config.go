@@ -26,8 +26,9 @@ type JWTConfig struct {
 
 // ServerConfig holds server configuration
 type ServerConfig struct {
-	Port       string
-	CORSOrigin string
+	Port          string
+	CORSOrigin    string
+	PublicBaseURL string // absolute URL prefix for /static (e.g. http://localhost:8080)
 }
 
 // DatabaseConfig holds database configuration
@@ -73,8 +74,9 @@ func Load() *Config {
 
 	return &Config{
 		Server: ServerConfig{
-			Port:       getEnv("SERVER_PORT", "8080"),
-			CORSOrigin: getEnv("CORS_ORIGIN", "*"),
+			Port:          getEnv("SERVER_PORT", "8080"),
+			CORSOrigin:    getEnv("CORS_ORIGIN", "*"),
+			PublicBaseURL: getEnv("PUBLIC_BASE_URL", "http://localhost:8080"),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
