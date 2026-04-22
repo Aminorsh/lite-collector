@@ -147,14 +147,63 @@ pages['profile'] = function(root, params) {
     editing: false,
     editNickname: '',
     saving: false,
+    uploading: false,
   };
+
+  function uploadAvatar(file) {
+    if (file.size > 2 * 1024 * 1024) {
+      wx.showToast({ title: '图片不得超过 2MB', icon: 'none' });
+      return;
+    }
+    var allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowed.indexOf(file.type) < 0) {
+      wx.showToast({ title: '仅支持 jpeg/png/webp', icon: 'none' });
+      return;
+    }
+    state.uploading = true;
+    render();
+
+    var form = new FormData();
+    form.append('file', file);
+    var token = services.storage.getToken();
+
+    fetch(services.api.BASE_URL + '/user/avatar', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: form,
+    }).then(function(resp) {
+      return resp.json().then(function(data) { return { ok: resp.ok, data: data }; });
+    }).then(function(res) {
+      state.uploading = false;
+      if (res.ok && res.data && res.data.avatar_url) {
+        var user = services.storage.getUser() || {};
+        user.avatar_url = res.data.avatar_url;
+        services.storage.setUser(user);
+        getApp().globalData.userInfo = user;
+        state.userInfo = user;
+        wx.showToast({ title: '头像已更新', icon: 'success' });
+      } else {
+        var msg = (res.data && res.data.error && res.data.error.message) || '上传失败';
+        wx.showToast({ title: msg, icon: 'none' });
+      }
+      render();
+    }).catch(function() {
+      state.uploading = false;
+      wx.showToast({ title: '网络错误', icon: 'none' });
+      render();
+    });
+  }
 
   function render() {
     var u = state.userInfo;
     var html = '';
     if (u) {
       html += '<div class="profile-card">';
+      html += '<label class="avatar-btn" title="点击更换头像">';
       html += '<img class="avatar" src="' + escHtml(u.avatar_url || '') + '" onerror="this.style.display=\'none\'">';
+      html += '<input type="file" id="avatar-file" accept="image/jpeg,image/png,image/webp" style="display:none">';
+      html += '</label>';
+      html += '<div class="avatar-hint text-secondary text-sm">' + (state.uploading ? '上传中...' : '点击更换头像') + '</div>';
       html += '<div class="user-name">' + escHtml(u.nickname || '微信用户') + '</div>';
       html += '<div class="user-id text-secondary text-sm">ID: ' + escHtml(u.id) + '</div>';
       html += '</div>';
@@ -182,6 +231,12 @@ pages['profile'] = function(root, params) {
     root.innerHTML = html;
 
     // Bind
+    var avatarFile = document.getElementById('avatar-file');
+    if (avatarFile) avatarFile.addEventListener('change', function() {
+      if (!avatarFile.files || !avatarFile.files[0]) return;
+      uploadAvatar(avatarFile.files[0]);
+    });
+
     var editBtn = document.getElementById('edit-nickname-btn');
     if (editBtn) editBtn.addEventListener('click', function() {
       state.editing = true;

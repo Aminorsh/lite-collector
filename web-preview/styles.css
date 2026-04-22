@@ -370,8 +370,18 @@ body {
   height: 80px;
   border-radius: 50%;
   background: var(--color-border);
-  margin-bottom: 12px;
   object-fit: cover;
+}
+.avatar-btn {
+  display: inline-block;
+  cursor: pointer;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.avatar-hint {
+  display: block;
+  text-align: center;
+  margin-bottom: 12px;
 }
 
 .user-name { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
