@@ -12,6 +12,22 @@
   margin-bottom: var(--spacing-md);
 }
 
+.avatar-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0 0 var(--spacing-sm);
+  line-height: 1;
+}
+
+.avatar-btn::after {
+  border: none;
+}
+
+.avatar-hint {
+  margin-bottom: var(--spacing-md);
+}
+
 .avatar {
   width: 160rpx;
   height: 160rpx;

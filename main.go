@@ -73,7 +73,7 @@ func main() {
 	submissionService := services.NewSubmissionService(submissionRepo, aiJobRepo)
 	aiJobService := services.NewAIJobService(aiJobRepo)
 	baseDataService := services.NewBaseDataService(baseDataRepo)
-	storageService := services.NewStorageService("./data", "/static")
+	storageService := services.NewStorageService("./data", cfg.Server.PublicBaseURL+"/static")
 
 	// DeepSeek client + AI worker + form generator
 	var formGenerator *services.FormGenerator

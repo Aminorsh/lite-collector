@@ -8,6 +8,7 @@ Page({
     editing: false,
     editNickname: '',
     saving: false,
+    uploading: false,
   },
 
   onShow() {
@@ -57,6 +58,43 @@ Page({
       this.setData({ saving: false })
       wx.showToast({ title: err.message || '修改失败', icon: 'none' })
     }
+  },
+
+  onChooseAvatar(e) {
+    var tempPath = e.detail.avatarUrl
+    if (!tempPath) return
+
+    this.setData({ uploading: true })
+    var token = storage.getToken()
+
+    var that = this
+    wx.uploadFile({
+      url: api.BASE_URL + '/user/avatar',
+      filePath: tempPath,
+      name: 'file',
+      header: { Authorization: 'Bearer ' + token },
+      success(res) {
+        var data
+        try { data = JSON.parse(res.data) } catch (e) { data = null }
+        if (res.statusCode >= 200 && res.statusCode < 300 && data && data.avatar_url) {
+          var user = storage.getUser() || {}
+          user.avatar_url = data.avatar_url
+          storage.setUser(user)
+          var app = getApp()
+          app.globalData.userInfo = user
+          that.setData({ uploading: false, userInfo: user })
+          wx.showToast({ title: '头像已更新', icon: 'success' })
+        } else {
+          var msg = (data && data.error && data.error.message) || '上传失败'
+          that.setData({ uploading: false })
+          wx.showToast({ title: msg, icon: 'none' })
+        }
+      },
+      fail() {
+        that.setData({ uploading: false })
+        wx.showToast({ title: '网络错误', icon: 'none' })
+      },
+    })
   },
 
   onLogout() {

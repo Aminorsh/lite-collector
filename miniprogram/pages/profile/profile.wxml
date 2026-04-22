@@ -1,11 +1,18 @@
 <view class="container">
   <view class="profile-card" wx:if="{{userInfo}}">
-    <view class="avatar-wrapper">
+    <button
+      class="avatar-btn"
+      open-type="chooseAvatar"
+      bindchooseavatar="onChooseAvatar"
+    >
       <image
         class="avatar"
         src="{{userInfo.avatar_url || '/assets/icons/profile.png'}}"
         mode="aspectFill"
       />
+    </button>
+    <view class="avatar-hint text-secondary text-sm">
+      {{uploading ? '上传中...' : '点击更换头像'}}
     </view>
     <view class="user-name">{{userInfo.nickname || '微信用户'}}</view>
     <view class="user-id text-secondary text-sm">ID: {{userInfo.id}}</view>
