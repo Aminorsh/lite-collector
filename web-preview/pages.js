@@ -6,13 +6,44 @@ var pages = {};
 
 // ==================== Index ====================
 pages['index'] = function(root, params) {
-  root.innerHTML = '<div class="loading-state"><span class="text-secondary">加载中...</span></div>';
+  var FILTER_KEY = 'formListFilter';
+  var STATUS_TABS = [
+    { label: '全部', value: '' },
+    { label: '草稿', value: '0' },
+    { label: '已发布', value: '1' },
+    { label: '已归档', value: '2' },
+  ];
+  var SORT_OPTIONS = [
+    { label: '最近更新', sort: 'updated_at', order: 'desc' },
+    { label: '最近创建', sort: 'created_at', order: 'desc' },
+    { label: '标题 A→Z', sort: 'title', order: 'asc' },
+  ];
 
-  var state = { forms: [] };
+  var saved = wx.getStorageSync(FILTER_KEY) || {};
+  var state = {
+    forms: [],
+    loading: true,
+    query: saved.query || '',
+    status: saved.status || '',
+    sortIndex: typeof saved.sortIndex === 'number' ? saved.sortIndex : 0,
+  };
+  var debounceTimer = null;
+
+  function persist() {
+    wx.setStorageSync(FILTER_KEY, {
+      query: state.query, status: state.status, sortIndex: state.sortIndex,
+    });
+  }
 
   async function loadForms() {
+    state.loading = true;
+    render();
     try {
-      var res = await services.api.get('/forms');
+      var sort = SORT_OPTIONS[state.sortIndex];
+      var params = { sort: sort.sort, order: sort.order };
+      if (state.query) params.q = state.query;
+      if (state.status) params.status = state.status;
+      var res = await services.api.get('/forms', params);
       state.forms = (res.forms || []).map(function(f) {
         return Object.assign({}, f, { updatedAtText: formatTime(f.updated_at || f.created_at) });
       });
@@ -20,12 +51,34 @@ pages['index'] = function(root, params) {
       console.error('[index] loadForms error:', e);
       state.forms = [];
     }
+    state.loading = false;
     render();
   }
 
+  function renderFilterBar() {
+    var html = '<div class="filter-bar">';
+    html += '<div class="search-row">';
+    html += '<input class="search-input" id="f-query" placeholder="搜索表单标题" value="' + escHtml(state.query) + '" />';
+    html += '<select class="sort-select" id="f-sort">';
+    SORT_OPTIONS.forEach(function(opt, i) {
+      html += '<option value="' + i + '"' + (i === state.sortIndex ? ' selected' : '') + '>' + escHtml(opt.label) + '</option>';
+    });
+    html += '</select>';
+    html += '</div>';
+    html += '<div class="status-tabs">';
+    STATUS_TABS.forEach(function(t) {
+      html += '<div class="status-tab' + (state.status === t.value ? ' active' : '') + '" data-value="' + escHtml(t.value) + '">' + escHtml(t.label) + '</div>';
+    });
+    html += '</div></div>';
+    return html;
+  }
+
   function render() {
-    var html = '';
-    if (state.forms.length === 0) {
+    var html = renderFilterBar();
+
+    if (state.loading) {
+      html += '<div class="loading-state"><span class="text-secondary">加载中...</span></div>';
+    } else if (state.forms.length === 0) {
       html += renderEmptyState('📋', '暂无表单', '点击右下方按钮创建第一个表单');
     } else {
       html += '<div class="form-list">';
@@ -46,7 +99,28 @@ pages['index'] = function(root, params) {
     html += '<div class="fab" id="fab-create"><span class="fab-icon">+</span></div>';
     root.innerHTML = html;
 
-    // Bind
+    var queryEl = document.getElementById('f-query');
+    if (queryEl) queryEl.addEventListener('input', function() {
+      state.query = queryEl.value;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function() { persist(); loadForms(); }, 300);
+    });
+
+    var sortEl = document.getElementById('f-sort');
+    if (sortEl) sortEl.addEventListener('change', function() {
+      state.sortIndex = Number(sortEl.value);
+      persist(); loadForms();
+    });
+
+    root.querySelectorAll('.status-tab').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var v = el.dataset.value;
+        if (v === state.status) return;
+        state.status = v;
+        persist(); loadForms();
+      });
+    });
+
     root.querySelectorAll('.form-card').forEach(function(el) {
       el.addEventListener('click', function() {
         wx.navigateTo({ url: '/pages/form-detail/form-detail?formId=' + el.dataset.id });

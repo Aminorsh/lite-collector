@@ -929,6 +929,53 @@ body {
   line-height: 1.8;
 }
 
+/* === Filter bar === */
+.filter-bar {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.search-input {
+  flex: 1;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+.sort-select {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.status-tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.status-tab {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  background: var(--color-bg);
+  color: #666;
+  cursor: pointer;
+  user-select: none;
+}
+.status-tab.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
 /* === Report === */
 .report-card {
   background: #fff;
