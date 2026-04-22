@@ -1,9 +1,40 @@
 const api = require('../../services/api')
 
+const FILTER_KEY = 'formListFilter'
+
+const STATUS_TABS = [
+  { label: '全部', value: '' },
+  { label: '草稿', value: '0' },
+  { label: '已发布', value: '1' },
+  { label: '已归档', value: '2' },
+]
+
+const SORT_OPTIONS = [
+  { label: '最近更新', sort: 'updated_at', order: 'desc' },
+  { label: '最近创建', sort: 'created_at', order: 'desc' },
+  { label: '标题 A→Z', sort: 'title', order: 'asc' },
+]
+
 Page({
   data: {
     loading: true,
     forms: [],
+    query: '',
+    status: '',
+    sortIndex: 0,
+    statusTabs: STATUS_TABS,
+    sortOptions: SORT_OPTIONS,
+  },
+
+  _debounceTimer: null,
+
+  onLoad() {
+    const saved = wx.getStorageSync(FILTER_KEY) || {}
+    this.setData({
+      query: saved.query || '',
+      status: saved.status || '',
+      sortIndex: typeof saved.sortIndex === 'number' ? saved.sortIndex : 0,
+    })
   },
 
   onShow() {
@@ -16,13 +47,26 @@ Page({
     })
   },
 
+  persistFilter() {
+    wx.setStorageSync(FILTER_KEY, {
+      query: this.data.query,
+      status: this.data.status,
+      sortIndex: this.data.sortIndex,
+    })
+  },
+
   async loadForms() {
     const app = getApp()
     await app.globalData.loginReady
 
     this.setData({ loading: true })
     try {
-      const res = await api.get('/forms')
+      const sort = SORT_OPTIONS[this.data.sortIndex]
+      const params = { sort: sort.sort, order: sort.order }
+      if (this.data.query) params.q = this.data.query
+      if (this.data.status) params.status = this.data.status
+
+      const res = await api.get('/forms', params)
       const forms = (res.forms || []).map((f) => {
         return Object.assign({}, f, {
           updatedAtText: formatTime(f.updated_at || f.created_at),
@@ -33,6 +77,32 @@ Page({
       console.error('[index] loadForms error:', err)
       this.setData({ loading: false })
     }
+  },
+
+  onQueryInput(e) {
+    const val = e.detail.value
+    this.setData({ query: val })
+    clearTimeout(this._debounceTimer)
+    this._debounceTimer = setTimeout(() => {
+      this.persistFilter()
+      this.loadForms()
+    }, 300)
+  },
+
+  onStatusTap(e) {
+    const value = e.currentTarget.dataset.value
+    if (value === this.data.status) return
+    this.setData({ status: value })
+    this.persistFilter()
+    this.loadForms()
+  },
+
+  onSortChange(e) {
+    const idx = Number(e.detail.value)
+    if (idx === this.data.sortIndex) return
+    this.setData({ sortIndex: idx })
+    this.persistFilter()
+    this.loadForms()
   },
 
   onFormTap(e) {

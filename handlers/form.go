@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
+	"lite-collector/repository"
 	"lite-collector/services"
 	"lite-collector/utils"
 
@@ -54,10 +56,14 @@ func CreateForm(formService *services.FormService) gin.HandlerFunc {
 
 // GetForms godoc
 // @Summary      获取我的表单列表
-// @Description  返回当前登录用户创建的所有表单（草稿和已发布均包含）。
+// @Description  返回当前登录用户创建的表单。支持按标题模糊搜索、状态筛选和排序。
 // @Tags         表单
 // @Produce      json
 // @Security     BearerAuth
+// @Param        q       query     string  false  "按标题模糊搜索"
+// @Param        status  query     int     false  "状态筛选：0 草稿 / 1 已发布 / 2 已归档；不传则返回全部"
+// @Param        sort    query     string  false  "排序字段：updated_at | created_at | title"  default(updated_at)
+// @Param        order   query     string  false  "排序方向：asc | desc"                         default(desc)
 // @Success      200  {object}  formListResponse
 // @Failure      401  {object}  errorResponse  "未登录或 token 已过期"
 // @Failure      500  {object}  errorResponse  "服务器内部错误"
@@ -66,7 +72,19 @@ func GetForms(formService *services.FormService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.MustGet("user_id").(uint64)
 
-		forms, err := formService.GetFormsByOwner(userID)
+		filter := repository.FormListFilter{
+			Query:  c.Query("q"),
+			SortBy: c.Query("sort"),
+			Order:  c.Query("order"),
+		}
+		if s := c.Query("status"); s != "" {
+			if n, err := strconv.ParseInt(s, 10, 8); err == nil {
+				st := int8(n)
+				filter.Status = &st
+			}
+		}
+
+		forms, err := formService.ListFormsByOwner(userID, filter)
 		if err != nil {
 			e := utils.AsAppError(err)
 			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})

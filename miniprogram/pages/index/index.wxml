@@ -1,4 +1,40 @@
 <view class="container">
+  <!-- Filter bar -->
+  <view class="filter-bar">
+    <view class="search-row">
+      <input
+        class="search-input"
+        placeholder="搜索表单标题"
+        value="{{query}}"
+        bindinput="onQueryInput"
+        confirm-type="search"
+      />
+      <picker
+        class="sort-picker"
+        range="{{sortOptions}}"
+        range-key="label"
+        value="{{sortIndex}}"
+        bindchange="onSortChange"
+      >
+        <view class="sort-label">
+          <text class="text-sm">{{sortOptions[sortIndex].label}}</text>
+          <text class="sort-caret">▾</text>
+        </view>
+      </picker>
+    </view>
+    <view class="status-tabs">
+      <view
+        class="status-tab {{status === item.value ? 'active' : ''}}"
+        wx:for="{{statusTabs}}"
+        wx:key="value"
+        data-value="{{item.value}}"
+        bindtap="onStatusTap"
+      >
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
   <!-- Loading -->
   <view class="loading-state" wx:if="{{loading}}">
     <text class="text-secondary">加载中...</text>
