@@ -168,6 +168,13 @@ var wx = {
     if (typeof router !== 'undefined') router.navigateTo(opts.url, true);
   },
 
+  reLaunch(opts) {
+    if (typeof router !== 'undefined') {
+      if (typeof router.resetStack === 'function') router.resetStack();
+      router.navigateTo(opts.url, true);
+    }
+  },
+
   switchTab(opts) {
     if (typeof router !== 'undefined') {
       var page = opts.url.replace(/^\/pages\//, '').replace(/\/.*$/, '');

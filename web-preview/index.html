@@ -61,7 +61,16 @@
     // Boot
     (async function() {
       await services.auth.silentLogin();
-      router.switchTab('index');
+
+      // Simulate a WeChat share-card entry: if the page URL has ?formId=N,
+      // open the form-fill page directly instead of the form list.
+      var params = new URLSearchParams(window.location.search);
+      var sharedFormId = params.get('formId');
+      if (sharedFormId) {
+        router.navigateTo('/pages/form-fill/form-fill?formId=' + encodeURIComponent(sharedFormId), true);
+      } else {
+        router.switchTab('index');
+      }
     })();
   </script>
 </body>

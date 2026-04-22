@@ -98,6 +98,10 @@ var router = (function() {
       renderPage(tabName, {});
     },
 
+    resetStack: function() {
+      _stack = [];
+    },
+
     getCurrentPage: function() {
       return _currentPage;
     },

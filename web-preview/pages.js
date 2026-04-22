@@ -539,6 +539,7 @@ pages['form-detail'] = function(root, params) {
       html += '<button class="action-btn-full" id="btn-submissions">查看提交</button>';
       html += '<button class="action-btn-full" id="btn-base-data">底表数据</button>';
       html += '<button class="action-btn-full" id="btn-report">生成报告</button>';
+      html += '<button class="action-btn-full" id="btn-share">复制分享链接</button>';
       html += '<button class="action-btn-full action-warn" id="btn-archive">归档表单</button>';
     } else if (f.status === 2) {
       html += '<button class="action-btn-full" id="btn-submissions">查看提交</button>';
@@ -587,6 +588,20 @@ pages['form-detail'] = function(root, params) {
 
     var fillBtn = document.getElementById('btn-fill');
     if (fillBtn) fillBtn.addEventListener('click', function() { wx.navigateTo({ url: '/pages/form-fill/form-fill?formId=' + formId }); });
+
+    var shareBtn = document.getElementById('btn-share');
+    if (shareBtn) shareBtn.addEventListener('click', function() {
+      var link = window.location.origin + window.location.pathname + '?formId=' + encodeURIComponent(formId);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(function() {
+          wx.showToast({ title: '分享链接已复制', icon: 'success' });
+        }, function() {
+          wx.showModal({ title: '分享链接', content: link, showCancel: false });
+        });
+      } else {
+        wx.showModal({ title: '分享链接', content: link, showCancel: false });
+      }
+    });
   }
 
   loadForm();
