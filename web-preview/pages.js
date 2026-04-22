@@ -883,22 +883,105 @@ pages['base-data'] = function(root, params) {
 
 // ==================== AI Generate ====================
 pages['ai-generate'] = function(root, params) {
-  var state = { description: '', generating: false, result: null, previewFields: [] };
+  var STORAGE_KEY = 'aiGenerateJobId';
+  var state = {
+    description: '',
+    generating: false,
+    statusText: '正在排队...',
+    jobId: null,
+    result: null,
+    previewFields: [],
+  };
+  var pollTimer = null;
+  var pollCount = 0;
+
+  function clearPoll() { if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; } }
+
+  function failGeneration(msg) {
+    wx.removeStorageSync(STORAGE_KEY);
+    state.generating = false;
+    state.jobId = null;
+    wx.showToast({ title: msg, icon: 'none', duration: 3000 });
+    render();
+  }
+
+  function handleComplete(output) {
+    wx.removeStorageSync(STORAGE_KEY);
+    state.jobId = null;
+    state.generating = false;
+
+    var parsed;
+    try { parsed = JSON.parse(output || '{}'); } catch (e) { parsed = null; }
+    if (!parsed || !parsed.schema) {
+      wx.showToast({ title: 'AI 返回数据解析失败', icon: 'none', duration: 3000 });
+      render();
+      return;
+    }
+
+    var fields = schemaUtils.schemaToFields(parsed.schema);
+    state.previewFields = fields.map(function(f) {
+      return { key: f.key, label: f.label, type: f.type, typeLabel: TYPE_LABEL_MAP[f.type] || f.type, required: f.required };
+    });
+    state.result = parsed;
+    render();
+  }
+
+  function isAlive() { return root.isConnected; }
+
+  function schedulePoll() {
+    clearPoll();
+    pollTimer = setTimeout(function() { if (isAlive()) checkJob(); }, 2000);
+  }
+
+  async function checkJob() {
+    pollCount++;
+    if (pollCount > 60) { failGeneration('生成超时，请稍后重试'); return; }
+    try {
+      var res = await services.api.get('/jobs/' + state.jobId);
+      if (!isAlive()) return;
+      if (res.status === 0) {
+        state.statusText = '正在排队...'; render(); schedulePoll();
+      } else if (res.status === 1) {
+        state.statusText = 'AI 正在生成表单...'; render(); schedulePoll();
+      } else if (res.status === 2) {
+        handleComplete(res.output);
+      } else {
+        failGeneration(res.output || 'AI 生成失败');
+      }
+    } catch (e) {
+      if (!isAlive()) return;
+      failGeneration(e.message || '查询任务状态失败');
+    }
+  }
+
+  function resumeIfAny() {
+    var saved = wx.getStorageSync(STORAGE_KEY);
+    if (!saved) return false;
+    state.jobId = saved;
+    state.generating = true;
+    state.statusText = '恢复生成进度...';
+    pollCount = 0;
+    render();
+    schedulePoll();
+    return true;
+  }
 
   function render() {
     var html = '';
 
-    if (!state.result) {
+    if (!state.result && !state.generating) {
       html += '<div class="input-card">';
       html += '<span class="card-title">描述你要创建的表单</span>';
       html += '<span class="card-hint text-secondary text-sm mt-sm">例如：员工信息登记表，包含姓名、年龄、部门、手机号、月薪</span>';
       html += '<textarea class="desc-textarea" id="ai-desc" placeholder="请描述表单内容..." maxlength="500">' + escHtml(state.description) + '</textarea>';
-      html += '<button class="btn-primary generate-btn" id="gen-btn"' + (state.generating ? ' disabled' : '') + '>' + (state.generating ? 'AI 正在生成...' : 'AI 生成') + '</button>';
+      html += '<button class="btn-primary generate-btn" id="gen-btn">AI 生成</button>';
       html += '</div>';
     }
 
     if (state.generating) {
-      html += '<div class="generating-state"><span class="generating-icon">���</span><span class="generating-text">AI 正在分析您的描述并生成表单...</span></div>';
+      html += '<div class="generating-state"><span class="generating-icon">🤖</span>';
+      html += '<span class="generating-title">' + escHtml(state.statusText) + '</span>';
+      html += '<span class="generating-hint text-secondary text-sm mt-sm">你可以暂时离开，回到此页面会自动继续。</span></div>';
     }
 
     if (state.result && !state.generating) {
@@ -926,7 +1009,6 @@ pages['ai-generate'] = function(root, params) {
 
     root.innerHTML = html;
 
-    // Bind
     var descEl = document.getElementById('ai-desc');
     if (descEl) descEl.addEventListener('input', function() { state.description = descEl.value; });
 
@@ -934,20 +1016,22 @@ pages['ai-generate'] = function(root, params) {
     if (genBtn) genBtn.addEventListener('click', async function() {
       var desc = state.description.trim();
       if (!desc) { wx.showToast({ title: '请输入表单描述', icon: 'none' }); return; }
-      state.generating = true; state.result = null; render();
+      state.generating = true;
+      state.statusText = '正在排队...';
+      state.result = null;
+      state.previewFields = [];
+      render();
       try {
         var res = await services.api.post('/forms/generate', { description: desc });
-        var fields = schemaUtils.schemaToFields(res.schema);
-        state.previewFields = fields.map(function(f) {
-          return { key: f.key, label: f.label, type: f.type, typeLabel: TYPE_LABEL_MAP[f.type] || f.type, required: f.required };
-        });
-        state.result = res;
-      } catch(e) {
+        state.jobId = res.job_id;
+        wx.setStorageSync(STORAGE_KEY, state.jobId);
+        pollCount = 0;
+        schedulePoll();
+      } catch (e) {
         var msg = e.message || 'AI 生成失败';
         if (e.status === 503) msg = 'AI 服务暂未开启，请手动创建表单';
-        wx.showToast({ title: msg, icon: 'none', duration: 3000 });
+        failGeneration(msg);
       }
-      state.generating = false; render();
     });
 
     var regenBtn = document.getElementById('regen-btn');
@@ -965,100 +1049,216 @@ pages['ai-generate'] = function(root, params) {
     });
   }
 
-  render();
+  if (!resumeIfAny()) render();
 };
 
 // ==================== Report ====================
 pages['report'] = function(root, params) {
   var formId = params.formId;
+  var MODE = { LOADING: 'loading', EMPTY: 'empty', GENERATING: 'generating', COMPLETED: 'completed', FAILED: 'failed' };
   var state = {
-    jobId: null, statusText: '正在排队...', statusHint: '请稍候，AI 正在准备分析数据',
-    completed: false, failed: false, failedMsg: '', reportOutput: '',
+    mode: MODE.LOADING,
+    jobId: null,
+    reportOutput: '',
+    reportHTML: '',
+    finishedAt: '',
+    statusText: '正在排队...',
+    statusHint: '请稍候，AI 正在准备分析数据',
+    failedMsg: '',
   };
   var pollTimer = null;
   var pollCount = 0;
 
   function clearPoll() { if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; } }
+  function isAlive() { return root.isConnected; }
+
+  function formatFinishedAt(s) {
+    if (!s) return '';
+    var d = new Date(s);
+    if (isNaN(d.getTime())) return '';
+    var pad = function(n) { return n < 10 ? '0' + n : String(n); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+      ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  function setReport(output, jobId, finishedAt) {
+    state.mode = MODE.COMPLETED;
+    state.jobId = jobId;
+    state.reportOutput = output || '';
+    state.reportHTML = markdown.render(output || '');
+    state.finishedAt = formatFinishedAt(finishedAt);
+    render();
+  }
+
+  async function loadLatest() {
+    state.mode = MODE.LOADING;
+    render();
+    try {
+      var res = await services.api.get('/forms/' + formId + '/report/latest');
+      if (!isAlive()) return;
+      if (!res || !res.output) {
+        state.mode = MODE.EMPTY;
+        render();
+        return;
+      }
+      setReport(res.output, res.job_id, res.finished_at);
+    } catch (e) {
+      if (!isAlive()) return;
+      // 204 surfaces as empty data via fetch; a hard error means something else is wrong.
+      if (e.status === 404 || e.status === 204) {
+        state.mode = MODE.EMPTY;
+      } else {
+        state.mode = MODE.FAILED;
+        state.failedMsg = e.message || '加载报告失败';
+      }
+      render();
+    }
+  }
 
   async function startReport() {
-    state.completed = false; state.failed = false; state.failedMsg = '';
-    state.reportOutput = ''; state.statusText = '正在排队...';
+    state.mode = MODE.GENERATING;
+    state.statusText = '正在排队...';
     state.statusHint = '请稍候，AI 正在准备分析数据';
+    state.failedMsg = '';
     render();
 
     try {
       var res = await services.api.post('/forms/' + formId + '/report');
+      if (!isAlive()) return;
       state.jobId = res.job_id;
       pollCount = 0;
-      pollJob();
-    } catch(e) {
-      state.failed = true;
+      schedulePoll();
+    } catch (e) {
+      if (!isAlive()) return;
+      state.mode = MODE.FAILED;
       state.failedMsg = e.message || '无法创建报告任务';
       render();
     }
   }
 
-  function pollJob() {
+  function schedulePoll() {
     clearPoll();
-    pollTimer = setTimeout(function() { checkJob(); }, 2000);
+    pollTimer = setTimeout(function() { if (isAlive()) checkJob(); }, 2000);
   }
 
   async function checkJob() {
     pollCount++;
-    if (pollCount > 60) { state.failed = true; state.failedMsg = '生成超时，请稍后重试'; render(); return; }
-
+    if (pollCount > 60) {
+      state.mode = MODE.FAILED;
+      state.failedMsg = '生成超时，请稍后重试';
+      render();
+      return;
+    }
     try {
       var res = await services.api.get('/jobs/' + state.jobId);
+      if (!isAlive()) return;
       if (res.status === 0) {
         state.statusText = '排队中...';
         state.statusHint = '请稍候，AI 正在准备分析数据';
-        render(); pollJob();
+        render(); schedulePoll();
       } else if (res.status === 1) {
         state.statusText = 'AI 正在分析数据...';
         state.statusHint = '即将完成，请耐心等待';
-        render(); pollJob();
+        render(); schedulePoll();
       } else if (res.status === 2) {
-        var output = res.output || '';
-        try { var parsed = JSON.parse(output); output = parsed.report || parsed.content || parsed.text || output; } catch(e) {}
-        state.completed = true; state.reportOutput = output;
-        render();
+        setReport(res.output, res.job_id, res.finished_at);
       } else {
-        state.failed = true; state.failedMsg = res.output || '报告生成失败';
+        state.mode = MODE.FAILED;
+        state.failedMsg = res.output || '报告生成失败';
         render();
       }
-    } catch(e) {
-      state.failed = true; state.failedMsg = e.message || '查询任务状态失败';
+    } catch (e) {
+      if (!isAlive()) return;
+      state.mode = MODE.FAILED;
+      state.failedMsg = e.message || '查询任务状态失败';
       render();
     }
+  }
+
+  function downloadPDF() {
+    if (!state.jobId) { wx.showToast({ title: '暂无可下载的报告', icon: 'none' }); return; }
+    var token = wx.getStorageSync('auth_token') || '';
+    wx.showLoading({ title: '正在下载...' });
+    wx.downloadFile({
+      url: services.api.BASE_URL + '/jobs/' + state.jobId + '/pdf',
+      header: { 'Authorization': 'Bearer ' + token },
+      success: function(res) {
+        wx.hideLoading();
+        if (res.statusCode === 200 && res.tempFilePath) {
+          wx.openDocument({
+            filePath: res.tempFilePath,
+            fileType: 'pdf',
+            showMenu: true,
+            fail: function() { wx.showToast({ title: '打开 PDF 失败', icon: 'none' }); },
+          });
+        } else {
+          wx.showToast({ title: '下载失败 (HTTP ' + res.statusCode + ')', icon: 'none' });
+        }
+      },
+      fail: function() {
+        wx.hideLoading();
+        wx.showToast({ title: '下载失败', icon: 'none' });
+      },
+    });
   }
 
   function render() {
     var html = '';
 
-    if (!state.completed && !state.failed) {
+    if (state.mode === MODE.LOADING) {
+      html += '<div class="generating-state"><span class="generating-icon">⏳</span>';
+      html += '<span class="generating-title">加载报告中...</span></div>';
+    }
+
+    if (state.mode === MODE.EMPTY) {
+      html += '<div class="empty-state"><div class="empty-icon">📝</div>';
+      html += '<div class="empty-text">该表单尚未生成过报告</div>';
+      html += '<button class="btn-primary mt-lg" id="gen-btn" style="margin-top:16px;width:auto;padding:10px 40px;">生成报告</button></div>';
+    }
+
+    if (state.mode === MODE.GENERATING) {
       html += '<div class="generating-state"><span class="generating-icon">🤖</span>';
       html += '<span class="generating-title">' + escHtml(state.statusText) + '</span>';
-      html += '<span class="generating-hint text-secondary text-sm mt-sm">' + escHtml(state.statusHint) + '</span></div>';
+      html += '<span class="generating-hint text-secondary text-sm mt-sm">' + escHtml(state.statusHint) + '</span>';
+      html += '<span class="generating-hint text-secondary text-sm mt-sm">你可以暂时离开，回到此页面会重新加载最新结果。</span></div>';
     }
 
-    if (state.failed) {
+    if (state.mode === MODE.FAILED) {
       html += '<div class="failed-state"><span class="failed-icon">⚠️</span>';
-      html += '<span class="failed-title">生成失败</span>';
+      html += '<span class="failed-title">操作失败</span>';
       html += '<span class="failed-msg text-secondary text-sm mt-sm">' + escHtml(state.failedMsg) + '</span>';
-      html += '<button class="btn-primary mt-lg" id="retry-btn" style="width:auto;padding:10px 40px;">重新生成</button></div>';
+      html += '<button class="btn-primary mt-lg" id="retry-btn" style="width:auto;padding:10px 40px;">重试</button></div>';
     }
 
-    if (state.completed) {
-      html += '<div class="report-card"><span class="report-title">数据分析报告</span>';
-      html += '<div class="report-content"><span class="report-text">' + escHtml(state.reportOutput) + '</span></div>';
-      html += '<button class="btn-primary mt-lg" id="retry-btn">重新生成</button></div>';
+    if (state.mode === MODE.COMPLETED) {
+      html += '<div class="report-card">';
+      html += '<span class="report-title">数据分析报告</span>';
+      if (state.finishedAt) {
+        html += '<span class="text-secondary text-sm" style="display:block;margin-bottom:12px;">生成于 ' + escHtml(state.finishedAt) + '</span>';
+      }
+      html += '<div class="report-content md-body">' + state.reportHTML + '</div>';
+      html += '<div class="result-actions mt-lg">';
+      html += '<button class="action-btn-outline" id="pdf-btn">下载 PDF</button>';
+      html += '<button class="btn-primary" id="regen-btn">重新生成</button>';
+      html += '</div></div>';
     }
 
     root.innerHTML = html;
 
+    var genBtn = document.getElementById('gen-btn');
+    if (genBtn) genBtn.addEventListener('click', function() { startReport(); });
+
     var retryBtn = document.getElementById('retry-btn');
-    if (retryBtn) retryBtn.addEventListener('click', function() { startReport(); });
+    if (retryBtn) retryBtn.addEventListener('click', function() {
+      if (state.jobId) startReport(); else loadLatest();
+    });
+
+    var regenBtn = document.getElementById('regen-btn');
+    if (regenBtn) regenBtn.addEventListener('click', function() { startReport(); });
+
+    var pdfBtn = document.getElementById('pdf-btn');
+    if (pdfBtn) pdfBtn.addEventListener('click', function() { downloadPDF(); });
   }
 
-  startReport();
+  loadLatest();
 };

@@ -179,6 +179,36 @@ var wx = {
     // no-op in browser
   },
 
+  // --- File download / open (browser: fetch blob, stash url, open via openDocument) ---
+  downloadFile(opts) {
+    var headers = opts.header || {};
+    fetch(opts.url, { headers: headers })
+      .then(function(resp) {
+        if (!resp.ok) {
+          if (opts.fail) opts.fail({ errMsg: 'downloadFile:fail status ' + resp.status });
+          return null;
+        }
+        return resp.blob().then(function(blob) {
+          var tempFilePath = URL.createObjectURL(blob);
+          if (opts.success) opts.success({ statusCode: resp.status, tempFilePath: tempFilePath });
+        });
+      })
+      .catch(function(err) {
+        if (opts.fail) opts.fail({ errMsg: err.message || 'downloadFile:fail' });
+      });
+  },
+
+  openDocument(opts) {
+    // In the browser, a blob URL from downloadFile opens in a new tab;
+    // most browsers render PDFs inline and expose a download button.
+    try {
+      window.open(opts.filePath, '_blank');
+      if (opts.success) opts.success({});
+    } catch (err) {
+      if (opts.fail) opts.fail({ errMsg: err.message || 'openDocument:fail' });
+    }
+  },
+
   // --- Media (file input shim) ---
   chooseMedia(opts) {
     var input = document.createElement('input');
