@@ -4,6 +4,65 @@
   padding-top: 200rpx;
 }
 
+/* Filter bar */
+.filter-bar {
+  background-color: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.search-input {
+  flex: 1;
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: 14rpx 20rpx;
+  font-size: var(--font-size-md);
+}
+
+.sort-picker {
+  flex-shrink: 0;
+}
+
+.sort-label {
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: 14rpx 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.sort-caret {
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
+}
+
+.status-tabs {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-md);
+}
+
+.status-tab {
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  font-size: var(--font-size-sm);
+  background-color: var(--color-bg);
+  color: var(--color-text-secondary);
+}
+
+.status-tab.active {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
 /* Form list */
 .form-list {
   padding-bottom: 160rpx;
