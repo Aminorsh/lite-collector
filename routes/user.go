@@ -8,6 +8,7 @@ import (
 )
 
 // RegisterUserRoutes registers user profile routes (requires auth)
-func RegisterUserRoutes(r *gin.RouterGroup, userService *services.UserService) {
+func RegisterUserRoutes(r *gin.RouterGroup, userService *services.UserService, storage *services.StorageService) {
 	r.PUT("/user/profile", handlers.UpdateProfile(userService))
+	r.POST("/user/avatar", handlers.UploadAvatar(userService, storage))
 }

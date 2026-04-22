@@ -45,6 +45,11 @@ var (
 	// AI
 	ErrAINotConfigured = &AppError{http.StatusServiceUnavailable, "AI_NOT_CONFIGURED", "AI service is not configured (DEEPSEEK_API_KEY not set)"}
 	ErrAIGenerateFail  = &AppError{http.StatusBadGateway, "AI_GENERATE_FAILED", "AI failed to generate form schema"}
+
+	// Avatar upload
+	ErrAvatarMissing  = &AppError{http.StatusBadRequest, "AVATAR_MISSING", "no avatar file in request"}
+	ErrAvatarTooLarge = &AppError{http.StatusRequestEntityTooLarge, "AVATAR_TOO_LARGE", "avatar exceeds 2MB size limit"}
+	ErrAvatarBadType  = &AppError{http.StatusUnsupportedMediaType, "AVATAR_BAD_TYPE", "avatar must be jpeg/png/webp"}
 )
 
 // AsAppError unwraps err into an *AppError. If err is not an *AppError,
