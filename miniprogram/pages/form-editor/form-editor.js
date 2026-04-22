@@ -73,6 +73,13 @@ Page({
     })
   },
 
+  onFieldPlaceholderInput(e) {
+    var idx = e.currentTarget.dataset.index
+    this.setData({
+      ['fields[' + idx + '].placeholder']: e.detail.value,
+    })
+  },
+
   onFieldRequiredChange(e) {
     var idx = e.currentTarget.dataset.index
     this.setData({

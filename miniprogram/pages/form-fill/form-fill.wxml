@@ -9,21 +9,6 @@
     <text class="text-secondary">{{errorMsg}}</text>
   </view>
 
-  <!-- Already submitted: read-only view -->
-  <block wx:if="{{!loading && !errorMsg && submitted}}">
-    <view class="success-banner">
-      <text class="success-icon">✓</text>
-      <text class="success-text">已提交</text>
-    </view>
-    <view class="form-card">
-      <text class="form-title">{{formTitle}}</text>
-      <text class="form-desc" wx:if="{{formDesc}}">{{formDesc}}</text>
-    </view>
-    <view class="form-body">
-      <form-renderer fields="{{fields}}" values="{{values}}" readonly="{{true}}" />
-    </view>
-  </block>
-
   <!-- Submission success -->
   <view class="success-full" wx:if="{{!loading && !errorMsg && submitSuccess}}">
     <text class="success-full-icon">✓</text>
@@ -32,27 +17,17 @@
     <button class="btn-primary mt-lg" bindtap="onGoBack">返回</button>
   </view>
 
-  <!-- Fill mode -->
-  <block wx:if="{{!loading && !errorMsg && !submitted && !submitSuccess}}">
+  <!-- Fill mode (with auto-prefill) -->
+  <block wx:if="{{!loading && !errorMsg && !submitSuccess}}">
     <view class="form-card">
       <text class="form-title">{{formTitle}}</text>
       <text class="form-desc" wx:if="{{formDesc}}">{{formDesc}}</text>
     </view>
 
-    <!-- Prefill lookup -->
-    <view class="lookup-card" wx:if="{{hasBaseData}}">
-      <text class="lookup-title">查询预填</text>
-      <view class="lookup-row">
-        <input
-          class="lookup-input"
-          placeholder="输入查询键（如工号）"
-          value="{{lookupKey}}"
-          bindinput="onLookupInput"
-        />
-        <button class="lookup-btn" bindtap="onLookup" disabled="{{lookingUp}}" size="mini">
-          {{lookingUp ? '查询中' : '查询'}}
-        </button>
-      </view>
+    <!-- Prefill banner -->
+    <view class="prefill-banner" wx:if="{{prefilled}}">
+      <text class="prefill-text">已根据你上次的填写自动预填</text>
+      <text class="prefill-clear" bindtap="onClearPrefill">清空</text>
     </view>
 
     <view class="form-body">
