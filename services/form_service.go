@@ -42,6 +42,15 @@ func (s *FormService) GetFormsByOwner(ownerID uint64) ([]models.Form, error) {
 	return forms, nil
 }
 
+// ListFormsByOwner returns a filtered, sorted list of forms for the given user.
+func (s *FormService) ListFormsByOwner(ownerID uint64, filter repository.FormListFilter) ([]models.Form, error) {
+	forms, err := s.formRepo.FindByOwnerWithFilter(ownerID, filter)
+	if err != nil {
+		return nil, utils.ErrInternal
+	}
+	return forms, nil
+}
+
 // GetFormByID returns a form by ID, enforcing ownership.
 func (s *FormService) GetFormByID(formID string, userID uint64) (*models.Form, error) {
 	id, err := parseID(formID)
