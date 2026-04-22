@@ -154,4 +154,11 @@ Page({
   onGoBack() {
     wx.navigateBack({ fail: function () { wx.switchTab({ url: '/pages/index/index' }) } })
   },
+
+  onShareAppMessage() {
+    return {
+      title: this.data.formTitle || '数据收集表单',
+      path: '/pages/form-fill/form-fill?formId=' + this.data.formId,
+    }
+  },
 })
