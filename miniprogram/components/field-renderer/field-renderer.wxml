@@ -21,7 +21,7 @@
     <input
       wx:if="{{field.type === 'text'}}"
       class="field-input"
-      placeholder="请输入{{field.label}}"
+      placeholder="{{field.placeholder || ('请输入' + field.label)}}"
       value="{{value}}"
       bindinput="onInput"
     />
@@ -30,7 +30,7 @@
     <textarea
       wx:elif="{{field.type === 'textarea'}}"
       class="field-textarea"
-      placeholder="请输入{{field.label}}"
+      placeholder="{{field.placeholder || ('请输入' + field.label)}}"
       value="{{value}}"
       bindinput="onInput"
       auto-height
@@ -42,7 +42,7 @@
       wx:elif="{{field.type === 'number'}}"
       class="field-input"
       type="digit"
-      placeholder="请输入{{field.label}}"
+      placeholder="{{field.placeholder || ('请输入' + field.label)}}"
       value="{{value}}"
       bindinput="onNumberInput"
     />
@@ -53,7 +53,7 @@
       class="field-input"
       type="number"
       maxlength="11"
-      placeholder="请输入手机号"
+      placeholder="{{field.placeholder || '请输入手机号'}}"
       value="{{value}}"
       bindinput="onInput"
     />
@@ -64,7 +64,7 @@
       class="field-input"
       type="idcard"
       maxlength="18"
-      placeholder="请输入身份证号"
+      placeholder="{{field.placeholder || '请输入身份证号'}}"
       value="{{value}}"
       bindinput="onInput"
     />
