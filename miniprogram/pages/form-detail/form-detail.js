@@ -1,4 +1,5 @@
 const api = require('../../services/api')
+const jobs = require('../../services/jobs')
 const { schemaToFields } = require('../../utils/schema')
 
 Page({
@@ -8,6 +9,7 @@ Page({
     fieldCount: 0,
     createdAtText: '',
     updatedAtText: '',
+    reportJob: null, // { id, status, title, path, inFlight } — only set when a report job is in-flight/recent
   },
 
   onLoad(options) {
@@ -19,6 +21,7 @@ Page({
   onShow() {
     if (this.data.formId) {
       this.loadForm(this.data.formId)
+      this.loadReportJob()
     }
   },
 
@@ -39,6 +42,52 @@ Page({
       console.error('[form-detail] load error:', err)
       wx.showToast({ title: '加载失败', icon: 'none' })
     }
+  },
+
+  async loadReportJob() {
+    const app = getApp()
+    await app.globalData.loginReady
+
+    const formIdNum = Number(this.data.formId)
+    const raw = await jobs.fetchVisible()
+    let match = null
+    for (let i = 0; i < raw.length; i++) {
+      const j = raw[i]
+      if (j.job_type !== 'generate_report') continue
+      if (Number(j.form_id) !== formIdNum) continue
+      match = j
+      break
+    }
+    if (!match) {
+      this.setData({ reportJob: null })
+      return
+    }
+    const d = jobs.describe(match)
+    if (!d) {
+      this.setData({ reportJob: null })
+      return
+    }
+    this.setData({
+      reportJob: {
+        id: match.id,
+        status: match.status,
+        title: d.title,
+        path: d.path,
+        inFlight: match.status === 0 || match.status === 1,
+      },
+    })
+  },
+
+  onReportJobTap() {
+    if (!this.data.reportJob) return
+    wx.navigateTo({ url: this.data.reportJob.path })
+  },
+
+  onReportJobDismiss() {
+    const job = this.data.reportJob
+    if (!job || job.inFlight) return
+    jobs.ack(job.id)
+    this.setData({ reportJob: null })
   },
 
   onEdit() {
