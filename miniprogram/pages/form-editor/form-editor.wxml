@@ -68,6 +68,17 @@
         />
       </view>
 
+      <!-- Placeholder input -->
+      <view class="input-group">
+        <input
+          class="input"
+          placeholder="占位提示（可选，默认：请输入{字段名}）"
+          value="{{item.placeholder}}"
+          bindinput="onFieldPlaceholderInput"
+          data-index="{{index}}"
+        />
+      </view>
+
       <!-- Required toggle -->
       <view class="toggle-row">
         <text>必填</text>

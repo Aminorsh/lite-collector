@@ -17,6 +17,7 @@ function newField(type, index) {
     label: '',
     type: type,
     required: false,
+    placeholder: '',
   }
   if (OPTION_TYPES.indexOf(type) !== -1) {
     field.options = ['选项1']
