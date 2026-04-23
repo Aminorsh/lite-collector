@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"time"
 
 	"lite-collector/models"
 
@@ -22,6 +23,9 @@ type AIJobRepository interface {
 	// FindLatestCompletedByForm returns the most recent completed job of the given type for a form.
 	// Returns gorm.ErrRecordNotFound when none exists.
 	FindLatestCompletedByForm(formID uint64, jobType string) (*models.AIJob, error)
+	// FindPendingAndRecentByUser returns a user's in-flight jobs plus any that finished
+	// within the last `recentMinutes`. Used to drive the global "AI 生成中" banner.
+	FindPendingAndRecentByUser(userID uint64, recentMinutes int) ([]models.AIJob, error)
 }
 
 // aiJobRepository implements AIJobRepository using GORM
@@ -79,6 +83,20 @@ func (r *aiJobRepository) FindLatestCompletedByForm(formID uint64, jobType strin
 		return nil, result.Error
 	}
 	return &job, nil
+}
+
+// FindPendingAndRecentByUser returns in-flight and recently-finished jobs for a user.
+func (r *aiJobRepository) FindPendingAndRecentByUser(userID uint64, recentMinutes int) ([]models.AIJob, error) {
+	var jobs []models.AIJob
+	cutoff := time.Now().Add(-time.Duration(recentMinutes) * time.Minute)
+	result := r.db.Where(
+		"user_id = ? AND (status IN (0,1) OR (status IN (2,3) AND finished_at IS NOT NULL AND finished_at > ?))",
+		userID, cutoff,
+	).Order("created_at DESC").Find(&jobs)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return jobs, nil
 }
 
 // FindBySubmissionIDs returns completed detect_anomaly jobs matching the given submission IDs.

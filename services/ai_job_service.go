@@ -92,3 +92,13 @@ func (s *AIJobService) GetLatestReport(formID uint64) (*models.AIJob, error) {
 	}
 	return job, nil
 }
+
+// ListPendingJobs returns the user's in-flight jobs plus any that finished in
+// the last 10 minutes, so the banner can surface "recently completed" state too.
+func (s *AIJobService) ListPendingJobs(userID uint64) ([]models.AIJob, error) {
+	jobs, err := s.aiJobRepo.FindPendingAndRecentByUser(userID, 10)
+	if err != nil {
+		return nil, utils.ErrInternal
+	}
+	return jobs, nil
+}

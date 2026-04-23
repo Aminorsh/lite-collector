@@ -1,4 +1,19 @@
 <view class="container" wx:if="{{form}}">
+  <!-- Report job banner -->
+  <view
+    wx:if="{{reportJob}}"
+    class="job-banner {{reportJob.inFlight ? 'job-banner-active' : (reportJob.status === 3 ? 'job-banner-failed' : 'job-banner-done')}}"
+    bindtap="onReportJobTap"
+  >
+    <view class="job-banner-spinner" wx:if="{{reportJob.inFlight}}" />
+    <text class="job-banner-title">{{reportJob.title}}</text>
+    <view
+      class="job-banner-dismiss"
+      wx:if="{{!reportJob.inFlight}}"
+      catchtap="onReportJobDismiss"
+    >×</view>
+  </view>
+
   <!-- Header -->
   <view class="detail-card">
     <view class="detail-header">

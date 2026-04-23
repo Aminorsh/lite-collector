@@ -1,4 +1,24 @@
 <view class="container">
+  <!-- Pending AI jobs banner -->
+  <view class="job-banner-list" wx:if="{{pendingJobs.length > 0}}">
+    <view
+      class="job-banner {{item.inFlight ? 'job-banner-active' : (item.status === 3 ? 'job-banner-failed' : 'job-banner-done')}}"
+      wx:for="{{pendingJobs}}"
+      wx:key="id"
+      data-index="{{index}}"
+      bindtap="onJobTap"
+    >
+      <view class="job-banner-spinner" wx:if="{{item.inFlight}}" />
+      <text class="job-banner-title">{{item.title}}</text>
+      <view
+        class="job-banner-dismiss"
+        wx:if="{{!item.inFlight}}"
+        catchtap="onJobDismiss"
+        data-index="{{index}}"
+      >×</view>
+    </view>
+  </view>
+
   <!-- Filter bar -->
   <view class="filter-bar">
     <view class="search-row">
