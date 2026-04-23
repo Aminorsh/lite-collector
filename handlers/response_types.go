@@ -22,3 +22,17 @@ type jobStatusResponse struct {
 	CreatedAt  time.Time  `json:"created_at"`
 	FinishedAt *time.Time `json:"finished_at,omitempty"`
 }
+
+// pendingJobItem is the trimmed shape used by the banner — no Input/Output blobs.
+type pendingJobItem struct {
+	ID         uint64     `json:"id"`
+	JobType    string     `json:"job_type"`
+	Status     int8       `json:"status"`
+	FormID     *uint64    `json:"form_id,omitempty"`
+	CreatedAt  time.Time  `json:"created_at"`
+	FinishedAt *time.Time `json:"finished_at,omitempty"`
+}
+
+type pendingJobsResponse struct {
+	Jobs []pendingJobItem `json:"jobs"`
+}
