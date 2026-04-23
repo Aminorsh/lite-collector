@@ -18,6 +18,7 @@ type Worker struct {
 	submissionRepo repository.SubmissionRepository
 	formRepo       repository.FormRepository
 	deepseek       *services.DeepSeekClient
+	formGenerator  *services.FormGenerator
 	pollInterval   time.Duration
 }
 
@@ -27,12 +28,14 @@ func NewWorker(
 	submissionRepo repository.SubmissionRepository,
 	formRepo repository.FormRepository,
 	deepseek *services.DeepSeekClient,
+	formGenerator *services.FormGenerator,
 ) *Worker {
 	return &Worker{
 		aiJobRepo:      aiJobRepo,
 		submissionRepo: submissionRepo,
 		formRepo:       formRepo,
 		deepseek:       deepseek,
+		formGenerator:  formGenerator,
 		pollInterval:   5 * time.Second,
 	}
 }
@@ -61,9 +64,49 @@ func (w *Worker) processOne() {
 		w.handleAnomaly(job)
 	case "generate_report":
 		w.handleReport(job)
+	case "generate_form":
+		w.handleFormGeneration(job)
 	default:
 		w.failJob(job, "unsupported job type: "+job.JobType)
 	}
+}
+
+// --- Form generation ---
+
+type formGenInput struct {
+	Description string `json:"description"`
+}
+
+func (w *Worker) handleFormGeneration(job *models.AIJob) {
+	if w.formGenerator == nil {
+		w.failJob(job, "form generator not configured")
+		return
+	}
+
+	var input formGenInput
+	if err := json.Unmarshal([]byte(job.Input), &input); err != nil {
+		w.failJob(job, "invalid job input: "+err.Error())
+		return
+	}
+
+	result, err := w.formGenerator.Generate(input.Description)
+	if err != nil {
+		w.failJob(job, "form generation failed: "+err.Error())
+		return
+	}
+
+	output, err := json.Marshal(map[string]string{
+		"title":       result.Title,
+		"description": result.Description,
+		"schema":      result.Schema,
+	})
+	if err != nil {
+		w.failJob(job, "failed to encode result: "+err.Error())
+		return
+	}
+
+	w.completeJob(job, string(output))
+	log.Printf("[ai-worker] form generation job %d done", job.ID)
 }
 
 // --- Anomaly detection ---

@@ -1,27 +1,26 @@
-.generating-state, .failed-state {
+.generating-state, .failed-state, .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 200rpx;
+  padding: 160rpx var(--spacing-xl) 0;
 }
 
-.generating-icon, .failed-icon {
+.generating-icon, .failed-icon, .empty-icon {
   font-size: 100rpx;
   margin-bottom: var(--spacing-lg);
 }
 
-.generating-title, .failed-title {
+.generating-title, .failed-title, .empty-title {
   font-size: var(--font-size-lg);
   font-weight: bold;
 }
 
-.generating-hint {
+.generating-hint, .failed-msg, .empty-hint {
   display: block;
+  text-align: center;
 }
 
 .failed-msg {
-  display: block;
-  text-align: center;
   padding: 0 var(--spacing-xl);
 }
 
@@ -31,22 +30,83 @@
   padding: var(--spacing-lg);
 }
 
+.report-header {
+  margin-bottom: var(--spacing-md);
+}
+
 .report-title {
   font-size: var(--font-size-lg);
   font-weight: bold;
   display: block;
-  margin-bottom: var(--spacing-md);
+}
+
+.report-timestamp {
+  display: block;
+  margin-top: 4rpx;
 }
 
 .report-content {
   padding: var(--spacing-md);
   background-color: var(--color-bg);
   border-radius: var(--radius-md);
+  line-height: 1.7;
 }
 
-.report-text {
+.report-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.report-actions button {
+  flex: 1;
+}
+
+/* Styles applied inside rich-text via the md-* classes emitted by
+   utils/markdown.js. rich-text sandboxes styles, so these must be
+   reachable within the component's inline style space — WeChat applies
+   class styles defined on the current page to rich-text children. */
+.md-body {
   font-size: var(--font-size-base);
-  line-height: 1.8;
+  color: var(--color-text);
+  word-break: break-word;
+}
+
+.md-h1 { font-size: 44rpx; font-weight: 700; margin: 28rpx 0 16rpx; display: block; }
+.md-h2 { font-size: 38rpx; font-weight: 700; margin: 24rpx 0 14rpx; display: block; }
+.md-h3 { font-size: 34rpx; font-weight: 700; margin: 20rpx 0 12rpx; display: block; }
+.md-h4 { font-size: 30rpx; font-weight: 700; margin: 16rpx 0 10rpx; display: block; }
+.md-p  { margin: 12rpx 0; display: block; }
+.md-bold { font-weight: 700; }
+.md-italic { font-style: italic; }
+.md-code-inline {
+  background: rgba(0,0,0,0.06);
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  font-family: Consolas, Menlo, monospace;
+}
+.md-pre {
+  display: block;
+  background: rgba(0,0,0,0.06);
+  padding: 16rpx;
+  border-radius: 8rpx;
+  margin: 16rpx 0;
   white-space: pre-wrap;
-  word-wrap: break-word;
+  font-family: Consolas, Menlo, monospace;
+  font-size: 26rpx;
+}
+.md-ul, .md-ol { padding-left: 40rpx; margin: 12rpx 0; }
+.md-li { margin: 6rpx 0; }
+.md-blockquote {
+  display: block;
+  border-left: 6rpx solid #d0d7de;
+  padding: 6rpx 16rpx;
+  color: var(--color-text-secondary);
+  margin: 12rpx 0;
+}
+.md-hr {
+  display: block;
+  height: 1rpx;
+  background: #d0d7de;
+  margin: 24rpx 0;
 }

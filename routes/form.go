@@ -8,11 +8,11 @@ import (
 )
 
 // RegisterFormRoutes registers form and nested submission/base-data routes
-func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, submissionService *services.SubmissionService, baseDataService *services.BaseDataService, aiJobService *services.AIJobService, formGenerator *services.FormGenerator) {
+func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, submissionService *services.SubmissionService, baseDataService *services.BaseDataService, aiJobService *services.AIJobService) {
 	forms := r.Group("/forms")
 	{
 		forms.POST("/", handlers.CreateForm(formService))
-		forms.POST("/generate", handlers.GenerateForm(formGenerator)) // must be before /:formId
+		forms.POST("/generate", handlers.GenerateForm(aiJobService)) // must be before /:formId
 		forms.GET("/", handlers.GetForms(formService))
 		forms.GET("/:formId", handlers.GetForm(formService))
 		forms.GET("/:formId/schema", handlers.GetPublishedForm(formService)) // any auth'd user; only published forms
@@ -20,6 +20,7 @@ func RegisterFormRoutes(r *gin.RouterGroup, formService *services.FormService, s
 		forms.POST("/:formId/publish", handlers.PublishForm(formService))
 		forms.POST("/:formId/archive", handlers.ArchiveForm(formService))
 		forms.POST("/:formId/report", handlers.GenerateReport(formService, aiJobService))
+		forms.GET("/:formId/report/latest", handlers.GetLatestReport(formService, aiJobService))
 
 		baseData := forms.Group("/:formId/base-data")
 		{

@@ -1,9 +1,24 @@
 <view class="container">
-  <!-- Generating state -->
-  <view class="generating-state" wx:if="{{!completed && !failed}}">
+  <!-- Initial load of the latest report -->
+  <view class="generating-state" wx:if="{{loading}}">
+    <text class="generating-icon">📄</text>
+    <text class="generating-title">加载中...</text>
+  </view>
+
+  <!-- No prior report: prompt to generate -->
+  <view class="empty-state" wx:if="{{!loading && !completed && !failed && !hasPrevious && !statusText}}">
+    <text class="empty-icon">🧠</text>
+    <text class="empty-title">还没有数据报告</text>
+    <text class="empty-hint text-secondary text-sm mt-sm">点击下方按钮，让 AI 根据表单提交数据生成报告。生成过程在后台进行，你可以离开此页面。</text>
+    <button class="btn-primary mt-lg" bindtap="onGenerate">生成报告</button>
+  </view>
+
+  <!-- Generating state (polling an active job) -->
+  <view class="generating-state" wx:if="{{!loading && !completed && !failed && statusText}}">
     <text class="generating-icon">🤖</text>
     <text class="generating-title">{{statusText}}</text>
     <text class="generating-hint text-secondary text-sm mt-sm">{{statusHint}}</text>
+    <text class="generating-hint text-secondary text-sm mt-sm">生成过程在后台进行，你可以暂时离开。</text>
   </view>
 
   <!-- Failed -->
@@ -14,12 +29,20 @@
     <button class="btn-primary mt-lg" bindtap="onRetry">重新生成</button>
   </view>
 
-  <!-- Completed -->
+  <!-- Completed: markdown-rendered report -->
   <view class="report-card" wx:if="{{completed}}">
-    <text class="report-title">数据分析报告</text>
-    <view class="report-content">
-      <text class="report-text">{{reportOutput}}</text>
+    <view class="report-header">
+      <text class="report-title">数据分析报告</text>
+      <text class="report-timestamp text-secondary text-sm" wx:if="{{finishedAtText}}">
+        生成于 {{finishedAtText}}
+      </text>
     </view>
-    <button class="btn-primary mt-lg" bindtap="onRetry">重新生成</button>
+    <rich-text class="report-content md-body" nodes="{{reportNodes}}" />
+    <view class="report-actions">
+      <button class="action-btn-outline" bindtap="onDownloadPDF" disabled="{{downloading}}">
+        {{downloading ? '下载中...' : '下载 PDF'}}
+      </button>
+      <button class="btn-primary" bindtap="onRegenerate">重新生成</button>
+    </view>
   </view>
 </view>

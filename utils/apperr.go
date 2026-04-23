@@ -45,6 +45,12 @@ var (
 	// AI
 	ErrAINotConfigured = &AppError{http.StatusServiceUnavailable, "AI_NOT_CONFIGURED", "AI service is not configured (DEEPSEEK_API_KEY not set)"}
 	ErrAIGenerateFail  = &AppError{http.StatusBadGateway, "AI_GENERATE_FAILED", "AI failed to generate form schema"}
+
+	// PDF
+	ErrJobNotCompleted = &AppError{http.StatusConflict, "JOB_NOT_COMPLETED", "job has not finished successfully yet"}
+	ErrJobNotReportable = &AppError{http.StatusBadRequest, "JOB_NOT_REPORTABLE", "PDF export is only supported for generate_report jobs"}
+	ErrPDFGenerateFail  = &AppError{http.StatusInternalServerError, "PDF_GENERATE_FAILED", "failed to render PDF"}
+	ErrPDFNotAvailable  = &AppError{http.StatusServiceUnavailable, "PDF_NOT_AVAILABLE", "PDF rendering is not available on this server (chromium missing)"}
 )
 
 // AsAppError unwraps err into an *AppError. If err is not an *AppError,

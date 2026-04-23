@@ -10,20 +10,19 @@ import (
 )
 
 // GenerateForm godoc
-// @Summary      AI 生成表单
-// @Description  根据自然语言描述，使用 AI 生成表单标题、描述和字段结构（schema）。返回结果可直接用于创建表单。
+// @Summary      AI 生成表单（异步）
+// @Description  根据自然语言描述异步生成表单结构。返回任务 ID，前端轮询 GET /jobs/:jobId 获取结果。完成时 output 字段为 JSON 字符串，包含 title/description/schema。
 // @Tags         AI任务
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
 // @Param        body  body      generateFormRequest  true  "表单描述"
-// @Success      200   {object}  generateFormResponse
+// @Success      202   {object}  generateFormResponse
 // @Failure      400   {object}  errorResponse  "请求参数错误"
 // @Failure      401   {object}  errorResponse  "未登录或 token 已过期"
-// @Failure      502   {object}  errorResponse  "AI 生成失败"
-// @Failure      503   {object}  errorResponse  "AI 服务未配置"
+// @Failure      500   {object}  errorResponse  "服务器内部错误"
 // @Router       /forms/generate [post]
-func GenerateForm(formGenerator *services.FormGenerator) gin.HandlerFunc {
+func GenerateForm(aiJobService *services.AIJobService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req generateFormRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -32,17 +31,17 @@ func GenerateForm(formGenerator *services.FormGenerator) gin.HandlerFunc {
 			return
 		}
 
-		result, err := formGenerator.Generate(req.Description)
+		userID := c.MustGet("user_id").(uint64)
+		jobID, err := aiJobService.EnqueueFormGeneration(userID, req.Description)
 		if err != nil {
 			e := utils.AsAppError(err)
 			c.JSON(e.HTTPStatus, errorResponse{Error: errorDetail{Code: e.Code, Message: e.Message}})
 			return
 		}
 
-		c.JSON(http.StatusOK, generateFormResponse{
-			Title:       result.Title,
-			Description: result.Description,
-			Schema:      result.Schema,
+		c.JSON(http.StatusAccepted, generateFormResponse{
+			JobID:   jobID,
+			Message: "AI 生成任务已排队，请通过 GET /api/v1/jobs/:jobId 查询结果",
 		})
 	}
 }
@@ -52,7 +51,6 @@ type generateFormRequest struct {
 }
 
 type generateFormResponse struct {
-	Title       string `json:"title"       example:"员工信息登记"`
-	Description string `json:"description" example:"请填写个人基本信息"`
-	Schema      string `json:"schema"      example:"{\"fields\":[...]}"`
+	JobID   uint64 `json:"job_id"  example:"42"`
+	Message string `json:"message" example:"AI 生成任务已排队，请通过 GET /api/v1/jobs/:jobId 查询结果"`
 }

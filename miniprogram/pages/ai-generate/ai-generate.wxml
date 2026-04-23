@@ -1,6 +1,6 @@
 <view class="container">
   <!-- Input -->
-  <view class="input-card" wx:if="{{!result}}">
+  <view class="input-card" wx:if="{{!result && !generating}}">
     <text class="card-title">描述你要创建的表单</text>
     <text class="card-hint text-secondary text-sm mt-sm">例如：员工信息登记表，包含姓名、年龄、部门、手机号、月薪</text>
     <textarea
@@ -23,7 +23,8 @@
   <!-- Loading animation -->
   <view class="generating-state" wx:if="{{generating}}">
     <text class="generating-icon">🤖</text>
-    <text class="generating-text">AI 正在分析您的描述并生成表单...</text>
+    <text class="generating-text">{{statusText || '正在生成...'}}</text>
+    <text class="generating-hint text-secondary text-sm mt-sm">你可以暂时离开，回到此页面会自动继续。</text>
   </view>
 
   <!-- Result preview -->
