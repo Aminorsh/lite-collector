@@ -51,6 +51,11 @@ var (
 	ErrJobNotReportable = &AppError{http.StatusBadRequest, "JOB_NOT_REPORTABLE", "PDF export is only supported for generate_report jobs"}
 	ErrPDFGenerateFail  = &AppError{http.StatusInternalServerError, "PDF_GENERATE_FAILED", "failed to render PDF"}
 	ErrPDFNotAvailable  = &AppError{http.StatusServiceUnavailable, "PDF_NOT_AVAILABLE", "PDF rendering is not available on this server (chromium missing)"}
+
+	// Avatar upload
+	ErrAvatarMissing  = &AppError{http.StatusBadRequest, "AVATAR_MISSING", "no avatar file in request"}
+	ErrAvatarTooLarge = &AppError{http.StatusRequestEntityTooLarge, "AVATAR_TOO_LARGE", "avatar exceeds 2MB size limit"}
+	ErrAvatarBadType  = &AppError{http.StatusUnsupportedMediaType, "AVATAR_BAD_TYPE", "avatar must be jpeg/png/webp"}
 )
 
 // AsAppError unwraps err into an *AppError. If err is not an *AppError,
