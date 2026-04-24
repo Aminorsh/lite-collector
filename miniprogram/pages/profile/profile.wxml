@@ -7,7 +7,7 @@
     >
       <image
         class="avatar"
-        src="{{userInfo.avatar_url || '/assets/icons/profile.png'}}"
+        src="{{userInfo.avatar_url || '/assets/icons/1.png'}}"
         mode="aspectFill"
       />
     </button>
@@ -20,7 +20,7 @@
 
   <view class="profile-card" wx:else>
     <view class="avatar-wrapper">
-      <view class="avatar avatar-placeholder"></view>
+      <view class="avatar avatar-placeholder" ></view>
     </view>
     <view class="user-name text-secondary">未登录</view>
   </view>

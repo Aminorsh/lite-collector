@@ -27,14 +27,14 @@
       {
         "pagePath": "pages/index/index",
         "text": "我的表单",
-        "iconPath": "assets/icons/form.png",
-        "selectedIconPath": "assets/icons/form-active.png"
+        "iconPath": "assets/icons/3.png",
+        "selectedIconPath": "assets/icons/4.png"
       },
       {
         "pagePath": "pages/profile/profile",
         "text": "我的",
-        "iconPath": "assets/icons/profile.png",
-        "selectedIconPath": "assets/icons/profile-active.png"
+        "iconPath": "assets/icons/1.png",
+        "selectedIconPath": "assets/icons/2.png"
       }
     ]
   },
