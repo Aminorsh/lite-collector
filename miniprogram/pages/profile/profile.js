@@ -97,19 +97,19 @@ Page({
     })
   },
 
-  onLogout() {
-    wx.showModal({
-      title: '提示',
-      content: '确定退出登录吗？',
-      success: (res) => {
-        if (res.confirm) {
-          auth.logout()
-          this.setData({ userInfo: null })
-          auth.silentLogin().then(() => {
-            this.onShow()
-          })
-        }
-      },
-    })
-  },
+  // onLogout() {
+  //   wx.showModal({
+  //     title: '提示',
+  //     content: '确定退出登录吗？',
+  //     success: (res) => {
+  //       if (res.confirm) {
+  //         auth.logout()
+  //         this.setData({ userInfo: null })
+  //         auth.silentLogin().then(() => {
+  //           this.onShow()
+  //         })
+  //       }
+  //     },
+  //   })
+  // },
 })
