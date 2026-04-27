@@ -97,20 +97,51 @@ Page({
 
   // --- Field operations ---
 
+  // onAddField() {
+  //   var typeLabels = FIELD_TYPES.map((t) => t.label)
+  //   wx.showActionSheet({
+  //     itemList: typeLabels,
+  //     success: (res) => {
+  //       var type = FIELD_TYPES[res.tapIndex].value
+  //       var nextIdx = schema.nextFieldIndex(this.data.fields)
+  //       var field = schema.newField(type, nextIdx)
+  //       var enriched = enrichFields([field])[0]
+  //       var fields = this.data.fields.concat([enriched])
+  //       this.setData({ fields: fields })
+  //     },
+  //   })
+  // },
   onAddField() {
-    var typeLabels = FIELD_TYPES.map((t) => t.label)
-    wx.showActionSheet({
-      itemList: typeLabels,
-      success: (res) => {
-        var type = FIELD_TYPES[res.tapIndex].value
-        var nextIdx = schema.nextFieldIndex(this.data.fields)
-        var field = schema.newField(type, nextIdx)
-        var enriched = enrichFields([field])[0]
-        var fields = this.data.fields.concat([enriched])
-        this.setData({ fields: fields })
-      },
+    // 把所有字段类型存到当前页面 data 里，给自定义弹窗用
+    this.setData({
+      showFieldTypePicker: true,
+      fieldTypeList: FIELD_TYPES
     })
   },
+  
+  // 弹窗取消
+  onCancelFieldType() {
+    this.setData({
+      showFieldTypePicker: false
+    })
+  },
+  
+  // 选择了某个字段类型
+  onSelectFieldType(e) {
+    const index = e.currentTarget.dataset.index
+    const type = this.data.fieldTypeList[index].value
+    const nextIdx = schema.nextFieldIndex(this.data.fields)
+    const field = schema.newField(type, nextIdx)
+    const enriched = enrichFields([field])[0]
+    
+    this.setData({
+      showFieldTypePicker: false,
+      fields: this.data.fields.concat(enriched)
+    })
+  },
+
+    
+ 
 
   onDeleteField(e) {
     var idx = e.currentTarget.dataset.index
