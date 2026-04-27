@@ -1,5 +1,7 @@
 <view class="container">
+  <!-- 1. 用户信息卡片（TDesign 风格） -->
   <view class="profile-card" wx:if="{{userInfo}}">
+    <!-- 头像上传按钮 -->
     <button
       class="avatar-btn"
       open-type="chooseAvatar"
@@ -10,55 +12,68 @@
         src="{{userInfo.avatar_url || '/assets/icons/1.png'}}"
         mode="aspectFill"
       />
+      <!-- 上传中 loading -->
+      <t-loading wx:if="{{uploading}}" class="avatar-loading" size="24" theme="white" />
     </button>
-    <view class="avatar-hint text-secondary text-sm">
+
+    <view class="avatar-hint">
       {{uploading ? '上传中...' : '点击更换头像'}}
     </view>
+
     <view class="user-name">{{userInfo.nickname || '微信用户'}}</view>
-    <view class="user-id text-secondary text-sm">ID: {{userInfo.id}}</view>
+    <view class="user-id">ID: {{userInfo.id}}</view>
   </view>
 
+  <!-- 未登录状态 -->
   <view class="profile-card" wx:else>
     <view class="avatar-wrapper">
-      <view class="avatar avatar-placeholder" ></view>
+      <view class="avatar avatar-placeholder"></view>
     </view>
-    <view class="user-name text-secondary">未登录</view>
+    <view class="user-name text-empty">未登录</view>
   </view>
 
-  <!-- Edit nickname -->
+  <!-- 2. 修改昵称菜单（TDesign List） -->
   <view class="menu-section" wx:if="{{userInfo}}">
-    <view class="menu-item" bindtap="onEditNickname">
-      <text>修改昵称</text>
-      <view class="menu-right">
-        <text class="menu-value text-secondary text-sm">{{userInfo.nickname || '未设置'}}</text>
-        <text class="menu-arrow">›</text>
+    <t-cell
+      title="修改昵称"
+      arrow
+      bindtap="onEditNickname"
+    >
+      <view slot="right">
+        <text class="cell-value">{{userInfo.nickname || '未设置'}}</text>
       </view>
-    </view>
+    </t-cell>
   </view>
 
-  <!-- Edit nickname panel -->
+  <!-- 3. 修改昵称面板（TDesign 美化） -->
   <view class="edit-panel" wx:if="{{editing}}">
     <view class="edit-title">修改昵称</view>
-    <input
-      class="edit-input"
-      placeholder="请输入新昵称"
+
+    <!-- TDesign 输入框 -->
+    <t-input
       value="{{editNickname}}"
-      bindinput="onNicknameInput"
-      focus="{{editing}}"
+      placeholder="请输入新昵称"
       maxlength="20"
+      bind:change="onNicknameInput"
+      class="edit-input"
     />
+
+    <!-- TDesign 按钮组 -->
     <view class="edit-actions">
-      <button class="edit-cancel" bindtap="onCancelEdit">取消</button>
-      <button class="btn-primary edit-save" bindtap="onSaveNickname" disabled="{{saving}}">
+      <t-button
+        variant="light"
+        bindtap="onCancelEdit"
+      >
+        取消
+      </t-button>
+      <t-button
+        theme="light"
+        bindtap="onSaveNickname"
+        disabled="{{saving}}"
+        loading="{{saving}}"
+      >
         {{saving ? '保存中...' : '保存'}}
-      </button>
+      </t-button>
     </view>
   </view>
-
-  <!-- <view class="menu-section">
-    <view class="menu-item" bindtap="onLogout">
-      <text>退出登录</text>
-      <text class="menu-arrow">›</text>
-    </view>
-  </view> -->
 </view>

@@ -1,5 +1,5 @@
 <view class="container">
-  <!-- Pending AI jobs banner -->
+  <!-- 1. AI 任务横幅 -->
   <view class="job-banner-list" wx:if="{{pendingJobs.length > 0}}">
     <view
       class="job-banner {{item.inFlight ? 'job-banner-active' : (item.status === 3 ? 'job-banner-failed' : 'job-banner-done')}}"
@@ -19,29 +19,34 @@
     </view>
   </view>
 
-  <!-- Filter bar -->
-  <view class="filter-bar">
-    <view class="search-row">
-      <input
-        class="search-input"
-        placeholder="搜索表单标题"
-        value="{{query}}"
-        bindinput="onQueryInput"
-        confirm-type="search"
-      />
-      <picker
-        class="sort-picker"
-        range="{{sortOptions}}"
-        range-key="label"
-        value="{{sortIndex}}"
-        bindchange="onSortChange"
-      >
-        <view class="sort-label">
-          <text class="text-sm">{{sortOptions[sortIndex].label}}</text>
-          <text class="sort-caret">▾</text>
-        </view>
-      </picker>
-    </view>
+  <!-- 2. 搜索栏（TDesign） -->
+  <t-search
+    placeholder="搜索表单标题"
+    value="{{query}}"
+    bind:change="onQueryInput"
+    shape="round"
+    class="search-box"
+  />
+
+  <!-- 3. 排序 + 状态标签 -->
+  <view class="filter-row">
+    <t-picker
+      value="{{sortIndex}}"
+      range="{{sortOptions}}"
+      range-key="label"
+      bind:change="onSortChange"
+    >
+      <view slot="trigger">
+        <t-button
+          variant="text"
+          icon="filter"
+          size="small"
+        >
+          {{sortOptions[sortIndex].label}}
+        </t-button>
+      </view>
+    </t-picker>
+
     <view class="status-tabs">
       <view
         class="status-tab {{status === item.value ? 'active' : ''}}"
@@ -55,20 +60,23 @@
     </view>
   </view>
 
-  <!-- Loading -->
-  <view class="loading-state" wx:if="{{loading}}">
-    <text class="text-secondary">加载中...</text>
-  </view>
-
-  <!-- Empty -->
-  <empty-state
-    wx:if="{{!loading && forms.length === 0}}"
-    icon="📋"
-    text="暂无表单"
-    hint="点击右下方按钮创建第一个表单"
+  <!-- 4. 加载状态（TDesign） -->
+  <t-loading
+    wx:if="{{loading}}"
+    class="loading-wrap"
+    tip="加载中..."
   />
 
-  <!-- Form list -->
+  <!-- 5. 空状态（TDesign） -->
+  <t-empty
+    wx:if="{{!loading && forms.length === 0}}"
+    text="暂无表单"
+    description="点击右下角按钮创建第一个表单"
+    icon="file"
+    class="empty-wrap"
+  />
+
+  <!-- 6. 表单列表 -->
   <view class="form-list" wx:if="{{!loading && forms.length > 0}}">
     <view
       class="form-card"
@@ -79,17 +87,28 @@
     >
       <view class="form-card-header">
         <text class="form-title">{{item.title}}</text>
-        <status-badge status="{{item.status}}" type="form" />
+        <t-tag
+          size="small"
+          variant="light"
+          shape="round"
+          color="{{item.status == 1 ? 'blue' : item.status == 2 ? 'grey' : 'warning'}}"
+        >
+          {{item.status == 1 ? '已发布' : item.status == 2 ? '已归档' : '草稿'}}
+        </t-tag>
       </view>
+
       <view class="form-card-desc" wx:if="{{item.description}}">
-        <text class="text-secondary text-sm">{{item.description}}</text>
+        <text class="text-desc">{{item.description}}</text>
       </view>
+
       <view class="form-card-footer">
-        <text class="text-secondary text-sm">{{item.updatedAtText}}</text>
+        <t-icon name="date" size="14" />
+        <text class="text-time">{{item.updatedAtText}}</text>
       </view>
     </view>
   </view>
 
+  <!-- 7. 悬浮创建按钮（修复点击） -->
   <!-- FAB -->
   <view class="fab" bindtap="onCreateTap">
     <text class="fab-icon">+</text>

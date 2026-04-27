@@ -1,137 +1,114 @@
+/* 全局容器 */
+.container {
+  padding: 24rpx;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* --------------------------
+  1. 用户信息卡片（优化阴影、圆角）
+--------------------------- */
 .profile-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--spacing-xl) 0;
-  background-color: var(--color-bg-white);
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--spacing-lg);
+  padding: 40rpx 0;
+  background: #fff;
+  border-radius: 20rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 }
 
-.avatar-wrapper {
-  margin-bottom: var(--spacing-md);
-}
-
+/* 头像按钮 */
 .avatar-btn {
+  position: relative;
   background: transparent;
   border: none;
   padding: 0;
-  margin: 0 0 var(--spacing-sm);
-  line-height: 1;
+  margin: 0 0 16rpx;
 }
-
 .avatar-btn::after {
   border: none;
 }
 
-.avatar-hint {
-  margin-bottom: var(--spacing-md);
-}
-
+/* 头像样式 */
 .avatar {
   width: 160rpx;
   height: 160rpx;
   border-radius: 50%;
-  background-color: var(--color-border);
+  background-color: #f2f3f5;
+  object-fit: cover;
 }
-
 .avatar-placeholder {
-  background-color: var(--color-border);
+  background-color: #f2f3f5;
 }
 
+/* 上传中 loading */
+.avatar-loading {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 文字样式 */
+.avatar-hint {
+  font-size: 26rpx;
+  color: #86898d;
+  margin-bottom: 10rpx;
+}
 .user-name {
-  font-size: var(--font-size-xl);
-  font-weight: bold;
-  margin-bottom: var(--spacing-xs);
-}
-
-.user-id {
-  margin-bottom: var(--spacing-sm);
-}
-
-.menu-section {
-  background-color: var(--color-bg-white);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  margin-bottom: var(--spacing-lg);
-}
-
-.menu-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-lg);
-  border-bottom: 1rpx solid var(--color-border);
-}
-
-.menu-item:last-child {
-  border-bottom: none;
-}
-
-.menu-item:active {
-  background-color: var(--color-bg);
-}
-
-.menu-right {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.menu-value {
-  max-width: 300rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.menu-arrow {
-  color: var(--color-text-placeholder);
-  font-size: var(--font-size-lg);
-}
-
-/* Edit panel */
-.edit-panel {
-  background-color: var(--color-bg-white);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-}
-
-.edit-title {
-  font-size: var(--font-size-base);
+  font-size: 36rpx;
   font-weight: 600;
-  margin-bottom: var(--spacing-md);
+  color: #1d2129;
+  margin-bottom: 12rpx;
+}
+.user-id {
+  font-size: 24rpx;
+  color: #86909c;
+}
+.text-empty {
+  color: #86909c;
 }
 
+/* --------------------------
+  2. 菜单列表（TDesign 风格）
+--------------------------- */
+.menu-section {
+  background: #fff;
+  border-radius: 20rpx;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+}
+.cell-value {
+  font-size: 26rpx;
+  color: #86909c;
+}
+
+/* --------------------------
+  3. 编辑昵称面板
+--------------------------- */
+.edit-panel {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+}
+.edit-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1d2129;
+  margin-bottom: 20rpx;
+}
 .edit-input {
-  width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 2rpx solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-base);
-  box-sizing: border-box;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 24rpx;
 }
 
+/* 按钮组 */
 .edit-actions {
   display: flex;
   gap: 20rpx;
 }
-
-.edit-actions button {
+.edit-actions t-button {
   flex: 1;
-}
-
-.edit-cancel {
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
-  line-height: 2;
-}
-
-.edit-save {
-  line-height: 2;
 }

@@ -2,7 +2,7 @@
 /* Global Styles */
 page {
   --color-primary: #4A90D9;
-  --color-primary-light: #6BA5E7;
+  --color-primary-light: #84abd6;
   --color-primary-dark: #3A7BC8;
   --color-success: #07C160;
   --color-warning: #FFA500;

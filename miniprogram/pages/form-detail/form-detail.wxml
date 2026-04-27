@@ -1,5 +1,5 @@
 <view class="container" wx:if="{{form}}">
-  <!-- Report job banner -->
+  <!-- 1. 报告任务横幅（优化UI） -->
   <view
     wx:if="{{reportJob}}"
     class="job-banner {{reportJob.inFlight ? 'job-banner-active' : (reportJob.status === 3 ? 'job-banner-failed' : 'job-banner-done')}}"
@@ -14,46 +14,59 @@
     >×</view>
   </view>
 
-  <!-- Header -->
+  <!-- 2. 表单详情卡片（TDesign 风格） -->
   <view class="detail-card">
     <view class="detail-header">
       <text class="detail-title">{{form.title}}</text>
-      <status-badge status="{{form.status}}" type="form" />
+      <!-- TDesign 状态标签 -->
+      <t-tag
+        size="medium"
+        shape="round"
+        variant="light"
+        color="{{form.status == 1 ? 'blue' : form.status == 2 ? 'grey' : 'warning'}}"
+      >
+        {{form.status == 1 ? '已发布' : form.status == 2 ? '已归档' : '草稿'}}
+      </t-tag>
     </view>
+
     <text class="detail-desc" wx:if="{{form.description}}">{{form.description}}</text>
+
     <view class="detail-meta">
-      <text class="text-secondary text-sm">创建于 {{createdAtText}}</text>
-      <text class="text-secondary text-sm">更新于 {{updatedAtText}}</text>
+      <text>创建于 {{createdAtText}}</text>
+      <text>更新于 {{updatedAtText}}</text>
     </view>
+
     <view class="detail-stats">
-      <text class="text-secondary text-sm">{{fieldCount}} 个字段</text>
+      <text>共 {{fieldCount}} 个字段</text>
     </view>
   </view>
 
-  <!-- Actions: Draft -->
+  <!-- 3. 操作按钮（草稿状态） -->
   <view class="action-section" wx:if="{{form.status === 0}}">
-    <button class="action-btn-full" bindtap="onEdit">编辑表单</button>
-    <button class="action-btn-full" bindtap="onBaseData">底表数据</button>
-    <button class="action-btn-full action-primary" bindtap="onPublish">发布表单</button>
+    <t-button block theme="light" bindtap="onEdit">编辑表单</t-button>
+    <t-button block theme="light" bindtap="onBaseData">底表数据</t-button>
+    <t-button block theme="primary" bindtap="onPublish">发布表单</t-button>
   </view>
 
-  <!-- Actions: Published -->
+  <!-- 4. 操作按钮（已发布） -->
   <view class="action-section" wx:if="{{form.status === 1}}">
-    <button class="action-btn-full action-primary" open-type="share">分享表单</button>
-    <button class="action-btn-full" bindtap="onViewSubmissions">查看提交</button>
-    <button class="action-btn-full" bindtap="onBaseData">底表数据</button>
-    <button class="action-btn-full" bindtap="onGenerateReport">生成报告</button>
-    <button class="action-btn-full action-warn" bindtap="onArchive">归档表单</button>
+    <t-button block theme="primary" open-type="share">分享表单</t-button>
+    <t-button block theme="light" bindtap="onViewSubmissions">查看提交</t-button>
+    <t-button block theme="light" bindtap="onBaseData">底表数据</t-button>
+    <t-button block theme="light" bindtap="onGenerateReport">生成报告</t-button>
+    <t-button block theme="danger" bindtap="onArchive">归档表单</t-button>
   </view>
 
-  <!-- Actions: Archived -->
+  <!-- 5. 操作按钮（已归档） -->
   <view class="action-section" wx:if="{{form.status === 2}}">
-    <button class="action-btn-full" bindtap="onViewSubmissions">查看提交</button>
-    <button class="action-btn-full" bindtap="onGenerateReport">生成报告</button>
+    <t-button block theme="primary" bindtap="onViewSubmissions">查看提交</t-button>
+    <t-button block theme="danger" bindtap="onGenerateReport">生成报告</t-button>
   </view>
 </view>
 
-<!-- Loading -->
-<view class="loading-center" wx:if="{{!form}}">
-  <text class="text-secondary">加载中...</text>
-</view>
+<!-- 6. 加载状态（TDesign） -->
+<t-loading
+  wx:if="{{!form}}"
+  class="loading-center"
+  tip="加载中..."
+/>

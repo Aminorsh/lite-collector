@@ -1,112 +1,103 @@
+/* 全局容器 */
+.container {
+  padding: 24rpx;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* --------------------------
+  加载状态
+--------------------------- */
 .loading-center {
   display: flex;
   justify-content: center;
   padding-top: 200rpx;
 }
 
+/* --------------------------
+  表单详情卡片（优化质感）
+--------------------------- */
 .detail-card {
-  background-color: var(--color-bg-white);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 }
 
 .detail-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-md);
+  align-items: center;
+  margin-bottom: 20rpx;
 }
 
 .detail-title {
-  font-size: var(--font-size-xl);
-  font-weight: bold;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1d2129;
   flex: 1;
-  margin-right: var(--spacing-sm);
+  margin-right: 16rpx;
 }
 
 .detail-desc {
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-md);
+  font-size: 28rpx;
+  color: #4e5969;
   line-height: 1.6;
+  margin-bottom: 24rpx;
 }
 
 .detail-meta {
   display: flex;
   flex-direction: column;
   gap: 8rpx;
-  margin-bottom: var(--spacing-sm);
+  color: #86909c;
+  font-size: 24rpx;
+  margin-bottom: 16rpx;
 }
 
 .detail-stats {
-  padding-top: var(--spacing-sm);
-  border-top: 2rpx solid var(--color-border);
+  padding-top: 20rpx;
+  border-top: 2rpx solid #f2f3f5;
+  color: #86909c;
+  font-size: 24rpx;
 }
 
-/* Action buttons */
+/* --------------------------
+  按钮区域
+--------------------------- */
 .action-section {
   display: flex;
   flex-direction: column;
   gap: 20rpx;
 }
 
-.action-btn-full {
-  width: 100%;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
-  line-height: 2.4;
-  background-color: var(--color-bg-white);
-  color: var(--color-text);
-  border: 2rpx solid var(--color-border);
-}
-
-.action-btn-full:active {
-  opacity: 0.8;
-}
-
-.action-primary {
-  background-color: var(--color-primary);
-  color: #FFFFFF;
-  border-color: var(--color-primary);
-}
-
-.action-primary:active {
-  background-color: var(--color-primary-dark);
-}
-
-.action-warn {
-  color: var(--color-warning);
-  border-color: var(--color-warning);
-}
-
-/* Job banner (shared shape; colors per state) */
+/* --------------------------
+  任务横幅（优化动画与圆角）
+--------------------------- */
 .job-banner {
   display: flex;
   align-items: center;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-md);
-  font-size: var(--font-size-base);
+  padding: 24rpx;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  font-size: 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
 }
 
 .job-banner-active {
-  background-color: #E8F1FB;
-  color: #2A5FAF;
+  background-color: #e8f4ff;
+  color: #1677ff;
 }
 
 .job-banner-done {
-  background-color: #E6F6EB;
-  color: #1F7A3C;
+  background-color: #e6ffee;
+  color: #00b42a;
 }
 
 .job-banner-failed {
-  background-color: #FBE9E9;
-  color: #B02A37;
-}
-
-.job-banner:active {
-  opacity: 0.85;
+  background-color: #fff1f0;
+  color: #f53f3f;
 }
 
 .job-banner-title {
@@ -116,30 +107,20 @@
 .job-banner-spinner {
   width: 24rpx;
   height: 24rpx;
-  border: 3rpx solid rgba(42, 95, 175, 0.25);
-  border-top-color: #2A5FAF;
+  border: 3rpx solid rgba(22, 119, 255, 0.2);
+  border-top-color: #1677ff;
   border-radius: 50%;
-  margin-right: var(--spacing-sm);
-  animation: job-banner-spin 0.8s linear infinite;
+  margin-right: 16rpx;
+  animation: spin 0.8s linear infinite;
 }
 
-@keyframes job-banner-spin {
+@keyframes spin {
   to { transform: rotate(360deg); }
 }
 
 .job-banner-dismiss {
-  width: 40rpx;
-  height: 40rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36rpx;
-  line-height: 1;
-  color: inherit;
+  font-size: 32rpx;
   opacity: 0.6;
-  margin-left: var(--spacing-sm);
+  margin-left: 16rpx;
 }
 
-.job-banner-dismiss:active {
-  opacity: 1;
-}
