@@ -1,5 +1,5 @@
+/* @import 'tdesign-miniprogram/common/style/index.wxss'; */
 /* Global Styles */
-
 page {
   --color-primary: #4A90D9;
   --color-primary-light: #6BA5E7;

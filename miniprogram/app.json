@@ -11,6 +11,22 @@
     "pages/ai-generate/ai-generate",
     "pages/report/report"
   ],
+  "usingComponents": {
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-input": "tdesign-miniprogram/input/input",
+    "t-search": "tdesign-miniprogram/search/search",
+    "t-tabs": "tdesign-miniprogram/tabs/tabs",
+    "t-tag": "tdesign-miniprogram/tag/tag",
+    "t-loading": "tdesign-miniprogram/loading/loading",
+    "t-empty": "tdesign-miniprogram/empty/empty",
+    "t-fab": "tdesign-miniprogram/fab/fab",
+    "t-cell": "tdesign-miniprogram/cell/cell",
+    "t-cell-group": "tdesign-miniprogram/cell-group/cell-group",
+    "t-swipe-cell": "tdesign-miniprogram/swipe-cell/swipe-cell",
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "t-picker": "tdesign-miniprogram/picker/picker",
+    "t-toast": "tdesign-miniprogram/toast/toast"
+  },
   "window": {
     "navigationBarBackgroundColor": "#4A90D9",
     "navigationBarTitleText": "数据收集",
@@ -38,7 +54,7 @@
       }
     ]
   },
-  "style": "v2",
+
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents"
 }
