@@ -54,7 +54,7 @@ type chatResponse struct {
 // Chat sends a chat completion request and returns the assistant's reply.
 func (c *DeepSeekClient) Chat(system, user string) (string, error) {
 	reqBody := chatRequest{
-		Model:       "deepseek-v4-flash",
+		Model:       "deepseek-v4-flash", 
 		Temperature: 0.2,
 		Messages: []chatMessage{
 			{Role: "system", Content: system},
