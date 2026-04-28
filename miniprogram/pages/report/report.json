@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "数据报告"
+  "navigationBarTitleText": "数据报告",
+  "navigationBarBackgroundColor": "#fff",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f5f5f5"
 }
