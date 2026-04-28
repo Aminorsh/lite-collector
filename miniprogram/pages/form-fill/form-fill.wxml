@@ -1,35 +1,59 @@
 <view class="container">
-  <!-- Loading -->
-  <view class="loading-center" wx:if="{{loading}}">
-    <text class="text-secondary">加载中...</text>
-  </view>
+  <!-- 1. 加载状态（TDesign 优化） -->
+  <t-loading
+    wx:if="{{loading}}"
+    class="loading-center"
+    tip="加载中..."
+  />
 
-  <!-- Error -->
+  <!-- 2. 错误状态 -->
   <view class="error-state" wx:if="{{errorMsg}}">
-    <text class="text-secondary">{{errorMsg}}</text>
+    <t-empty
+      description="{{errorMsg}}"
+      type="error"
+    />
   </view>
 
-  <!-- Submission success -->
+  <!-- 3. 提交成功页面（TDesign 风格） -->
   <view class="success-full" wx:if="{{!loading && !errorMsg && submitSuccess}}">
-    <text class="success-full-icon">✓</text>
-    <text class="success-full-title">提交成功</text>
-    <text class="success-full-hint">感谢您的填写</text>
-    <button class="btn-primary mt-lg" bindtap="onGoBack">返回</button>
+    <t-result
+      type="success"
+      title="提交成功"
+      description="感谢您的填写"
+    />
+    <t-button
+      class="back-btn"
+      block
+      theme="primary"
+      bindtap="onGoBack"
+    >
+      返回
+    </t-button>
   </view>
 
-  <!-- Fill mode (with auto-prefill) -->
+  <!-- 4. 表单填写区域 -->
   <block wx:if="{{!loading && !errorMsg && !submitSuccess}}">
+    <!-- 表单标题卡片 -->
     <view class="form-card">
       <text class="form-title">{{formTitle}}</text>
       <text class="form-desc" wx:if="{{formDesc}}">{{formDesc}}</text>
     </view>
 
-    <!-- Prefill banner -->
+    <!-- 自动预填提示条 -->
     <view class="prefill-banner" wx:if="{{prefilled}}">
+      <t-icon name="info-circle" color="#1677ff" size="12" />
       <text class="prefill-text">已根据你上次的填写自动预填</text>
-      <text class="prefill-clear" bindtap="onClearPrefill">清空</text>
+      <t-button
+        variant="text"
+        size="medium"
+        theme="primary"
+        bindtap="onClearPrefill"
+      >
+        清空
+      </t-button>
     </view>
 
+    <!-- 表单内容 -->
     <view class="form-body">
       <form-renderer
         fields="{{fields}}"
@@ -38,10 +62,18 @@
         bind:change="onFieldChange"
       />
     </view>
+
+    <!-- 提交按钮 -->
     <view class="submit-area">
-      <button class="btn-primary submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
+      <t-button
+        block
+        theme="primary"
+        bindtap="onSubmit"
+        disabled="{{submitting}}"
+        loading="{{submitting}}"
+      >
         {{submitting ? '提交中...' : '提交'}}
-      </button>
+      </t-button>
     </view>
   </block>
 </view>

@@ -1,128 +1,146 @@
-.loading-center {
-  display: flex;
-  justify-content: center;
-  padding-top: 200rpx;
+/* ==================== 全局容器 ==================== */
+.container {
+  padding: 24rpx;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
+/* ==================== 加载/错误居中 ==================== */
+.loading-center,
 .error-state {
   display: flex;
   justify-content: center;
   padding-top: 200rpx;
 }
 
-/* Success banner (already submitted) */
-.success-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12rpx;
-  background-color: #07C160;
-  color: #FFFFFF;
-  padding: 20rpx;
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--spacing-md);
-}
-
-.success-icon {
-  font-size: 36rpx;
-  font-weight: bold;
-}
-
-.success-text {
-  font-size: var(--font-size-lg);
-}
-
-/* Success full screen */
+/* ==================== 提交成功页面 ==================== */
 .success-full {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 200rpx;
+  padding-top: 120rpx;
 }
 
-.success-full-icon {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 50%;
-  background-color: #07C160;
-  color: #FFFFFF;
-  font-size: 60rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: var(--spacing-lg);
+.back-btn {
+  width: 80%;
+  margin-top: 40rpx;
 }
 
-.success-full-title {
-  font-size: var(--font-size-xl);
-  font-weight: bold;
-  margin-bottom: var(--spacing-sm);
-}
-
-.success-full-hint {
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-}
-
-/* Form header */
+/* ==================== 表单标题卡片 ==================== */
 .form-card {
-  background-color: var(--color-bg-white);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-md);
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 40rpx 32rpx;
+  margin-bottom: 28rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 
 .form-title {
-  font-size: var(--font-size-xl);
-  font-weight: bold;
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #1d2129;
   display: block;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 16rpx;
+  line-height: 1.4;
 }
 
 .form-desc {
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-  display: block;
+  font-size: 30rpx;
+  color: #4e5969;
   line-height: 1.6;
+  display: block;
 }
 
-/* Prefill banner */
+/* ==================== 预填提示条 ==================== */
 .prefill-banner {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  background-color: rgba(74, 144, 217, 0.08);
-  border-left: 6rpx solid var(--color-primary);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md) var(--spacing-lg);
-  margin-bottom: var(--spacing-md);
+  gap: 12rpx;
+  background: #e8f4ff;
+  border-left: 6rpx solid #1677ff;
+  border-radius: 16rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 28rpx;
 }
 
 .prefill-text {
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
+  flex: 1;
+  font-size: 28rpx;
+  color: #1d2129;
 }
 
-.prefill-clear {
-  color: var(--color-primary);
-  font-size: var(--font-size-sm);
-  padding: 4rpx 16rpx;
-}
-
-/* Form body */
+/* ==================== 表单内容区域 ==================== */
 .form-body {
-  background-color: var(--color-bg-white);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-md);
+  height: auto;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 48rpx 32rpx;
+  margin-bottom: 28rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 
-/* Submit */
+/* ==================== TDesign 输入框全局加大加高 ==================== */
+
+/* Input 输入框 */
+.form-body .t-input__inner {
+  height: 204rpx !important;
+  padding: 32rpx 28rpx !important;
+  font-size: 25rpx !important;
+  border-radius: 16rpx !important;
+  line-height: 3 !important;
+  box-sizing: border-box !important;
+}
+
+/* Input 外层容器 */
+.form-body .t-input {
+  margin-bottom: 32rpx !important;
+}
+
+/* Textarea 文本域 */
+.form-body .t-textarea__inner {
+  padding: 32rpx 28rpx !important;
+  font-size: 34rpx !important;
+  line-height: 1 !important;
+  border-radius: 16rpx !important;
+  min-height: 200rpx !important;
+  box-sizing: border-box !important;
+}
+
+/* Textarea 外层容器 */
+.form-body .t-textarea {
+  margin-bottom: 32rpx !important;
+}
+
+/* 表单项标签 */
+.form-body .t-form-item__label {
+  font-size: 32rpx !important;
+  margin-bottom: 20rpx !important;
+  font-weight: 500 !important;
+  color: #1d2129 !important;
+  line-height: 1.4 !important;
+}
+
+/* 表单项整体间距 */
+.form-body .t-form-item {
+  margin-bottom: 40rpx !important;
+}
+
+/* 占位符文字 */
+.form-body .t-input__placeholder,
+.form-body .t-textarea__placeholder {
+  font-size: 32rpx !important;
+  color: #c9cdd4 !important;
+}
+
+/* ==================== 提交按钮区域 ==================== */
 .submit-area {
-  padding: var(--spacing-lg) 0;
   padding-bottom: 80rpx;
+  margin-top: 16rpx;
 }
 
-.submit-btn {
-  width: 100%;
+.submit-area .t-button {
+  height: 96rpx !important;
+  font-size: 34rpx !important;
+  border-radius: 16rpx !important;
 }

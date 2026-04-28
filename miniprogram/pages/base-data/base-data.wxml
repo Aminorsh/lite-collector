@@ -1,17 +1,31 @@
 <view class="container">
-  <!-- Loading -->
-  <view class="loading-center" wx:if="{{loading}}">
-    <text class="text-secondary">加载中...</text>
-  </view>
+  <!-- 1. 加载状态（TDesign 美化） -->
+  <t-loading
+    wx:if="{{loading}}"
+    class="loading-center"
+    tip="加载中..."
+  />
 
   <block wx:if="{{!loading}}">
-    <!-- Stats & actions -->
+    <!-- 2. 顶部标题与操作栏（TDesign 风格卡片） -->
     <view class="header-card">
       <text class="header-title">底表数据管理</text>
-      <text class="text-secondary text-sm mt-sm">共 {{rows.length}} 条记录</text>
-      <view class="header-actions mt-md">
-        <button class="action-btn" bindtap="onShowImport">导入数据</button>
-        <button class="action-btn action-danger" bindtap="onClearAll" wx:if="{{rows.length > 0}}">清空数据</button>
+      <text class="sub-title">共 {{rows.length}} 条记录</text>
+      
+      <view class="header-actions">
+        <!-- 导入数据按钮（浅色系） -->
+        <t-button block theme="light" bindtap="onShowImport">
+          导入数据
+        </t-button>
+        <!-- 清空数据按钮（浅红） -->
+        <t-button 
+          block 
+          theme="danger" 
+          bindtap="onClearAll" 
+          wx:if="{{rows.length > 0}}"
+        >
+          清空数据
+        </t-button>
       </view>
     </view>
 
@@ -29,17 +43,21 @@
         maxlength="50000"
       />
       <view class="import-actions">
-        <button class="action-btn" bindtap="onCancelImport">取消</button>
-        <button class="action-btn action-primary" bindtap="onDoImport" disabled="{{importing}}">
-          {{importing ? '导入中...' : '确认导入'}}
-        </button>
+        <t-button variant="light" bindtap="onCancelImport">取消</t-button>
+        <t-button
+          theme="light"
+          bindtap="onDoImport"
+          disabled="{{importing}}"
+          loading="{{importing}}"
+          >
+        {{importing ? '导入中...' : '确认导入'}}
+        </t-button>
       </view>
     </view>
 
     <!-- Data list -->
     <empty-state
       wx:if="{{rows.length === 0 && !showImport}}"
-      icon="📊"
       text="暂无底表数据"
       hint="点击「导入数据」添加预填充数据"
     />

@@ -1,5 +1,8 @@
 {
   "navigationBarTitleText": "提交详情",
+  "navigationBarBackgroundColor": "#fff",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f5f5f5",
   "usingComponents": {
     "status-badge": "/components/status-badge/status-badge",
     "form-renderer": "/components/form-renderer/form-renderer"

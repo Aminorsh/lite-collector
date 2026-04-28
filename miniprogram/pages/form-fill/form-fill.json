@@ -1,6 +1,14 @@
 {
   "navigationBarTitleText": "填写表单",
+  "navigationBarBackgroundColor": "#fff",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f5f5f5",
   "usingComponents": {
-    "form-renderer": "/components/form-renderer/form-renderer"
+    "form-renderer": "/components/form-renderer/form-renderer",
+    "t-loading": "tdesign-miniprogram/loading/loading",
+    "t-empty": "tdesign-miniprogram/empty/empty",
+    "t-result": "tdesign-miniprogram/result/result",
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-icon": "tdesign-miniprogram/icon/icon"
   }
 }

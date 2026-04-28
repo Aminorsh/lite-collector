@@ -1,145 +1,178 @@
 <view class="container">
-  <!-- Form meta -->
-  <view class="section">
-    <view class="section-title">基本信息</view>
-    <view class="input-group">
-      <input
-        class="input"
-        placeholder="表单标题（必填）"
-        value="{{title}}"
-        bindinput="onTitleInput"
-      />
-    </view>
-    <view class="input-group">
-      <textarea
-        class="textarea"
-        placeholder="表单描述（选填）"
-        value="{{description}}"
-        bindinput="onDescInput"
-        auto-height
-        maxlength="500"
-      />
-    </view>
+  <!-- 基本信息 -->
+  <view class="section-1">
+    <view class="section-title">表单基本信息</view>
+    <!-- 表单标题 -->
+    <view class="form-title">表单标题</view>
+    <t-input
+      placeholder="表单标题（必填）"
+      value="{{title}}"
+      bind:change="onTitleInput"
+      class="input-item"
+    />
+    <!-- 表单描述 -->
+    <view class="description-title">表单描述</view>
+    <t-textarea
+      placeholder="表单描述（选填）"
+      value="{{description}}"
+      bind:change="onDescInput"
+      max-length="500"
+      class="input-item"
+      auto-height
+    />
   </view>
 
-  <!-- Field list -->
-  <view class="section">
+  <!-- 字段列表 -->
+  <view class="section-2">
     <view class="section-header">
       <text class="section-title">字段列表</text>
-      <text class="field-count text-secondary text-sm">{{fields.length}} 个字段</text>
+      <text class="field-count">{{fields.length}} 个字段</text>
     </view>
 
-    <view
-      class="field-card"
-      wx:for="{{fields}}"
-      wx:key="key"
-    >
+    <view class="field-card" wx:for="{{fields}}" wx:key="key">
+      <!-- 字段头部：类型 + 操作 -->
       <view class="field-header">
-        <text class="field-type-label">{{item.typeLabel}}</text>
+        <t-tag size="medium" shape="round" variant="light" color="blue">
+          {{item.typeLabel}}
+        </t-tag>
         <view class="field-actions">
-          <text
-            class="action-btn"
+          <t-button
             wx:if="{{index > 0}}"
+            variant="text"
+            size="small"
             bindtap="onMoveUp"
             data-index="{{index}}"
-          >↑</text>
-          <text
-            class="action-btn"
+          >
+            上移
+          </t-button>
+          <t-button
             wx:if="{{index < fields.length - 1}}"
+            variant="text"
+            size="small"
             bindtap="onMoveDown"
             data-index="{{index}}"
-          >↓</text>
-          <text
-            class="action-btn action-delete"
+          >
+            下移
+          </t-button>
+          <t-button
+            variant="text"
+            size="small"
+            theme="danger"
             bindtap="onDeleteField"
             data-index="{{index}}"
-          >删除</text>
+          >
+            删除
+          </t-button>
         </view>
       </view>
 
-      <!-- Label input -->
-      <view class="input-group">
-        <input
-          class="input"
-          placeholder="字段名称"
-          value="{{item.label}}"
-          bindinput="onFieldLabelInput"
-          data-index="{{index}}"
-        />
-      </view>
+      <!-- 字段名称 -->
+      <t-input
+        placeholder="字段名称"
+        value="{{item.label}}"
+        bind:change="onFieldLabelInput"
+        data-index="{{index}}"
+        class="input-item"
+      />
 
-      <!-- Placeholder input -->
-      <view class="input-group">
-        <input
-          class="input"
-          placeholder="占位提示（可选，默认：请输入{字段名}）"
-          value="{{item.placeholder}}"
-          bindinput="onFieldPlaceholderInput"
-          data-index="{{index}}"
-        />
-      </view>
+      <!-- 占位提示 -->
+      <t-input
+        placeholder="占位提示（可选）"
+        value="{{item.placeholder}}"
+        bind:change="onFieldPlaceholderInput"
+        data-index="{{index}}"
+        class="input-item"
+      />
 
-      <!-- Required toggle -->
+      <!-- 必填开关 -->
       <view class="toggle-row">
         <text>必填</text>
-        <switch
-          checked="{{item.required}}"
-          bindchange="onFieldRequiredChange"
+        <t-switch
+          value="{{item.required}}"
+          bind:change="onFieldRequiredChange"
           data-index="{{index}}"
-          color="#4A90D9"
         />
       </view>
 
-      <!-- Options for select/radio/checkbox -->
+      <!-- 选项配置（单选/多选/下拉） -->
       <view class="options-section" wx:if="{{item.hasOptions}}">
         <view class="options-title">选项</view>
-        <view
-          class="option-row"
-          wx:for="{{item.options}}"
-          wx:for-item="opt"
-          wx:for-index="optIdx"
-          wx:key="*this"
-        >
-          <input
-            class="input option-input"
-            value="{{opt}}"
+        <view class="option-row" wx:for="{{item.options}}" wx:key="*this" wx:for-index="optIdx">
+          <t-input
+            class="option-input"
+            value="{{item}}"
             placeholder="选项内容"
-            bindinput="onOptionInput"
+            bind:change="onOptionInput"
             data-field-index="{{index}}"
             data-opt-index="{{optIdx}}"
           />
-          <text
-            class="action-btn action-delete"
+          <t-button
+            wx:if="{{item.options.length > 1}}"
+            variant="text"
+            size="small"
+            theme="danger"
             bindtap="onDeleteOption"
             data-field-index="{{index}}"
             data-opt-index="{{optIdx}}"
-            wx:if="{{item.options.length > 1}}"
-          >×</text>
+          >
+            删除
+          </t-button>
         </view>
-        <view
+        <t-button
+          variant="text"
+          size="small"
           class="add-option-btn"
           bindtap="onAddOption"
           data-field-index="{{index}}"
         >
-          <text>+ 添加选项</text>
-        </view>
+          + 添加选项
+        </t-button>
       </view>
     </view>
   </view>
 
-  <!-- Add field button -->
-  <view class="add-field-btn" bindtap="onAddField">
-    <text>+ 添加字段</text>
-  </view>
+  <!-- 添加字段按钮 -->
+  <t-button block theme="light-primary" class="add-field-btn" bindtap="onAddField">
+    + 添加字段
+  </t-button>
 
-  <!-- Save button -->
+
+  <!-- 保存按钮 -->
   <view class="save-area">
-    <button class="btn-primary save-btn" bindtap="onSave" disabled="{{saving}}">
+    <t-button
+      block
+      theme="primary"
+      bindtap="onSave"
+      disabled="{{saving}}"
+      loading="{{saving}}"
+    >
       {{saving ? '保存中...' : '保存草稿'}}
-    </button>
+    </t-button>
   </view>
 
-  <!-- 字段类型选择弹窗 -->
+  <!-- 字段类型选择弹窗（TDesign 优化）
+  <t-dialog
+    visible="{{showFieldTypePicker}}"
+    title="选择字段类型"
+    show-cancel
+    cancel-text="取消"
+    confirm-visible="{{false}}"
+    bind:close="onCancelFieldType"
+  >
+    <scroll-view scroll-y class="dialog-content">
+      <view
+        class="dialog-item"
+        wx:for="{{fieldTypeList}}"
+        wx:key="value"
+        bindtap="onSelectFieldType"
+        data-index="{{index}}"
+      >
+        {{item.label}}
+      </view>
+    </scroll-view>
+  </t-dialog> -->
+
+   <!-- 字段类型选择弹窗 -->
 <view class="picker-mask" wx:if="{{showFieldTypePicker}}" bindtap="onCancelFieldType">
   <view class="picker-panel" catchtap>
     <view class="picker-header">
@@ -160,4 +193,3 @@
   </view>
 </view>
 </view>
-

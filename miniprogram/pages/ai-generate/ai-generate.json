@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "AI 创建表单"
+  "navigationBarTitleText": "AI 创建表单",
+  "navigationBarBackgroundColor": "#fff",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f5f5f5"
 }
