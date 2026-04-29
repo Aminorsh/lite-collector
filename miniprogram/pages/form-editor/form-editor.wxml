@@ -132,7 +132,7 @@
   </view>
 
   <!-- 添加字段按钮 -->
-  <t-button block theme="light-primary" class="add-field-btn" bindtap="onAddField">
+  <t-button block theme="light" class="add-field-btn" bindtap="onAddField">
     + 添加字段
   </t-button>
 
