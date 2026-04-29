@@ -110,3 +110,7 @@
   background: #d0d7de;
   margin: 24rpx 0;
 }
+
+.mt-lg{
+  background-color: rgb(78, 124, 167);
+}
