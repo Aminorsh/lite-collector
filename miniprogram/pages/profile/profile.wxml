@@ -32,6 +32,14 @@
     <view class="user-name text-empty">未登录</view>
   </view>
 
+  <view class="quote-card">
+    <view class="quote-icon">🤪</view>
+    <view class="quote-content">
+      <text class="quote-text">{{todayQuote}}</text>
+      <!-- <text class="quote-author">—— {{quoteAuthor}}</text> -->
+    </view>
+  </view>
+
   <!-- 2. 修改昵称菜单（TDesign List） -->
   <view class="menu-section" wx:if="{{userInfo}}">
     <t-cell
@@ -77,3 +85,4 @@
     </view>
   </view>
 </view>
+

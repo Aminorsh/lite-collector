@@ -9,6 +9,38 @@ Page({
     editNickname: '',
     saving: false,
     uploading: false,
+    todayQuote: "",
+    quoteAuthor: "",
+  },
+
+  onLoad() {
+    this.generateDailyQuote();
+  },
+
+  generateDailyQuote() {
+    // 纯文本语录库
+    const quoteList = [
+      "不要来，慢慢急",
+      "出淤泥而抹全身",
+      "慢工出烂活，欲速则一坨",
+      "话到嘴边又咽了下去 每天以此获得饱腹感",
+      "花香蕉的钱就只能请到我这样的猴子",
+      "退一万步来讲的话 根本就听不到你讲什么",
+      "干我们这一行最忌讳的就是干我们这一行",
+      "我收到牛国英津大学的邀请了，再见了我的朋友们",
+      "我不惹事，我也怕事",
+      "以柔克刚 以巧克力 以德克士",
+      "马上离开 不要回来",
+      "每天一个仰卧起坐，已经坚持了二十多年了",
+    ];
+    
+    // 随机选择一条
+    const randomIndex = Math.floor(Math.random() * quoteList.length);
+    const quote = quoteList[randomIndex];
+    
+    this.setData({
+      todayQuote: quote
+    });
   },
 
   onShow() {

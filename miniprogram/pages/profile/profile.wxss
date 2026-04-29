@@ -112,3 +112,103 @@
 .edit-actions t-button {
   flex: 1;
 }
+
+/* --------------------------
+  每日一句卡片 带动态滚动小球背景
+--------------------------- */
+.quote-card {
+  /* 原有底色保留 */
+  background: rgb(255, 255, 255);
+  border-radius: 20rpx;
+  padding: 32rpx 28rpx;
+  margin-bottom: 24rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(141, 76, 76, 0.04);
+ /* 让整个卡片开启呼吸动画 */
+ animation: cardBreath 5s ease-in-out infinite;
+ transform-origin: center center;
+  /* 开启相对定位，放动画小球 */
+  position: relative;
+  overflow: hidden;
+}
+
+/* 整体卡片 呼吸缩放动画 */
+@keyframes cardBreath {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 2. 轻微上下悬浮 */
+@keyframes cardFloat {
+  0% {
+    transform: translateY(0rpx);
+  }
+  100% {
+    transform: translateY(-8rpx);
+  }
+}
+
+/* 新建：背景滚动小球 */
+.quote-card::before {
+  content: '';
+  position: absolute;
+  top: 30%;
+  width: 80rpx;
+  height: 80rpx;
+  background: rgb(0, 77, 17);
+  /* background: linear-gradient(135deg, #fcff43, #7c0bec); */
+  border-radius: 50%;
+  opacity: 0.15;
+  /* 绑定滚动动画 */
+  animation: ballMove 8s ease-in-out infinite alternate;
+}
+
+/* 定义小球左右滚动动画 */
+@keyframes ballMove {
+  0% {
+    left: -40rpx;
+  }
+  100% {
+    left: calc(100% - 40rpx);
+  }
+}
+
+.quote-icon {
+  font-size: 48rpx;
+  width: 60rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea15, #764ba215);
+  border-radius: 50%;
+  /* 层级高于背景小球 */
+  position: relative;
+  z-index: 2;
+}
+
+.quote-content {
+  flex: 1;
+  /* 文字层级在上，不被小球遮挡 */
+  position: relative;
+  z-index: 2;
+}
+
+.quote-text {
+  font-size: 32rpx;
+  font-weight: 150;
+  color: #1d2129;
+  line-height: 1.5;
+  display: block;
+  font-style: italic;
+  text-align: left;
+}
