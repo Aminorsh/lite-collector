@@ -84,5 +84,19 @@
       </t-button>
     </view>
   </view>
+  <view class="ad-container">
+    <swiper class="ad-swiper" autoplay circular interval="3000">
+      <swiper-item>
+        <image class="ad-img" src="/assets/icons/1.png" mode="aspectFill" />
+      </swiper-item>
+      <swiper-item>
+        <image class="ad-img" src="/assets/icons/2.png" mode="aspectFill" />
+      </swiper-item>
+      <swiper-item>
+        <image class="ad-img" src="/assets/icons/3.png" mode="aspectFill" />
+      </swiper-item>
+    </swiper>
+    <view class="ad-text">广告位招租</view>
+  </view>
 </view>
 
