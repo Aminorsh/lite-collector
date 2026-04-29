@@ -26,9 +26,16 @@ Page({
     statusTabs: STATUS_TABS,
     sortOptions: SORT_OPTIONS,
     pendingJobs: [], // [{ id, jobType, status, title, path, inFlight }]
+    showSplashModal: true
   },
 
   _debounceTimer: null,
+
+  closeSplashModal() {
+    this.setData({ showSplashModal: false })
+  },
+
+
 
   onLoad() {
     const saved = wx.getStorageSync(FILTER_KEY) || {}

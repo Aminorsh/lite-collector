@@ -1,12 +1,13 @@
-/* 全局容器 */
+/* 全局容器 - 浅灰色背景 */
 .container {
   padding: 24rpx;
-  background-color: #ffffff;
+
+  background-color: #f8f9fa;  /* 改为浅灰色背景 */
   min-height: 100vh;
 }
 
 /* --------------------------
-  1. AI 任务横幅（优化圆角、间距）
+  1. AI 任务横幅
 --------------------------- */
 .job-banner-list {
   margin-bottom: 24rpx;
@@ -18,7 +19,7 @@
   border-radius: 16rpx;
   margin-bottom: 16rpx;
   font-size: 28rpx;
-  box-shadow: 0 2rpx 12rpx rgba(42, 68, 105, 0.05);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
 }
 .job-banner-active {
   background-color: #e8f4ff;
@@ -49,10 +50,16 @@
 }
 
 /* --------------------------
-  2. 搜索框（间距优化）
+  2. 搜索框
 --------------------------- */
 .search-box {
-  margin-bottom: 25rpx;
+  margin-bottom: 32rpx;
+}
+/* TDesign 搜索框样式覆盖 - 匹配图示 */
+.search-box .t-search__input {
+  background-color: #ffffff !important;
+  border: 1px solid #e4e7ed !important;
+  border-radius: 32rpx !important;
 }
 
 /* --------------------------
@@ -66,20 +73,21 @@
 }
 .status-tabs {
   display: flex;
-  gap: 12rpx;
+  gap: 16rpx;
 }
 .status-tab {
-  padding: 12rpx 24rpx;
-  border-radius: 999rpx;
-  font-size: 25rpx;
-  background-color: #fff;
-  color: #0e0f0f;
-  border: 2rpx solid #dadee0;
+  padding: 12rpx 28rpx;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  background-color: #ffffff;
+  color: #2c3e50;  /* 深蓝色文字 */
+  border: 1px solid #dcdfe6;
+  transition: all 0.2s;
 }
 .status-tab.active {
-  background-color: #05517e;
-  color: #fff;
-  border-color: #828488;
+  background-color: #2c3e50;  /* 深蓝色背景 */
+  color: #ffffff;  /* 白色文字 */
+  border-color: #2c3e50;
 }
 
 /* --------------------------
@@ -94,28 +102,28 @@
 }
 
 /* --------------------------
-  5. 表单卡片（质感升级）
+  5. 表单卡片
 --------------------------- */
 .form-list {
   padding-bottom: 160rpx;
 }
 .form-card {
-  background: #fff;
-  border-radius: 20rpx;
+  background: #ffffff;
+  border-radius: 16rpx;
   padding: 32rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  transition: all 0.2s;
 }
 .form-card:active {
-  opacity: 0.9;
-  transform: scale(0.98);
-  transition: 0.2s;
+  opacity: 0.95;
+  transform: scale(0.99);
 }
 .form-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16rpx;
+  margin-bottom: 20rpx;
 }
 .form-title {
   font-size: 32rpx;
@@ -127,55 +135,129 @@
   white-space: nowrap;
 }
 .form-card-desc {
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
 }
 .text-desc {
   font-size: 26rpx;
-  color: #86909c;
+  color: #909399;
   line-height: 1.5;
 }
 .form-card-footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  color: #86909c;
-  font-size: 24rpx;
   gap: 8rpx;
 }
 .text-time {
-  color: #2d3b37;
+  font-size: 24rpx;
+  color: #909399;
+}
+/* TDesign 标签样式覆盖 - 匹配图示的标签颜色 */
+.form-card .t-tag {
+  border-radius: 24rpx !important;
+  font-size: 24rpx !important;
+  padding: 6rpx 16rpx !important;
 }
 
 /* --------------------------
-  6. 悬浮按钮（位置微调）
+  6. 悬浮按钮 - 深蓝色匹配整体风格
 --------------------------- */
-/* .custom-fab {
-  bottom: 120rpx !important;
-} */
-
-/* FAB */
 .fab {
-  background-color: #acccaa !important;
   position: fixed;
   right: 40rpx;
   bottom: 120rpx;
-  width: 100rpx;
-  height: 100rpx;
+  width: 112rpx;
+  height: 112rpx;
   border-radius: 50%;
-  background-color: var(--color-primary);
+  background-color: #587e64;  /* 深蓝色，与激活标签色一致 */
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6rpx 20rpx rgb(243, 243, 243);
+  box-shadow: 0 8rpx 20rpx rgba(44, 62, 80, 0.3);
+  transition: all 0.2s;
 }
 
 .fab:active {
-  background-color: var(--color-primary-dark);
+  background-color: #1e2a36;  /* 按下时更深 */
+  transform: scale(0.95);
 }
 
 .fab-icon {
-  color: #FFFFFF;
-  font-size: 56rpx;
+  color: #ffffff;
+  font-size: 60rpx;
   line-height: 1;
   margin-top: -4rpx;
+}
+
+/* 遮罩层 */
+.splash-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* 整个小窗卡片 */
+.splash-card {
+  width: 72%;
+  background: #ffffff;
+  border-radius: 60rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 40rpx;
+
+  /* 外层大阴影：做主悬浮 */
+  box-shadow: 0 50rpx 50rpx rgba(0, 0, 0, 0.25),
+              0 8rpx 50rpx rgba(0, 0, 0, 0.08);
+  /* 内层内阴影：凹陷质感 */
+  box-shadow: inset 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+/* ========== 这里可以自由改图片宽高 ========== */
+.splash-img {
+  object-fit: contain;
+  width: 100%;
+  height: 400rpx; /* 改这个就能调图片高度 */
+  display: block;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.1);
+  opacity: 0.85;
+}
+
+/* 文字区域 */
+.splash-text-wrap {
+  padding: 30rpx 24rpx;
+  text-align: center;
+}
+.splash-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1d2129;
+  display: block;
+  margin-bottom: 20rpx;
+}
+.splash-desc {
+  font-size: 26rpx;
+  color: #777b80;
+  line-height: 1.6;
+}
+
+/* 底部居中关闭 × 按钮 */
+.close-icon {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  background-color: #f2f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  color: rgb(0, 0, 0);
 }

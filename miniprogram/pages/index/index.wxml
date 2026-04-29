@@ -114,3 +114,26 @@
     <text class="fab-icon">+</text>
   </view>
 </view>
+
+<!-- 开屏图文小窗弹窗 -->
+<view class="splash-mask" wx:if="{{showSplashModal}}">
+  <view class="splash-card" catchtap="stopEvent">
+    <!-- 可自定义尺寸的图片 -->
+    <image 
+      src="/assets/icons/6.png" 
+      class="splash-img"
+      mode="aspectFill"
+    ></image>
+
+    <!-- 文案区域 -->
+    <view class="splash-text-wrap">
+      <text class="splash-title">欢迎使用数据收集程序</text>
+      <text class="splash-desc">快速创建、收集、管理所有表单数据，智能生成分析报告。</text>
+    </view>
+
+    <!-- 底部居中关闭×按钮 -->
+    <view class="close-icon" bindtap="closeSplashModal">
+      <text>×</text>
+    </view>
+  </view>
+</view>
