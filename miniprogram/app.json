@@ -9,7 +9,8 @@
     "pages/submission-detail/submission-detail",
     "pages/base-data/base-data",
     "pages/ai-generate/ai-generate",
-    "pages/report/report"
+    "pages/report/report",
+    "pages/ai-chat/ai-chat"
   ],
   "usingComponents": {
     "t-button": "tdesign-miniprogram/button/button",

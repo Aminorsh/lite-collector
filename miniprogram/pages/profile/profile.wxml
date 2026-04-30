@@ -98,5 +98,14 @@
     </swiper>
     <view class="ad-text">广告位招租</view>
   </view>
+
+  <view class="ai-chat-btn" bindtap="onOpenAIChat">
+    <image 
+    class="ai-icon-img" 
+    src="/assets/icons/ai-icon.png" 
+    mode="aspectFit" 
+  />
+    <view class="ai-pulse"></view>
+  </view>
 </view>
 

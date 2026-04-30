@@ -1,0 +1,54 @@
+<view class="chat-container">
+  <!-- 消息列表 -->
+  <scroll-view 
+    class="message-list" 
+    scroll-y 
+    scroll-into-view="{{scrollToView}}"
+    scroll-with-animation
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <view wx:for="{{messageList}}" wx:key="index" class="message-item" id="msg-{{index}}">
+      <!-- 用户消息（右侧） -->
+      <view class="message-row message-user" wx:if="{{item.role === 'user'}}">
+        <view class="message-bubble-user">
+          <text class="message-text">{{item.content}}</text>
+        </view>
+        <view class="message-avatar-user">
+          <image class="avatar-img" src="{{userAvatar}}" mode="aspectFill" />
+        </view>
+      </view>
+
+      <!-- AI 消息（左侧） -->
+      <view class="message-row message-ai" wx:if="{{item.role === 'assistant'}}">
+        <view class="message-avatar-ai">
+          <view class="ai-avatar-icon">🤖</view>
+        </view>
+        <view class="message-bubble-ai">
+          <text class="message-text" wx:if="{{item.status === 'complete'}}">{{item.content}}</text>
+          <t-chat-loading wx:if="{{item.status === 'pending'}}" text="AI 正在思考..." />
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-chat" wx:if="{{messageList.length === 0}}">
+      <t-icon name="lightbulb" size="48"  />
+      <text class="empty-title" >你好呀！</text>
+      <text class="empty-desc">我是你的 AI 助手，有问题随时问我～</text>
+    </view>
+  </scroll-view>
+
+  <!-- 输入框 -->
+  <view class="sender-container">
+    <t-chat-sender 
+      value="{{inputValue}}"
+      placeholder="输入消息..."
+      disabled="{{isLoading}}"
+      bind:send="onSend"
+      bind:stop="onStop"
+    />
+    
+  </view>
+
+</view>

@@ -43,6 +43,12 @@ Page({
     });
   },
 
+  onOpenAIChat() {
+    wx.navigateTo({
+      url: '/pages/ai-chat/ai-chat'
+    })
+  },
+
   onShow() {
     const userInfo = storage.getUser()
     this.setData({ userInfo })
